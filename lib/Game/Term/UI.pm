@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.01';
 
-my $debug = 0;
+my $debug = 2;
 
 sub new{
 	my $class = shift;
@@ -22,12 +22,16 @@ sub new{
 
 sub run{
 		my $ui = shift;
-		system $ui->{ cls_cmd };
+		system $ui->{ cls_cmd } unless $debug;
 		# calculate offsets (same calculation is made in _enlarge_map)
 		my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
 		my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
+		
 		# enlarge the map to enable scrolling
+		# this will erase $ui->{map}
 		my @map = $ui->_enlarge_map();
+		# get hero position in the ORIGINAL map
+		my ($pos,$starting_side) = $ui->_get_hero_pos();
 		# MAP AREA:
 		# print decoration first row
 		print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
@@ -52,16 +56,37 @@ sub run{
 					if $debug;
 }		
 
+sub _get_hero_pos{
+	my $ui = shift;
+	# hero position MUST be on a side and NEVER on a corner
+	my $pos;
+	my $side;
+	foreach my $row ( 0..$#{$ui->{map}} ){
+		foreach my $col ( 0..$#{$ui->{map}->[$row]} ){
+			if ( ${$ui->{map}}[$row][$col] eq 'X' ){
+				$pos = [ $row, $col];
+				if    ( $row == 0 )						{ $side = 'N' }
+				elsif ( $row == $#{$ui->{map}} )		{ $side = 'S' }
+				elsif ( $col == 0 )						{ $side = 'W' }
+				elsif ( $row == $#{$ui->{map}->[$row]} ){ $side = 'E' }
+				else									{ die "Hero side not found!" }
+				print "DEBUG: hero at $$pos[0]-$$pos[1] side: $side\n" if $debug;
+				return $pos,$side;
+			}				
+		}
+	}	
+}
+
 sub _enlarge_map{
 	my $ui = shift;
 	unless (defined $ui->{ map }[0][0] ){
 			$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
-			$ui->{ map }[0][0] = '#';
-			$ui->{ map }[0][-1] = '#';
-			$ui->{ map }[-1][0] = '#';
-			$ui->{ map }[-1][-1] = '#';
+			$ui->{map}[0][0] = '#';
+			$ui->{map}[0][-1] = '#';
+			$ui->{map}[-1][0] = '#';
+			$ui->{map}[-1][-1] = '#';
 			# fake hero
-			$ui->{ map }[-1][10] = 'X';
+			$ui->{map}[-1][10] = 'X';
 		}
 		# add empty spaces for a half in four directions
 		# same calculation is made in run for offsets
@@ -82,7 +107,7 @@ sub _enlarge_map{
 		}
 		# add at bottom
 		push @map,map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ;
-		undef $ui->{ map };
+		#undef $ui->{ map };
 		return @map;
 	
 }
@@ -104,6 +129,8 @@ sub _validate_conf{
 
 1; # End of Game::Term::UI
 __DATA__
+perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new(); print $ui->{map_area_w}.$/;dd $ui; dd $ui->{map};$ui->run"
+perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new();$ui->run"
 
 =head1 NAME
 
