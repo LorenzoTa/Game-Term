@@ -32,6 +32,7 @@ sub run{
 		my @map = $ui->_enlarge_map();
 		# get hero position in the ORIGINAL map
 		my ($pos,$starting_side) = $ui->_get_hero_pos();
+		print "DEBUG: hero at $$pos[0]-$$pos[1] side: $starting_side\n" if $debug;
 		# MAP AREA:
 		# print decoration first row
 		print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
@@ -70,7 +71,6 @@ sub _get_hero_pos{
 				elsif ( $col == 0 )						{ $side = 'W' }
 				elsif ( $row == $#{$ui->{map}->[$row]} ){ $side = 'E' }
 				else									{ die "Hero side not found!" }
-				print "DEBUG: hero at $$pos[0]-$$pos[1] side: $side\n" if $debug;
 				return $pos,$side;
 			}				
 		}
