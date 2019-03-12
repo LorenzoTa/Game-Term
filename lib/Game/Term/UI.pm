@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.01';
 
-my $debug = 1;
+my $debug = 0;
 
 sub new{
 	my $class = shift;
@@ -23,38 +23,30 @@ sub new{
 sub run{
 		my $ui = shift;
 		system $ui->{ cls_cmd };
-		# calculate offsets before enlarging the map
+		# calculate offsets (same calculation is made in _enlarge_map)
 		my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
 		my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
+		# enlarge the map to enable scrolling
 		my @map = $ui->_enlarge_map();
-		# map area FAKE
+		# MAP AREA:
+		# print decoration first row
 		print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
-		unless (defined $ui->{ map }[0][0] ){
-			$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
-			$ui->{ map }[0][0] = '#';
-			$ui->{ map }[0][-1] = '#';
-			$ui->{ map }[-1][0] = '#';
-			$ui->{ map }[-1][-1] = '#';
-			# fake hero
-			$ui->{ map }[-1][10] = 'X';
-		}
-		
-		
-		
+		# print map body with decorations		
 		foreach my $row ( @map[ $off_y..$#map-$off_y] ){ # era $#map 
 			print 	' ',$ui->{ dec_ver },
 					@$row[ $off_x..$#$row-$off_x ],
 					$ui->{ dec_ver },"\n"
 		}
-		# menu area
+		# print decoration last row
 		print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
+		# MENU AREA:
+		# print decoration first row
 		print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
+		# manu fake data
 		print ' ',$ui->{ dec_ver }."\n" for 0..4;
 		
 		print "DEBUG: map: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n"
 				if $debug;
-		
-		#use Data::Dump; dd @map;
 		print 	"DEBUG: map extended:\n",
 				map{ join'',@$_,$/ }@map
 					if $debug;
@@ -72,6 +64,7 @@ sub _enlarge_map{
 			$ui->{ map }[-1][10] = 'X';
 		}
 		# add empty spaces for a half in four directions
+		# same calculation is made in run for offsets
 		my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
 		my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
 		#
@@ -89,7 +82,7 @@ sub _enlarge_map{
 		}
 		# add at bottom
 		push @map,map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ;
-		
+		undef $ui->{ map };
 		return @map;
 	
 }
@@ -109,7 +102,7 @@ sub _validate_conf{
 	return %conf;
 }
 
-
+1; # End of Game::Term::UI
 __DATA__
 
 =head1 NAME
@@ -229,4 +222,4 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of Game::Term::UI
+
