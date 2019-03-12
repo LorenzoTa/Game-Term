@@ -7,6 +7,8 @@ use warnings;
 
 our $VERSION = '0.01';
 
+my $debug = 1;
+
 sub new{
 	my $class = shift;
 	my %conf = _validate_conf( @_ );
@@ -21,28 +23,77 @@ sub new{
 sub run{
 		my $ui = shift;
 		system $ui->{ cls_cmd };
-		# map area
-		print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
+		# calculate offsets before enlarging the map
+		my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
+		my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
+		my @map = $ui->_enlarge_map();
+		# map area FAKE
+		print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
 		unless (defined $ui->{ map }[0][0] ){
 			$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
 			$ui->{ map }[0][0] = '#';
 			$ui->{ map }[0][-1] = '#';
 			$ui->{ map }[-1][0] = '#';
 			$ui->{ map }[-1][-1] = '#';
+			# fake hero
+			$ui->{ map }[-1][10] = 'X';
 		}
-		foreach my $row ( @{$ui->{map}} ){
-			print ' ',$ui->{ dec_ver },@$row,$ui->{ dec_ver },"\n"
-
+		
+		
+		
+		foreach my $row ( @map[ $off_y..$#map-$off_y] ){ # era $#map 
+			print 	' ',$ui->{ dec_ver },
+					@$row[ $off_x..$#$row-$off_x ],
+					$ui->{ dec_ver },"\n"
 		}
 		# menu area
 		print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 		print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 		print ' ',$ui->{ dec_ver }."\n" for 0..4;
 		
-		print "DEBUG: map: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n";
+		print "DEBUG: map: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n"
+				if $debug;
 		
+		#use Data::Dump; dd @map;
+		print 	"DEBUG: map extended:\n",
+				map{ join'',@$_,$/ }@map
+					if $debug;
+}		
+
+sub _enlarge_map{
+	my $ui = shift;
+	unless (defined $ui->{ map }[0][0] ){
+			$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
+			$ui->{ map }[0][0] = '#';
+			$ui->{ map }[0][-1] = '#';
+			$ui->{ map }[-1][0] = '#';
+			$ui->{ map }[-1][-1] = '#';
+			# fake hero
+			$ui->{ map }[-1][10] = 'X';
+		}
+		# add empty spaces for a half in four directions
+		my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
+		my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
+		#
+		print "DEBUG: half: w: $half_w h: $half_h\n"
+				if $debug > 1;
+		# add at top
+		my @map = map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ; 
+		# at the center
+		foreach my $orig_map_row( @{$ui->{map}} ){
+			push @map,	[ 
+							($ui->{ ext_tile }) x $half_w,
+							@$orig_map_row,
+							($ui->{ ext_tile }) x $half_w
+						]
+		}
+		# add at bottom
+		push @map,map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ;
 		
+		return @map;
+	
 }
+
 
 sub _validate_conf{
 	my %conf = @_;
@@ -52,6 +103,7 @@ sub _validate_conf{
 	$conf{ menu_area_h } //= 20;
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
+	$conf{ ext_tile }	//='O';
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	$conf{ map } //=[];
 	return %conf;
