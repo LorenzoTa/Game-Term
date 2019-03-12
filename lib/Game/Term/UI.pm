@@ -4,6 +4,62 @@ use 5.014;
 use strict;
 use warnings;
 
+
+our $VERSION = '0.01';
+
+sub new{
+	my $class = shift;
+	my %conf = _validate_conf( @_ );
+	
+	
+	return bless {
+				%conf
+	}, $class;
+}
+
+
+sub run{
+		my $ui = shift;
+		system $ui->{ cls_cmd };
+		# map area
+		print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
+		unless (defined $ui->{ map }[0][0] ){
+			$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
+			$ui->{ map }[0][0] = '#';
+			$ui->{ map }[0][-1] = '#';
+			$ui->{ map }[-1][0] = '#';
+			$ui->{ map }[-1][-1] = '#';
+		}
+		foreach my $row ( @{$ui->{map}} ){
+			print ' ',$ui->{ dec_ver },@$row,$ui->{ dec_ver },"\n"
+
+		}
+		# menu area
+		print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
+		print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
+		print ' ',$ui->{ dec_ver }."\n" for 0..4;
+		
+		print "DEBUG: map: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n";
+		
+		
+}
+
+sub _validate_conf{
+	my %conf = @_;
+	$conf{ map_area_w } //= 20;
+	$conf{ map_area_h } //= 10;
+	$conf{ menu_area_w } //= $conf{ map_area_w };
+	$conf{ menu_area_h } //= 20;
+	$conf{ dec_hor }     //= '-';
+	$conf{ dec_ver }     //= '|';
+	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
+	$conf{ map } //=[];
+	return %conf;
+}
+
+
+__DATA__
+
 =head1 NAME
 
 Game::Term::UI - The great new Game::Term::UI!
@@ -13,9 +69,6 @@ Game::Term::UI - The great new Game::Term::UI!
 Version 0.01
 
 =cut
-
-our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -28,26 +81,11 @@ Perhaps a little code snippet.
     my $foo = Game::Term::UI->new();
     ...
 
-=head1 EXPORT
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 SUBROUTINES/METHODS
+=head1 METHODS
 
 =head2 function1
 
-=cut
-
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
-}
 
 =head1 AUTHOR
 
@@ -61,8 +99,9 @@ automatically be notified of progress on your bug as I make changes.
 
 
 
-
 =head1 SUPPORT
+
+Main support site for the current module is L<https://www.perlmonks.org|perlmonks.org>
 
 You can find documentation for this module with the perldoc command.
 
