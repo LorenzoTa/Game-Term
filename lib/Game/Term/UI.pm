@@ -8,8 +8,8 @@ use Term::ReadKey;
 ReadMode 'cbreak';
 
 our $VERSION = '0.01';
-my $fake_map = 1;
-my $debug = 2;
+my $fake_map = 0;
+my $debug = 0;
 
 sub new{
 	my $class = shift;
@@ -25,6 +25,11 @@ sub new{
 sub run{
 		my $ui = shift;
 		$ui->set_map_and_hero();
+		# now BIG map, hero_pos and hero_side are initialized
+		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)
+		
+		$ui->set_map_offsets();
+		
 		print "DEBUG: REF ui->map: ",ref $ui->{map},"\n",
 				"DEBUG: REF ui->map[0]: ",ref $ui->{map}->[0],' = ',@{$ui->{map}->[0]},"\n",
 				"DEBUG: NEW map hero at: $ui->{hero_pos}->[0] $ui->{hero_pos}[1]\n"
@@ -53,6 +58,19 @@ sub run{
 		
 		}
 }
+
+sub set_map_offsets{
+	my $ui = shift;
+	if ( $ui->{hero_side} eq 'S' ){
+		$ui->{map_off_x} = $ui->{hero_pos}[0] - 4;
+		$ui->{map_off_y} = $ui->{hero_pos}[1] - $ui->{map_area_h} - 6;
+		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
+	}
+	
+	else{die}
+
+}
+
 sub move{
 	my $ui = shift;
 	my $key = shift;
@@ -128,12 +146,16 @@ sub draw_map{
 	# MAP AREA:
 	# print decoration first row
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
-	# print map body with decorations		
-	foreach my $row ( @{$ui->{map}}[ $off_y..$#{$ui->{map}}-$off_y] ){ # era $#map 
+	# print map body with decorations
+	
+	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h} ] ){ # era $#map 
+	#foreach my $row ( @{$ui->{map}}[ $off_y..$#{$ui->{map}}-$off_y] ){ # era $#map 
 		print 	' ',$ui->{ dec_ver },
-				@$row[ $off_x..$#$row-$off_x ],
+				@$row[ $ui->{map_off_x}..$ui->{map_off_x} + $ui->{map_area_w} ],
+				#@$row[ $off_x..$#$row-$off_x ],
 				$ui->{ dec_ver },"\n"
 	}
+	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 }
@@ -164,8 +186,8 @@ sub set_map_and_hero{
 		my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
 		my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
 		#
-		print "DEBUG: half: w: $half_w h: $half_h\n"
-				if $debug > 1;
+		print "DEBUG: half: w: $half_w h: $half_h\n" if $debug > 1;
+		
 		# add at top
 		my @map = map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ; 
 		# at the center
@@ -220,6 +242,8 @@ sub validate_conf{
 	$conf{ hero_pos } = [];
 	$conf{ hero_side } = '';
 	$conf{ map } //=[];
+	$conf{ map_off_x } = 0;
+	$conf{ map_off_y } = 0;
 	$conf{ no_scroll } = 0;
 	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
 	return %conf;
