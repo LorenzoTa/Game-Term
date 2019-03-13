@@ -57,22 +57,47 @@ sub move{
 	my $ui = shift;
 	my $key = shift;
     # move with WASD
-    if ( $key eq 'w' and  is_walkable($ui->{map}->	[
-														$ui->{hero_pos}[0] - 1
-													]
-													[
-														$ui->{hero_pos}[1]
-													]
+    if ( $key eq 'w' and  is_walkable(
+							# map coord as hero X - 1, hero Y
+							$ui->{map}->[ $ui->{hero_pos}[0] - 1 ][	$ui->{hero_pos}[1] ]
 							)
 		){
-        print "free move up!\n";
-        #$off_y-- if $scroll;
-        # $map[ $$pos[0] ][ $$pos[1] ] = ' ';
+        #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
-        # $$pos[0]--;
-		$ui->{hero_pos}[0]--;
+        $ui->{hero_pos}[0]--;
         return 1;
     }
+	elsif ( $key eq 's' and  is_walkable(
+							# map coord as hero X + 1, hero Y
+							$ui->{map}->[ $ui->{hero_pos}[0] + 1 ][	$ui->{hero_pos}[1] ]
+							)
+		){
+        #									THIS must be set to $hero->{on_terrain}
+		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
+        $ui->{hero_pos}[0]++;
+        return 1;
+    }
+	elsif ( $key eq 'a' and  is_walkable(
+							# map coord as hero X, hero Y - 1
+							$ui->{map}->[ $ui->{hero_pos}[0] ][	$ui->{hero_pos}[1] - 1 ]
+							)
+		){
+        #									THIS must be set to $hero->{on_terrain}
+		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
+        $ui->{hero_pos}[1]--;
+        return 1;
+    }
+	elsif ( $key eq 'd' and  is_walkable(
+							# map coord as hero X, hero Y + 1
+							$ui->{map}->[ $ui->{hero_pos}[0] ][	$ui->{hero_pos}[1] + 1 ]
+							)
+		){
+        #									THIS must be set to $hero->{on_terrain}
+		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
+        $ui->{hero_pos}[1]++;
+        return 1;
+    }
+	
 }
 
 sub is_walkable{
@@ -94,6 +119,8 @@ sub _draw_map{
 	my $ui = shift;
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
+	# draw hero
+	# this must set $hero->{on_terrain}
 	$ui->{map}[ $ui->{hero_pos}->[0] ][ $ui->{hero_pos}->[1] ] = 'X';
 	# calculate offsets (same calculation is made in _set_map_and_hero)
 	my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
