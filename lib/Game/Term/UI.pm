@@ -23,21 +23,24 @@ sub new{
 sub run{
 		my $ui = shift;
 		system $ui->{ cls_cmd } unless $debug;
-		# calculate offsets (same calculation is made in _enlarge_map)
+		# calculate offsets (same calculation is made in _set_map_and_hero)
 		my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
 		my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
 		
 		# enlarge the map to enable scrolling
 		# this will erase $ui->{map}
-		my @map = $ui->_enlarge_map();
-		# get hero position in the ORIGINAL map
-		my ($pos,$starting_side) = $ui->_get_hero_pos();
-		print "DEBUG: hero at $$pos[0]-$$pos[1] side: $starting_side\n" if $debug;
+		
+		$ui->_set_map_and_hero();
+		print "DEBUG: REF ui->map: ",ref $ui->{map},"\n",
+				"DEBUG: REF ui->map[0]: ",ref $ui->{map}->[0],' = ',@{$ui->{map}->[0]},"\n",
+				"DEBUG: NEW map hero at: $ui->{hero_pos}->[0] $ui->{hero_pos}[1]\n"
+				if $debug;
+	
 		# MAP AREA:
 		# print decoration first row
 		print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
 		# print map body with decorations		
-		foreach my $row ( @map[ $off_y..$#map-$off_y] ){ # era $#map 
+		foreach my $row ( @{$ui->{map}}[ $off_y..$#{$ui->{map}}-$off_y] ){ # era $#map 
 			print 	' ',$ui->{ dec_ver },
 					@$row[ $off_x..$#$row-$off_x ],
 					$ui->{ dec_ver },"\n"
@@ -47,16 +50,63 @@ sub run{
 		# MENU AREA:
 		# print decoration first row
 		print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
-		# manu fake data
+		# menu fake data
 		print ' ',$ui->{ dec_ver }."\n" for 0..4;
 		
 		print "DEBUG: map: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n"
 				if $debug;
 		print 	"DEBUG: map extended:\n",
-				map{ join'',@$_,$/ }@map
-					if $debug;
+				map{ join'',@$_,$/ } @{$ui->{map}}
+					if $debug > 1;
 }		
 
+
+
+#sub _enlarge_map{
+sub _set_map_and_hero{
+	my $ui = shift;
+	unless (defined $ui->{ map }[0][0] ){
+			$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
+			$ui->{map}[0][0] = '#';
+			$ui->{map}[0][-1] = '#';
+			$ui->{map}[-1][0] = '#';
+			$ui->{map}[-1][-1] = '#';
+			# fake hero
+			$ui->{map}[-1][10] = 'X';
+		}
+		# get hero position and side BEFORE enlarging
+		my ($pos,$starting_side) = $ui->_get_hero_pos();
+		print "DEBUG: hero at $$pos[0]-$$pos[1] (in original map) side: $starting_side\n" if $debug;
+		
+		
+		# add empty spaces for a half in four directions
+		# same calculation is made in run for offsets
+		my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
+		my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
+		#
+		print "DEBUG: half: w: $half_w h: $half_h\n"
+				if $debug > 1;
+		# add at top
+		my @map = map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ; 
+		# at the center
+		foreach my $orig_map_row( @{$ui->{map}} ){
+			push @map,	[ 
+							($ui->{ ext_tile }) x $half_w,
+							@$orig_map_row,
+							($ui->{ ext_tile }) x $half_w
+						]
+		}
+		# add at bottom
+		push @map,map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ;
+		
+		@{$ui->{map}} = @map;
+		$ui->{hero_pos} = [ 
+							$$pos[0] + ( $ui->{ map_area_h}/2 + 1 ),
+							$$pos[1] + ( $ui->{ map_area_w}/2 + 1 )	
+						];
+		$ui->{hero_side} = $starting_side;
+	
+}
 sub _get_hero_pos{
 	my $ui = shift;
 	# hero position MUST be on a side and NEVER on a corner
@@ -77,42 +127,6 @@ sub _get_hero_pos{
 	}	
 }
 
-sub _enlarge_map{
-	my $ui = shift;
-	unless (defined $ui->{ map }[0][0] ){
-			$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
-			$ui->{map}[0][0] = '#';
-			$ui->{map}[0][-1] = '#';
-			$ui->{map}[-1][0] = '#';
-			$ui->{map}[-1][-1] = '#';
-			# fake hero
-			$ui->{map}[-1][10] = 'X';
-		}
-		# add empty spaces for a half in four directions
-		# same calculation is made in run for offsets
-		my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
-		my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
-		#
-		print "DEBUG: half: w: $half_w h: $half_h\n"
-				if $debug > 1;
-		# add at top
-		my @map = map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ; 
-		# at the center
-		foreach my $orig_map_row( @{$ui->{map}} ){
-			push @map,	[ 
-							($ui->{ ext_tile }) x $half_w,
-							@$orig_map_row,
-							($ui->{ ext_tile }) x $half_w
-						]
-		}
-		# add at bottom
-		push @map,map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ;
-		#undef $ui->{ map };
-		return @map;
-	
-}
-
-
 sub _validate_conf{
 	my %conf = @_;
 	$conf{ map_area_w } //= 20;
@@ -124,6 +138,8 @@ sub _validate_conf{
 	$conf{ ext_tile }	//='O';
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	$conf{ map } //=[];
+	$conf{ hero_pos } = [];
+	$conf{ hero_side } = '';
 	return %conf;
 }
 
