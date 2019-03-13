@@ -36,8 +36,8 @@ sub run{
 			my $key = ReadKey(0);
 			
 			$ui->_draw_map();
-			$ui->_draw_menu();
-			print "key $key was pressed:",ord($key),"\n"; 
+			$ui->_draw_menu( ["key $key was pressed:".ord($key),] );
+			; 
 			
 			print "DEBUG: map: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n"
 					if $debug;
@@ -51,11 +51,12 @@ sub run{
 }		
 sub _draw_menu{
 	my $ui = shift;
+	my $messages = shift;
 	# MENU AREA:
 	# print decoration first row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 	# menu fake data
-	print ' ',$ui->{ dec_ver }."\n" for 0..4;
+	print ' ',$ui->{ dec_ver }.$_."\n" for @$messages;
 }
 sub _draw_map{
 	my $ui = shift;
