@@ -13,7 +13,7 @@ my $debug = 0;
 
 sub new{
 	my $class = shift;
-	my %conf = _validate_conf( @_ );
+	my %conf = validate_conf( @_ );
 	
 	
 	return bless {
@@ -24,21 +24,21 @@ sub new{
 
 sub run{
 		my $ui = shift;
-		$ui->_set_map_and_hero();
+		$ui->set_map_and_hero();
 		print "DEBUG: REF ui->map: ",ref $ui->{map},"\n",
 				"DEBUG: REF ui->map[0]: ",ref $ui->{map}->[0],' = ',@{$ui->{map}->[0]},"\n",
 				"DEBUG: NEW map hero at: $ui->{hero_pos}->[0] $ui->{hero_pos}[1]\n"
 				if $debug;
 	
-		$ui->_draw_map();
-		$ui->_draw_menu();	
+		$ui->draw_map();
+		$ui->draw_menu();	
 		while(1){
 			my $key = ReadKey(0);
 			
 			if( $ui->move( $key, $ui->{hero_pos}) ){
 			
-				$ui->_draw_map();
-				$ui->_draw_menu( ["key $key was pressed:",] );
+				$ui->draw_map();
+				$ui->draw_menu( ["key $key was pressed:",] );
 			
 
 			}
@@ -106,7 +106,7 @@ sub is_walkable{
 	else{return 0}
 }
 		
-sub _draw_menu{
+sub draw_menu{
 	my $ui = shift;
 	my $messages = shift;
 	# MENU AREA:
@@ -115,14 +115,14 @@ sub _draw_menu{
 	# menu fake data
 	print ' ',$ui->{ dec_ver }.$_."\n" for @$messages;
 }
-sub _draw_map{
+sub draw_map{
 	my $ui = shift;
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
 	# draw hero
 	# this must set $hero->{on_terrain}
 	$ui->{map}[ $ui->{hero_pos}->[0] ][ $ui->{hero_pos}->[1] ] = 'X';
-	# calculate offsets (same calculation is made in _set_map_and_hero)
+	# calculate offsets (same calculation is made in set_map_and_hero)
 	my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
 	my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
 	# MAP AREA:
@@ -139,7 +139,7 @@ sub _draw_map{
 }
 
 
-sub _set_map_and_hero{
+sub set_map_and_hero{
 	my $ui = shift;
 	unless (defined $ui->{ map }[0][0] ){
 			$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
@@ -151,7 +151,7 @@ sub _set_map_and_hero{
 			$ui->{map}[-1][10] = 'X';
 		}
 		# get hero position and side BEFORE enlarging
-		my ($pos,$starting_side) = $ui->_get_hero_pos();
+		my ($pos,$starting_side) = $ui->get_hero_pos();
 		print "DEBUG: hero at $$pos[0]-$$pos[1] (in original map) side: $starting_side\n" if $debug;
 		
 		
@@ -183,7 +183,7 @@ sub _set_map_and_hero{
 		$ui->{hero_side} = $starting_side;
 	
 }
-sub _get_hero_pos{
+sub get_hero_pos{
 	my $ui = shift;
 	# hero position MUST be on a side and NEVER on a corner
 	my $pos;
@@ -203,7 +203,7 @@ sub _get_hero_pos{
 	}	
 }
 
-sub _validate_conf{
+sub validate_conf{
 	my %conf = @_;
 	$conf{ map_area_w } //= 20;
 	$conf{ map_area_h } //= 10;
