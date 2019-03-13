@@ -8,7 +8,7 @@ use Term::ReadKey;
 ReadMode 'cbreak';
 
 our $VERSION = '0.01';
-
+my $fake_map = 1;
 my $debug = 2;
 
 sub new{
@@ -142,14 +142,16 @@ sub draw_map{
 sub set_map_and_hero{
 	my $ui = shift;
 	unless (defined $ui->{ map }[0][0] ){
-			# $ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
-			# $ui->{map}[0][0] = '#';
-			# $ui->{map}[0][-1] = '#';
-			# $ui->{map}[-1][0] = '#';
-			# $ui->{map}[-1][-1] = '#';
-			# # fake hero
-			# $ui->{map}[-1][10] = 'X';
-			@{$ui->{map}} = fake_map();
+			if ( $fake_map ) { @{$ui->{map}} = fake_map(); }
+			else{
+				$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
+				$ui->{map}[0][0] = '#';
+				$ui->{map}[0][-1] = '#';
+				$ui->{map}[-1][0] = '#';
+				$ui->{map}[-1][-1] = '#';
+				# fake hero
+				$ui->{map}[-1][10] = 'X';
+			}
 			
 		}
 		# get hero position and side BEFORE enlarging
