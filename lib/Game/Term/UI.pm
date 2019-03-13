@@ -35,9 +35,13 @@ sub run{
 		while(1){
 			my $key = ReadKey(0);
 			
-			$ui->_draw_map();
-			$ui->_draw_menu( ["key $key was pressed:".ord($key),] );
-			; 
+			if( $ui->move( $key, $ui->{hero_pos}) ){
+			
+				$ui->_draw_map();
+				$ui->_draw_menu( ["key $key was pressed:",] );
+			
+
+			}
 			
 			print "DEBUG: map: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n"
 					if $debug;
@@ -48,7 +52,35 @@ sub run{
 		
 		
 		}
-}		
+}
+sub move{
+	my $ui = shift;
+	my $key = shift;
+    # move with WASD
+    if ( $key eq 'w' and  is_walkable($ui->{map}->	[
+														$ui->{hero_pos}[0] - 1
+													]
+													[
+														$ui->{hero_pos}[1]
+													]
+							)
+		){
+        print "free move up!\n";
+        #$off_y-- if $scroll;
+        # $map[ $$pos[0] ][ $$pos[1] ] = ' ';
+		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
+        # $$pos[0]--;
+		$ui->{hero_pos}[0]--;
+        return 1;
+    }
+}
+
+sub is_walkable{
+	my $tile = shift;
+	if( $tile eq ' ' ){ return 1 }
+	else{return 0}
+}
+		
 sub _draw_menu{
 	my $ui = shift;
 	my $messages = shift;
@@ -62,6 +94,7 @@ sub _draw_map{
 	my $ui = shift;
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
+	$ui->{map}[ $ui->{hero_pos}->[0] ][ $ui->{hero_pos}->[1] ] = 'X';
 	# calculate offsets (same calculation is made in _set_map_and_hero)
 	my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
 	my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
