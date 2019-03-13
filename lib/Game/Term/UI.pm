@@ -3,11 +3,13 @@ package Game::Term::UI;
 use 5.014;
 use strict;
 use warnings;
+use Term::ReadKey;
 
+ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 
-my $debug = 2;
+my $debug = 0;
 
 sub new{
 	my $class = shift;
@@ -22,47 +24,60 @@ sub new{
 
 sub run{
 		my $ui = shift;
-		system $ui->{ cls_cmd } unless $debug;
-		# calculate offsets (same calculation is made in _set_map_and_hero)
-		my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
-		my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
-		
-		# enlarge the map to enable scrolling
-		# this will erase $ui->{map}
-		
 		$ui->_set_map_and_hero();
 		print "DEBUG: REF ui->map: ",ref $ui->{map},"\n",
 				"DEBUG: REF ui->map[0]: ",ref $ui->{map}->[0],' = ',@{$ui->{map}->[0]},"\n",
 				"DEBUG: NEW map hero at: $ui->{hero_pos}->[0] $ui->{hero_pos}[1]\n"
 				if $debug;
 	
-		# MAP AREA:
-		# print decoration first row
-		print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
-		# print map body with decorations		
-		foreach my $row ( @{$ui->{map}}[ $off_y..$#{$ui->{map}}-$off_y] ){ # era $#map 
-			print 	' ',$ui->{ dec_ver },
-					@$row[ $off_x..$#$row-$off_x ],
-					$ui->{ dec_ver },"\n"
-		}
-		# print decoration last row
-		print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
-		# MENU AREA:
-		# print decoration first row
-		print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
-		# menu fake data
-		print ' ',$ui->{ dec_ver }."\n" for 0..4;
+		$ui->_draw_map();
+		$ui->_draw_menu();	
+		while(1){
+			my $key = ReadKey(0);
+			
+			$ui->_draw_map();
+			$ui->_draw_menu();
+			print "key $key was pressed:",ord($key),"\n"; 
+			
+			print "DEBUG: map: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n"
+					if $debug;
+			print 	"DEBUG: map extended:\n",
+					map{ join'',@$_,$/ } @{$ui->{map}}
+						if $debug > 1;
 		
-		print "DEBUG: map: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n"
-				if $debug;
-		print 	"DEBUG: map extended:\n",
-				map{ join'',@$_,$/ } @{$ui->{map}}
-					if $debug > 1;
+		
+		
+		}
 }		
+sub _draw_menu{
+	my $ui = shift;
+	# MENU AREA:
+	# print decoration first row
+	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
+	# menu fake data
+	print ' ',$ui->{ dec_ver }."\n" for 0..4;
+}
+sub _draw_map{
+	my $ui = shift;
+	# clear screen
+	system $ui->{ cls_cmd } unless $debug;
+	# calculate offsets (same calculation is made in _set_map_and_hero)
+	my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
+	my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
+	# MAP AREA:
+	# print decoration first row
+	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
+	# print map body with decorations		
+	foreach my $row ( @{$ui->{map}}[ $off_y..$#{$ui->{map}}-$off_y] ){ # era $#map 
+		print 	' ',$ui->{ dec_ver },
+				@$row[ $off_x..$#$row-$off_x ],
+				$ui->{ dec_ver },"\n"
+	}
+	# print decoration last row
+	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
+}
 
 
-
-#sub _enlarge_map{
 sub _set_map_and_hero{
 	my $ui = shift;
 	unless (defined $ui->{ map }[0][0] ){
