@@ -4,6 +4,59 @@ use 5.014;
 use strict;
 use warnings;
 
+
+
+our $VERSION = '0.01';
+
+sub new{
+	my $class = shift;
+	my %conf = validate_conf( @_ );	
+	return bless {
+				%conf
+	}, $class;
+}
+
+
+
+sub validate_conf{
+	my %conf = @_;
+	$conf{ fake_map } //= 2;
+	$conf{ fake_x } //= 20;
+	$conf{ fake_y } //= 10;
+	
+	$conf{data} = fake_map( $conf{ fake_map },$conf{ fake_x },$conf{ fake_y } );
+	return %conf;
+}
+
+sub fake_map{
+	my ($type, $x, $y) = @_;
+	my $map;
+	if ($type == 1){ # hero at S
+		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+				$$map[0][0] 	= '#';
+				$$map[0][-1] 	= '#';
+				$$map[-1][0] 	= '#';
+				$$map[-1][-1] 	= '#';
+				# fake hero
+				$$map[-1][10] 	=  'X' ;#'X';
+	}
+	elsif ($type == 2){ # hero at N
+		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+				$$map[0][0] 	= '#';
+				$$map[0][-1] 	= '#';
+				$$map[-1][0] 	= '#';
+				$$map[-1][-1] 	= '#';
+				# fake hero
+				$$map[0][10] 	=  'X' ;#'X';
+	}
+	else{die}
+	return $map;
+
+}
+
+1; # End of Game::Term::Map
+
+__DATA__
 =head1 NAME
 
 Game::Term::Map - The great new Game::Term::Map!
@@ -11,10 +64,6 @@ Game::Term::Map - The great new Game::Term::Map!
 =head1 VERSION
 
 Version 0.01
-
-=cut
-
-our $VERSION = '0.01';
 
 
 =head1 SYNOPSIS
@@ -28,26 +77,11 @@ Perhaps a little code snippet.
     my $foo = Game::Term::Map->new();
     ...
 
-=head1 EXPORT
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+=head1 METHODS
 
-=head1 SUBROUTINES/METHODS
+=head2 new
 
-=head2 function1
-
-=cut
-
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
-}
 
 =head1 AUTHOR
 
@@ -138,4 +172,3 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of Game::Term::Map

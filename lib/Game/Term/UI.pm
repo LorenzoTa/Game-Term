@@ -5,6 +5,8 @@ use strict;
 use warnings;
 use Term::ReadKey;
 
+use Game::Term::Map;
+
 ReadMode 'cbreak';
 
 our $VERSION = '0.01';
@@ -24,6 +26,11 @@ sub new{
 
 sub run{
 		my $ui = shift;
+		
+		my $map = Game::Term::Map->new(  );
+		print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
+		$ui->{map} = $map->{data};
+		
 		$ui->set_map_and_hero();
 		# now BIG map, hero_pos and hero_side are initialized
 		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)		
@@ -62,7 +69,13 @@ sub set_map_offsets{
 		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
-	
+	elsif ( $ui->{hero_side} eq 'N' ){
+		
+		$ui->{map_off_x} =   $ui->{hero_x} - 1 - $ui->{map_area_w} / 2;
+		$ui->{map_off_y} =   $ui->{hero_y}   ;# ????????????????
+		
+		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
+	}
 	else{die}
 
 }
@@ -196,18 +209,18 @@ sub draw_menu{
 
 sub set_map_and_hero{
 	my $ui = shift;
-	unless (defined $ui->{ map }[0][0] ){
-			if ( $fake_map ) { @{$ui->{map}} = fake_map(); }
-			else{
-				$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w } ) ] } 0..$ui->{ map_area_h }   ];
-				$ui->{map}[0][0] 	= '#';
-				$ui->{map}[0][-1] 	= '#';
-				$ui->{map}[-1][0] 	= '#';
-				$ui->{map}[-1][-1] 	= '#';
-				# fake hero
-				$ui->{map}[-1][10] 	= $ui->{hero_icon};#'X';
-			}			
-		}
+	# unless (defined $ui->{ map }[0][0] ){
+			# if ( $fake_map ) { @{$ui->{map}} = fake_map(); }
+			# else{
+				# $ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w } ) ] } 0..$ui->{ map_area_h }   ];
+				# $ui->{map}[0][0] 	= '#';
+				# $ui->{map}[0][-1] 	= '#';
+				# $ui->{map}[-1][0] 	= '#';
+				# $ui->{map}[-1][-1] 	= '#';
+				# # fake hero
+				# $ui->{map}[-1][10] 	= $ui->{hero_icon};#'X';
+			# }			
+		# }
 		my $original_map_w = $#{$ui->{map}->[0]} + 1;
 		my $original_map_h = $#{$ui->{map}} + 1;
 		print "DEBUG origial map was $original_map_w x $original_map_h\n" if $debug;
@@ -252,6 +265,14 @@ sub set_no_scrolling_area{
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
 		}
+		elsif ( $ui->{hero_side} eq 'N' ){
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + $half_h;
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y}; 
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
+			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
+		}
+		
+		else{die}
 	}
 	print "DEBUG: no_scroll area from $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
 			"to $ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n" if $debug;
@@ -287,8 +308,8 @@ sub get_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ map_area_w } //= 30;
-	$conf{ map_area_h } //= 20;
+	$conf{ map_area_w } //= 20;
+	$conf{ map_area_h } //= 10;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
 	$conf{ dec_hor }     //= '-';
