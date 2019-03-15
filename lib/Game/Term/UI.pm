@@ -76,6 +76,15 @@ sub set_map_offsets{
 		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
+	elsif ( $ui->{hero_side} eq 'E' ){
+		
+		$ui->{map_off_x} = $ui->{hero_x} - $ui->{map_area_w} ;
+		#$ui->{map_off_y} = $ui->{hero_y} - 1 - 4 - $ui->{map_area_y} / 2; # ????????????????
+													########?????????????????
+		$ui->{map_off_y} = $ui->{map_area_y}  / 2 + ($ui->{hero_y} / 2  + 1); # ????????????????
+		
+		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
+	}
 	else{die}
 
 }
@@ -270,6 +279,13 @@ sub set_no_scrolling_area{
 			$ui->{no_scroll_area}{min_y} = $ui->{hero_y}; 
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
+		}
+		
+		elsif ( $ui->{hero_side} eq 'E' ){
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_y} / 4);
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_arya_w} / 4); 
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x};
+			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - $half_w;
 		}
 		
 		else{die}
