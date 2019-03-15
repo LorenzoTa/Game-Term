@@ -8,7 +8,7 @@ use Term::ReadKey;
 ReadMode 'cbreak';
 
 our $VERSION = '0.01';
-my $fake_map = 0;
+my $fake_map = 1;
 my $debug = 0;
 
 sub new{
@@ -26,17 +26,11 @@ sub run{
 		my $ui = shift;
 		$ui->set_map_and_hero();
 		# now BIG map, hero_pos and hero_side are initialized
-		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)
+		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)		
 		
-		
-		
-		print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" 
-				if $debug;
-		print 	"DEBUG: map extended:\n",
-					map{ join'',@$_,$/ } @{$ui->{map}}
-						if $debug > 1;
-	
-	$ui->set_map_offsets();
+		print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" if $debug;
+			
+		$ui->set_map_offsets();
 	
 		$ui->draw_map();
 		$ui->draw_menu( ["hero HP: 42","walk with WASD"] );	
@@ -46,16 +40,13 @@ sub run{
 			if( $ui->move( $key ) ){
 			
 				$ui->draw_map();
-				$ui->draw_menu( ["hero HP: 42","key $key was pressed:"] );
-			
+				$ui->draw_menu( ["hero HP: 42",
+									"hero at: $ui->{hero_x}-$ui->{hero_y}",
+									"key $key was pressed:"] );	
 
 			}
 			
-			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n"
-					if $debug;
-			
-		
-		
+			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;		
 		
 		}
 }
@@ -78,13 +69,10 @@ sub set_map_offsets{
 sub draw_map{
 	my $ui = shift;
 	# clear screen
-	system $ui->{ cls_cmd } unless $debug;
-	
-	
-	
+	system $ui->{ cls_cmd } unless $debug;	
 	# draw hero
 	# this must set $hero->{on_terrain}
-	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = 'X';
+	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
 	# calculate offsets (same calculation is made in set_map_and_hero)
 	my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
 	my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
@@ -92,14 +80,11 @@ sub draw_map{
 	# print decoration first row
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
 	# print map body with decorations
-	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ # era $#map 
-	
+	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
 		print 	' ',$ui->{ dec_ver },
-				#@$row[ $ui->{map_off_x}..$ui->{map_off_x} + $ui->{map_area_w} - 1 ],
 				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
 				$ui->{ dec_ver },"\n"
-	}
-	
+	}	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 }
@@ -107,6 +92,8 @@ sub draw_map{
 sub move{
 	my $ui = shift;
 	my $key = shift;
+	#check if leaving the no_scroll area
+	
     # move with WASD
     if ( $key eq 'w' and  is_walkable(
 							# map coord as hero X - 1, hero Y
@@ -116,7 +103,7 @@ sub move{
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
 		$ui->{hero_y}--;
-		
+		$ui->{map_off_y}-- if $ui->must_scroll();
         return 1;
     }
 	elsif ( $key eq 's' and  is_walkable(
@@ -127,7 +114,7 @@ sub move{
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
 		$ui->{hero_y}++;
-		
+		$ui->{map_off_y}++ if $ui->must_scroll();		
         return 1;
     }
 	elsif ( $key eq 'a' and  is_walkable(
@@ -138,7 +125,7 @@ sub move{
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
 		$ui->{hero_x}--;
-		
+		$ui->{map_off_x}-- if $ui->must_scroll();		
         return 1;
     }
 	elsif ( $key eq 'd' and  is_walkable(
@@ -149,7 +136,7 @@ sub move{
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
 		$ui->{hero_x}++;
-		
+		$ui->{map_off_x}++ if $ui->must_scroll();				
         return 1;
     }
 	else{
@@ -157,6 +144,36 @@ sub move{
 		return 0;
 	}
 	
+}
+
+sub must_scroll{
+	my $ui = shift;
+	return 0 if $ui->{no_scroll};
+	return 1 if $ui->{scrolling};
+	if(	 
+		$ui->{hero_y} < $ui->{no_scroll_area}{min_y} or
+		$ui->{hero_y} > $ui->{no_scroll_area}{max_y} or
+		$ui->{hero_x} < $ui->{no_scroll_area}{min_x} or
+		$ui->{hero_x} > $ui->{no_scroll_area}{max_x} #and $ui->{scrolling} == 0
+	
+	){
+		print "DEBUG: OUT of scrolling area\n" if $debug;
+		$ui->{scrolling} = 1;
+		return 1;
+	}
+	# elsif(	 
+		# $ui->{hero_y} > $ui->{no_scroll_area}{min_y} or
+		# $ui->{hero_y} < $ui->{no_scroll_area}{max_y} or
+		# $ui->{hero_x} > $ui->{no_scroll_area}{min_x} or
+		# $ui->{hero_x} < $ui->{no_scroll_area}{max_x} and $ui->{scrolling} == 1
+	
+	# ){
+		# print "DEBUG: IN of scrolling area\n" if $debug;
+		# $ui->{scrolling} = 0;
+		# return 0;
+	# }
+	else { return 0 }
+
 }
 
 sub is_walkable{
@@ -182,17 +199,18 @@ sub set_map_and_hero{
 	unless (defined $ui->{ map }[0][0] ){
 			if ( $fake_map ) { @{$ui->{map}} = fake_map(); }
 			else{
-				#$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
 				$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w } ) ] } 0..$ui->{ map_area_h }   ];
-				$ui->{map}[0][0] = '#';
-				$ui->{map}[0][-1] = '#';
-				$ui->{map}[-1][0] = '#';
-				$ui->{map}[-1][-1] = '#';
+				$ui->{map}[0][0] 	= '#';
+				$ui->{map}[0][-1] 	= '#';
+				$ui->{map}[-1][0] 	= '#';
+				$ui->{map}[-1][-1] 	= '#';
 				# fake hero
-				$ui->{map}[-1][10] = 'X';
-			}
-			
+				$ui->{map}[-1][10] 	= $ui->{hero_icon};#'X';
+			}			
 		}
+		my $original_map_w = $#{$ui->{map}->[0]} + 1;
+		my $original_map_h = $#{$ui->{map}} + 1;
+		print "DEBUG origial map was $original_map_w x $original_map_h\n" if $debug;
 		# get hero position and side BEFORE enlarging
 		$ui->get_hero_pos();
 				
@@ -204,7 +222,7 @@ sub set_map_and_hero{
 		print "DEBUG: half: w: $half_w h: $half_h\n" if $debug > 1;
 		
 		# add at top
-		my @map = map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ; 
+		my @map = map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ; 
 		# at the center
 		foreach my $orig_map_row( @{$ui->{map}} ){
 			push @map,	[ 
@@ -214,13 +232,37 @@ sub set_map_and_hero{
 						]
 		}
 		# add at bottom
-		push @map,map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ;
+		push @map,map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ;
 		
 		@{$ui->{map}} = @map;
-		$ui->{hero_x} += $ui->{ map_area_w}/2 + 1;
-		$ui->{hero_y} += $ui->{ map_area_h}/2 + 1;
+		$ui->{hero_x} += $half_w; 
+		$ui->{hero_y} += $half_h; 
+		
+		$ui->set_no_scrolling_area( $half_w, $half_h );
 	
 }
+
+sub set_no_scrolling_area{
+	my $ui = shift;
+	my ( $half_w, $half_h ) = @_;
+	if ( $ui->{no_scroll} == 0 ){
+		if ( $ui->{hero_side} eq 'S' ){
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y};
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - $half_h;
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
+			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
+		}
+	}
+	print "DEBUG: no_scroll area from $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
+			"to $ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n" if $debug;
+	
+	local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '-';
+	local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '-';
+	
+	print 	"DEBUG: map extended with no_scroll vertexes:\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
+
+}
+
 sub get_hero_pos{
 	my $ui = shift;
 	# hero position MUST be on a side and NEVER on a corner
@@ -230,7 +272,7 @@ sub get_hero_pos{
 	foreach my $row ( 0..$#{$ui->{map}} ){
 		foreach my $col ( 0..$#{$ui->{map}->[$row]} ){
 			if ( ${$ui->{map}}[$row][$col] eq 'X' ){
-				print "DEBUG: found hero at row $row col $col\n" if $debug;
+				print "DEBUG: (original map) found hero at row $row col $col\n" if $debug;
 				$ui->{hero_y} = $row;
 				$ui->{hero_x} = $col;
 				if    ( $row == 0 )						{ $ui->{hero_side} = 'N' }
@@ -245,26 +287,26 @@ sub get_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ map_area_w } //= 20;
-	$conf{ map_area_h } //= 10;
+	$conf{ map_area_w } //= 30;
+	$conf{ map_area_h } //= 20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
-	$conf{ ext_tile }	//='O';
+	$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
+	$conf{ hero_icon } = chr(2);#'X'; 30 1 2 
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
+	$conf{ scrolling } = 0;
 	$conf{ no_scroll } = 0;
 	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
 	
-	# $conf{ map_area_w }-=2;
-	# $conf{ map_area_y }-=2;
-	
+		
 	return %conf;
 }
 
@@ -303,8 +345,8 @@ sub fake_map{
        ####                                    #######                 ###  ####
        ############################                ###                 ###  ####
  #     ############################      ########                      ###  ####
-###    ############################      ########         ######################
-###                                   X               ##########################
+###    012345678901234#############      ########         ######################
+###  X                                                ##########################
 EOM
 	my @map;
 	foreach my $row( split "\n", $fake){
