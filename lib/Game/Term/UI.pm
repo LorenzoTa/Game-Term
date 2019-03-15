@@ -117,6 +117,10 @@ sub move{
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
         $ui->{hero_pos}[0]--;
+		
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{hero_y}--;
+		
         return 1;
     }
 	elsif ( $key eq 's' and  is_walkable(
@@ -127,6 +131,10 @@ sub move{
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
         $ui->{hero_pos}[0]++;
+		
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{hero_y}++;
+		
         return 1;
     }
 	elsif ( $key eq 'a' and  is_walkable(
@@ -137,6 +145,10 @@ sub move{
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
         $ui->{hero_pos}[1]--;
+		
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{hero_x}--;
+		
         return 1;
     }
 	elsif ( $key eq 'd' and  is_walkable(
@@ -147,6 +159,10 @@ sub move{
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
         $ui->{hero_pos}[1]++;
+		
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{hero_x}++;
+		
         return 1;
     }
 	
@@ -215,6 +231,8 @@ sub set_map_and_hero{
 							$$pos[0] + ( $ui->{ map_area_h}/2 + 1 ),
 							$$pos[1] + ( $ui->{ map_area_w}/2 + 1 )	
 						];
+		$ui->{hero_x} += $ui->{ map_area_w}/2 + 1;
+		$ui->{hero_y} += $ui->{ map_area_h}/2 + 1;
 		$ui->{hero_side} = $starting_side;
 	
 }
@@ -230,8 +248,8 @@ sub get_hero_pos{
 				print "DEBUG: found hero at row $row col $col\n" if $debug;
 				$pos = [ $row, $col];
 				#$pos = [ $col, $row];
-				$ui->{hero_x} = $row;
-				$ui->{hero_y} = $col;
+				$ui->{hero_y} = $row;
+				$ui->{hero_x} = $col;
 				if    ( $row == 0 )						{ $side = 'N' }
 				elsif ( $row == $#{$ui->{map}} )		{ $side = 'S' }
 				elsif ( $col == 0 )						{ $side = 'W' }
