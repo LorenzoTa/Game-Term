@@ -43,7 +43,8 @@ sub run{
 		while(1){
 			my $key = ReadKey(0);
 			
-			if( $ui->move( $key, $ui->{hero_pos}) ){
+			#if( $ui->move( $key, $ui->{hero_pos}) ){
+			if( $ui->move( $key ) ){
 			
 				$ui->draw_map();
 				$ui->draw_menu( ["hero HP: 42","key $key was pressed:"] );
@@ -52,7 +53,7 @@ sub run{
 			}
 			
 			print "DEBUG: map: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n",
-					"DEBUG: hero_pos at $ui->{hero_pos}[0] $ui->{hero_pos}[1]\n",
+					#"DEBUG: hero_pos at $ui->{hero_pos}[0] $ui->{hero_pos}[1]\n",
 					"DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n"
 					if $debug;
 			print 	"DEBUG: map extended:\n",
@@ -69,8 +70,12 @@ sub set_map_offsets{
 	
 	
 	if ( $ui->{hero_side} eq 'S' ){
-		$ui->{map_off_x} =   $ui->{map_area_w} - $ui->{hero_pos}[0] ; # + int( $ui->{ map_area_w } / 2 )
-		$ui->{map_off_y} =   $ui->{map_area_h} - $ui->{hero_pos}[1];
+		# $ui->{map_off_x} =   $ui->{map_area_w} - $ui->{hero_pos}[0] ; # + int( $ui->{ map_area_w } / 2 )
+		# $ui->{map_off_y} =   $ui->{map_area_h} - $ui->{hero_pos}[1];
+		
+		$ui->{map_off_x} =   $ui->{map_area_w} - $ui->{hero_y}; # + int( $ui->{ map_area_w } / 2 )
+		$ui->{map_off_y} =   $ui->{map_area_h} - $ui->{hero_x};
+		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
 	
@@ -82,8 +87,11 @@ sub draw_map{
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
 	# draw hero
+	# # this must set $hero->{on_terrain}
+	# $ui->{map}[ $ui->{hero_pos}->[0] ][ $ui->{hero_pos}->[1] ] = 'X';
+	
 	# this must set $hero->{on_terrain}
-	$ui->{map}[ $ui->{hero_pos}->[0] ][ $ui->{hero_pos}->[1] ] = 'X';
+	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = 'X';
 	# calculate offsets (same calculation is made in set_map_and_hero)
 	my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
 	my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
@@ -111,12 +119,13 @@ sub move{
     # move with WASD
     if ( $key eq 'w' and  is_walkable(
 							# map coord as hero X - 1, hero Y
-							$ui->{map}->[ $ui->{hero_pos}[0] - 1 ][	$ui->{hero_pos}[1] ]
+							#$ui->{map}->[ $ui->{hero_pos}[0] - 1 ][	$ui->{hero_pos}[1] ]
+							$ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
-        $ui->{hero_pos}[0]--;
+		# $ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
+        # $ui->{hero_pos}[0]--;
 		
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
 		$ui->{hero_y}--;
@@ -125,12 +134,13 @@ sub move{
     }
 	elsif ( $key eq 's' and  is_walkable(
 							# map coord as hero X + 1, hero Y
-							$ui->{map}->[ $ui->{hero_pos}[0] + 1 ][	$ui->{hero_pos}[1] ]
+							#$ui->{map}->[ $ui->{hero_pos}[0] + 1 ][	$ui->{hero_pos}[1] ]
+							$ui->{map}->[ $ui->{hero_y} + 1 ][	$ui->{hero_x} ]
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
-        $ui->{hero_pos}[0]++;
+		# $ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
+        # $ui->{hero_pos}[0]++;
 		
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
 		$ui->{hero_y}++;
@@ -139,12 +149,13 @@ sub move{
     }
 	elsif ( $key eq 'a' and  is_walkable(
 							# map coord as hero X, hero Y - 1
-							$ui->{map}->[ $ui->{hero_pos}[0] ][	$ui->{hero_pos}[1] - 1 ]
+							#$ui->{map}->[ $ui->{hero_pos}[0] ][	$ui->{hero_pos}[1] - 1 ]
+							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} - 1 ]
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
-        $ui->{hero_pos}[1]--;
+		# $ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
+        # $ui->{hero_pos}[1]--;
 		
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
 		$ui->{hero_x}--;
@@ -153,12 +164,13 @@ sub move{
     }
 	elsif ( $key eq 'd' and  is_walkable(
 							# map coord as hero X, hero Y + 1
-							$ui->{map}->[ $ui->{hero_pos}[0] ][	$ui->{hero_pos}[1] + 1 ]
+							#$ui->{map}->[ $ui->{hero_pos}[0] ][	$ui->{hero_pos}[1] + 1 ]
+							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} + 1 ]
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
-        $ui->{hero_pos}[1]++;
+		# $ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
+        # $ui->{hero_pos}[1]++;
 		
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
 		$ui->{hero_x}++;
@@ -202,8 +214,9 @@ sub set_map_and_hero{
 			
 		}
 		# get hero position and side BEFORE enlarging
-		my ($pos,$starting_side) = $ui->get_hero_pos();
-		print "DEBUG: hero at $$pos[0]-$$pos[1] (in original map) side: $starting_side\n" if $debug;
+		#my ($pos,$starting_side) = $ui->get_hero_pos();
+		$ui->get_hero_pos();
+		#print "DEBUG: hero at $$pos[0]-$$pos[1] (in original map) side: $starting_side\n" if $debug;
 		
 		
 		# add empty spaces for a half in four directions
@@ -227,13 +240,14 @@ sub set_map_and_hero{
 		push @map,map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ;
 		
 		@{$ui->{map}} = @map;
-		$ui->{hero_pos} = [ 
-							$$pos[0] + ( $ui->{ map_area_h}/2 + 1 ),
-							$$pos[1] + ( $ui->{ map_area_w}/2 + 1 )	
-						];
+		# $ui->{hero_pos} = [ 
+							# $$pos[0] + ( $ui->{ map_area_h}/2 + 1 ),
+							# $$pos[1] + ( $ui->{ map_area_w}/2 + 1 )	
+						# ];
+		# same calculation is made above
 		$ui->{hero_x} += $ui->{ map_area_w}/2 + 1;
 		$ui->{hero_y} += $ui->{ map_area_h}/2 + 1;
-		$ui->{hero_side} = $starting_side;
+		#$ui->{hero_side} = $starting_side;
 	
 }
 sub get_hero_pos{
@@ -246,16 +260,21 @@ sub get_hero_pos{
 		foreach my $col ( 0..$#{$ui->{map}->[$row]} ){
 			if ( ${$ui->{map}}[$row][$col] eq 'X' ){
 				print "DEBUG: found hero at row $row col $col\n" if $debug;
-				$pos = [ $row, $col];
+				#$pos = [ $row, $col];
 				#$pos = [ $col, $row];
 				$ui->{hero_y} = $row;
 				$ui->{hero_x} = $col;
-				if    ( $row == 0 )						{ $side = 'N' }
-				elsif ( $row == $#{$ui->{map}} )		{ $side = 'S' }
-				elsif ( $col == 0 )						{ $side = 'W' }
-				elsif ( $row == $#{$ui->{map}->[$row]} ){ $side = 'E' }
+				# if    ( $row == 0 )						{ $side = 'N' }
+				# elsif ( $row == $#{$ui->{map}} )		{ $side = 'S' }
+				# elsif ( $col == 0 )						{ $side = 'W' }
+				# elsif ( $row == $#{$ui->{map}->[$row]} ){ $side = 'E' }
+				# else									{ die "Hero side not found!" }
+				if    ( $row == 0 )						{ $ui->{hero_side} = 'N' }
+				elsif ( $row == $#{$ui->{map}} )		{ $ui->{hero_side} = 'S' }
+				elsif ( $col == 0 )						{ $ui->{hero_side} = 'W' }
+				elsif ( $row == $#{$ui->{map}->[$row]} ){ $ui->{hero_side} = 'E' }
 				else									{ die "Hero side not found!" }
-				return $pos,$side;
+				#return $pos,$side;
 			}				
 		}
 	}	
@@ -271,7 +290,7 @@ sub validate_conf{
 	$conf{ dec_ver }     //= '|';
 	$conf{ ext_tile }	//='O';
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
-	$conf{ hero_pos } = [];
+	#$conf{ hero_pos } = [];
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
