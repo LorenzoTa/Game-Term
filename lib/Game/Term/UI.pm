@@ -28,19 +28,22 @@ sub run{
 		# now BIG map, hero_pos and hero_side are initialized
 		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)
 		
-		$ui->set_map_offsets();
 		
-		print "DEBUG: REF ui->map: ",ref $ui->{map},"\n",
-				"DEBUG: REF ui->map[0]: ",ref $ui->{map}->[0],' = ',@{$ui->{map}->[0]},"\n",
-				"DEBUG: NEW map hero at: $ui->{hero_pos}->[0] $ui->{hero_pos}[1]\n"
+		
+		print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" 
 				if $debug;
+		print 	"DEBUG: map extended:\n",
+					map{ join'',@$_,$/ } @{$ui->{map}}
+						if $debug > 1;
+	
+	$ui->set_map_offsets();
 	
 		$ui->draw_map();
 		$ui->draw_menu( ["hero HP: 42","walk with WASD"] );	
 		while(1){
 			my $key = ReadKey(0);
 			
-			if( $ui->move( $key, $ui->{hero_pos}) ){
+			if( $ui->move( $key ) ){
 			
 				$ui->draw_map();
 				$ui->draw_menu( ["hero HP: 42","key $key was pressed:"] );
@@ -48,11 +51,9 @@ sub run{
 
 			}
 			
-			print "DEBUG: map: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n"
+			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n"
 					if $debug;
-			print 	"DEBUG: map extended:\n",
-					map{ join'',@$_,$/ } @{$ui->{map}}
-						if $debug > 1;
+			
 		
 		
 		
@@ -61,14 +62,46 @@ sub run{
 
 sub set_map_offsets{
 	my $ui = shift;
+	
+	
 	if ( $ui->{hero_side} eq 'S' ){
-		$ui->{map_off_x} = $ui->{hero_pos}[0] - 4;
-		$ui->{map_off_y} = $ui->{hero_pos}[1] - $ui->{map_area_h} - 6;
+		
+		$ui->{map_off_x} =   $ui->{hero_x} - 1 - $ui->{map_area_w} / 2;
+		$ui->{map_off_y} =   $ui->{hero_y} - $ui->{map_area_h};
+		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
 	
 	else{die}
 
+}
+sub draw_map{
+	my $ui = shift;
+	# clear screen
+	system $ui->{ cls_cmd } unless $debug;
+	
+	
+	
+	# draw hero
+	# this must set $hero->{on_terrain}
+	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = 'X';
+	# calculate offsets (same calculation is made in set_map_and_hero)
+	my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
+	my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
+	# MAP AREA:
+	# print decoration first row
+	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
+	# print map body with decorations
+	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ # era $#map 
+	
+		print 	' ',$ui->{ dec_ver },
+				#@$row[ $ui->{map_off_x}..$ui->{map_off_x} + $ui->{map_area_w} - 1 ],
+				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
+				$ui->{ dec_ver },"\n"
+	}
+	
+	# print decoration last row
+	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 }
 
 sub move{
@@ -77,44 +110,52 @@ sub move{
     # move with WASD
     if ( $key eq 'w' and  is_walkable(
 							# map coord as hero X - 1, hero Y
-							$ui->{map}->[ $ui->{hero_pos}[0] - 1 ][	$ui->{hero_pos}[1] ]
+							$ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
-        $ui->{hero_pos}[0]--;
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{hero_y}--;
+		
         return 1;
     }
 	elsif ( $key eq 's' and  is_walkable(
 							# map coord as hero X + 1, hero Y
-							$ui->{map}->[ $ui->{hero_pos}[0] + 1 ][	$ui->{hero_pos}[1] ]
+							$ui->{map}->[ $ui->{hero_y} + 1 ][	$ui->{hero_x} ]
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
-        $ui->{hero_pos}[0]++;
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{hero_y}++;
+		
         return 1;
     }
 	elsif ( $key eq 'a' and  is_walkable(
 							# map coord as hero X, hero Y - 1
-							$ui->{map}->[ $ui->{hero_pos}[0] ][	$ui->{hero_pos}[1] - 1 ]
+							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} - 1 ]
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
-        $ui->{hero_pos}[1]--;
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{hero_x}--;
+		
         return 1;
     }
 	elsif ( $key eq 'd' and  is_walkable(
 							# map coord as hero X, hero Y + 1
-							$ui->{map}->[ $ui->{hero_pos}[0] ][	$ui->{hero_pos}[1] + 1 ]
+							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} + 1 ]
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[$ui->{hero_pos}[0]][$ui->{hero_pos}[1]] = ' ';
-        $ui->{hero_pos}[1]++;
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{hero_x}++;
+		
         return 1;
     }
+	else{
+		print "unused [$key] was pressed\n" if $debug;
+		return 0;
+	}
 	
 }
 
@@ -133,32 +174,7 @@ sub draw_menu{
 	# menu fake data
 	print ' ',$ui->{ dec_ver }.$_."\n" for @$messages;
 }
-sub draw_map{
-	my $ui = shift;
-	# clear screen
-	system $ui->{ cls_cmd } unless $debug;
-	# draw hero
-	# this must set $hero->{on_terrain}
-	$ui->{map}[ $ui->{hero_pos}->[0] ][ $ui->{hero_pos}->[1] ] = 'X';
-	# calculate offsets (same calculation is made in set_map_and_hero)
-	my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
-	my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
-	# MAP AREA:
-	# print decoration first row
-	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
-	# print map body with decorations
-	
-	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h} ] ){ # era $#map 
-	#foreach my $row ( @{$ui->{map}}[ $off_y..$#{$ui->{map}}-$off_y] ){ # era $#map 
-		print 	' ',$ui->{ dec_ver },
-				@$row[ $ui->{map_off_x}..$ui->{map_off_x} + $ui->{map_area_w} ],
-				#@$row[ $off_x..$#$row-$off_x ],
-				$ui->{ dec_ver },"\n"
-	}
-	
-	# print decoration last row
-	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
-}
+
 
 
 sub set_map_and_hero{
@@ -166,7 +182,8 @@ sub set_map_and_hero{
 	unless (defined $ui->{ map }[0][0] ){
 			if ( $fake_map ) { @{$ui->{map}} = fake_map(); }
 			else{
-				$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
+				#$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
+				$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w } ) ] } 0..$ui->{ map_area_h }   ];
 				$ui->{map}[0][0] = '#';
 				$ui->{map}[0][-1] = '#';
 				$ui->{map}[-1][0] = '#';
@@ -177,15 +194,13 @@ sub set_map_and_hero{
 			
 		}
 		# get hero position and side BEFORE enlarging
-		my ($pos,$starting_side) = $ui->get_hero_pos();
-		print "DEBUG: hero at $$pos[0]-$$pos[1] (in original map) side: $starting_side\n" if $debug;
-		
-		
+		$ui->get_hero_pos();
+				
 		# add empty spaces for a half in four directions
 		# same calculation is made in draw_map for offsets
 		my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
 		my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
-		#
+		
 		print "DEBUG: half: w: $half_w h: $half_h\n" if $debug > 1;
 		
 		# add at top
@@ -202,11 +217,8 @@ sub set_map_and_hero{
 		push @map,map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ;
 		
 		@{$ui->{map}} = @map;
-		$ui->{hero_pos} = [ 
-							$$pos[0] + ( $ui->{ map_area_h}/2 + 1 ),
-							$$pos[1] + ( $ui->{ map_area_w}/2 + 1 )	
-						];
-		$ui->{hero_side} = $starting_side;
+		$ui->{hero_x} += $ui->{ map_area_w}/2 + 1;
+		$ui->{hero_y} += $ui->{ map_area_h}/2 + 1;
 	
 }
 sub get_hero_pos{
@@ -214,16 +226,18 @@ sub get_hero_pos{
 	# hero position MUST be on a side and NEVER on a corner
 	my $pos;
 	my $side;
+	print "DEBUG: original map size; rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n" if $debug;
 	foreach my $row ( 0..$#{$ui->{map}} ){
 		foreach my $col ( 0..$#{$ui->{map}->[$row]} ){
 			if ( ${$ui->{map}}[$row][$col] eq 'X' ){
-				$pos = [ $row, $col];
-				if    ( $row == 0 )						{ $side = 'N' }
-				elsif ( $row == $#{$ui->{map}} )		{ $side = 'S' }
-				elsif ( $col == 0 )						{ $side = 'W' }
-				elsif ( $row == $#{$ui->{map}->[$row]} ){ $side = 'E' }
+				print "DEBUG: found hero at row $row col $col\n" if $debug;
+				$ui->{hero_y} = $row;
+				$ui->{hero_x} = $col;
+				if    ( $row == 0 )						{ $ui->{hero_side} = 'N' }
+				elsif ( $row == $#{$ui->{map}} )		{ $ui->{hero_side} = 'S' }
+				elsif ( $col == 0 )						{ $ui->{hero_side} = 'W' }
+				elsif ( $col == $#{$ui->{map}->[$row]} ){ $ui->{hero_side} = 'E' }
 				else									{ die "Hero side not found!" }
-				return $pos,$side;
 			}				
 		}
 	}	
@@ -239,13 +253,18 @@ sub validate_conf{
 	$conf{ dec_ver }     //= '|';
 	$conf{ ext_tile }	//='O';
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
-	$conf{ hero_pos } = [];
+	$conf{ hero_x } = undef;
+	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
 	$conf{ no_scroll } = 0;
 	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
+	
+	# $conf{ map_area_w }-=2;
+	# $conf{ map_area_y }-=2;
+	
 	return %conf;
 }
 
@@ -298,6 +317,8 @@ EOM
 __DATA__
 perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new(); print $ui->{map_area_w}.$/;dd $ui; dd $ui->{map};$ui->run"
 perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new();$ui->run"
+
+perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new();$ui->run"
 
 =head1 NAME
 
