@@ -302,12 +302,12 @@ sub validate_conf{
 	$conf{ menu_area_h } //= 20;
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
-	$conf{ ext_tile }	//='O';
+	$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
-	$conf{ hero_icon } = '@';
+	$conf{ hero_icon } = chr(2);#'X'; 30 1 2 
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
@@ -315,9 +315,7 @@ sub validate_conf{
 	$conf{ no_scroll } = 0;
 	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
 	
-	# $conf{ map_area_w }-=2;
-	# $conf{ map_area_y }-=2;
-	
+		
 	return %conf;
 }
 
