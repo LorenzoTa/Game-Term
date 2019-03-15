@@ -9,7 +9,7 @@ ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 my $fake_map = 0;
-my $debug = 1;
+my $debug = 0;
 
 sub new{
 	my $class = shift;
@@ -30,10 +30,11 @@ sub run{
 		
 		
 		
-		print #"DEBUG: REF ui->map: ",ref $ui->{map},"\n",
-				# "DEBUG: REF ui->map[0]: ",ref $ui->{map}->[0],' = ',@{$ui->{map}->[0]},"\n",
-				"DEBUG: NEW MAP: x: 0-",$#{$ui->{map}->[0]}," y: 0-", $#{$ui->{map}} ,"\n",
+		print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" 
 				if $debug;
+		print 	"DEBUG: map extended:\n",
+					map{ join'',@$_,$/ } @{$ui->{map}}
+						if $debug > 1;
 	
 	$ui->set_map_offsets();
 	
@@ -50,12 +51,9 @@ sub run{
 
 			}
 			
-			print "DEBUG: map: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n",
-					"DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n"
+			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n"
 					if $debug;
-			print 	"DEBUG: map extended:\n",
-					map{ join'',@$_,$/ } @{$ui->{map}}
-						if $debug > 1;
+			
 		
 		
 		
@@ -68,8 +66,8 @@ sub set_map_offsets{
 	
 	if ( $ui->{hero_side} eq 'S' ){
 		
-		$ui->{map_off_x} =   $ui->{map_area_w} - $ui->{hero_y}; # + int( $ui->{ map_area_w } / 2 )
-		$ui->{map_off_y} =   $ui->{map_area_h} - $ui->{hero_x};
+		$ui->{map_off_x} =   $ui->{hero_x} - 1 - $ui->{map_area_w} / 2;
+		$ui->{map_off_y} =   $ui->{hero_y} - $ui->{map_area_h};
 		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
@@ -81,6 +79,9 @@ sub draw_map{
 	my $ui = shift;
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
+	
+	
+	
 	# draw hero
 	# this must set $hero->{on_terrain}
 	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = 'X';
@@ -91,20 +92,18 @@ sub draw_map{
 	# print decoration first row
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
 	# print map body with decorations
+	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ # era $#map 
 	
-	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h} ] ){ # era $#map 
-	
-	#foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h} ] ){ # era $#map 
-	#foreach my $row ( @{$ui->{map}}[ $off_y..$#{$ui->{map}}-$off_y] ){ # era $#map 
 		print 	' ',$ui->{ dec_ver },
-				@$row[ $ui->{map_off_x}..$ui->{map_off_x} + $ui->{map_area_w} ],
-				#@$row[ $off_x..$#$row-$off_x ],
+				#@$row[ $ui->{map_off_x}..$ui->{map_off_x} + $ui->{map_area_w} - 1 ],
+				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
 				$ui->{ dec_ver },"\n"
 	}
 	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 }
+
 sub move{
 	my $ui = shift;
 	my $key = shift;
@@ -154,7 +153,7 @@ sub move{
         return 1;
     }
 	else{
-		print "unused [$key] was pressed" if $debug;
+		print "unused [$key] was pressed\n" if $debug;
 		return 0;
 	}
 	
@@ -183,7 +182,8 @@ sub set_map_and_hero{
 	unless (defined $ui->{ map }[0][0] ){
 			if ( $fake_map ) { @{$ui->{map}} = fake_map(); }
 			else{
-				$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
+				#$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
+				$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w } ) ] } 0..$ui->{ map_area_h }   ];
 				$ui->{map}[0][0] = '#';
 				$ui->{map}[0][-1] = '#';
 				$ui->{map}[-1][0] = '#';
@@ -261,6 +261,10 @@ sub validate_conf{
 	$conf{ map_off_y } = 0;
 	$conf{ no_scroll } = 0;
 	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
+	
+	# $conf{ map_area_w }-=2;
+	# $conf{ map_area_y }-=2;
+	
 	return %conf;
 }
 
@@ -313,6 +317,8 @@ EOM
 __DATA__
 perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new(); print $ui->{map_area_w}.$/;dd $ui; dd $ui->{map};$ui->run"
 perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new();$ui->run"
+
+perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new();$ui->run"
 
 =head1 NAME
 
