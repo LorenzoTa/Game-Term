@@ -29,9 +29,8 @@ sub run{
 		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)		
 		
 		print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" if $debug;
-		#print 	"DEBUG: map extended:\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
-	
-	$ui->set_map_offsets();
+			
+		$ui->set_map_offsets();
 	
 		$ui->draw_map();
 		$ui->draw_menu( ["hero HP: 42","walk with WASD"] );	
@@ -73,7 +72,7 @@ sub draw_map{
 	system $ui->{ cls_cmd } unless $debug;	
 	# draw hero
 	# this must set $hero->{on_terrain}
-	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon};#'X';
+	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
 	# calculate offsets (same calculation is made in set_map_and_hero)
 	my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
 	my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
@@ -83,7 +82,6 @@ sub draw_map{
 	# print map body with decorations
 	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
 		print 	' ',$ui->{ dec_ver },
-				#@$row[ $ui->{map_off_x}..$ui->{map_off_x} + $ui->{map_area_w} - 1 ],
 				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
 				$ui->{ dec_ver },"\n"
 	}	
@@ -201,7 +199,6 @@ sub set_map_and_hero{
 	unless (defined $ui->{ map }[0][0] ){
 			if ( $fake_map ) { @{$ui->{map}} = fake_map(); }
 			else{
-				#$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
 				$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w } ) ] } 0..$ui->{ map_area_h }   ];
 				$ui->{map}[0][0] 	= '#';
 				$ui->{map}[0][-1] 	= '#';
@@ -225,8 +222,6 @@ sub set_map_and_hero{
 		print "DEBUG: half: w: $half_w h: $half_h\n" if $debug > 1;
 		
 		# add at top
-		#my @map = map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ; 
-		#my @map = map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$half_h-1 ; 
 		my @map = map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ; 
 		# at the center
 		foreach my $orig_map_row( @{$ui->{map}} ){
@@ -237,13 +232,11 @@ sub set_map_and_hero{
 						]
 		}
 		# add at bottom
-		#push @map,map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ;
-		#push @map,map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$half_h-1 ;
 		push @map,map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ;
 		
 		@{$ui->{map}} = @map;
-		$ui->{hero_x} += $half_w; #$ui->{ map_area_w}/2 + 1;
-		$ui->{hero_y} += $half_h; #int( $ui->{ map_area_h } / 2 ) + 1;#$ui->{ map_area_h}/2 + 1;
+		$ui->{hero_x} += $half_w; 
+		$ui->{hero_y} += $half_h; 
 		
 		$ui->set_no_scrolling_area( $half_w, $half_h );
 	
@@ -256,8 +249,6 @@ sub set_no_scrolling_area{
 		if ( $ui->{hero_side} eq 'S' ){
 			$ui->{no_scroll_area}{max_y} = $ui->{hero_y};
 			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - $half_h;
-			# $ui->{no_scroll_area}{max_x} = $ui->{hero_x} + $half_w;
-			# $ui->{no_scroll_area}{min_x} = $ui->{hero_x} - $half_w;
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
 		}
