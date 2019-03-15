@@ -73,7 +73,7 @@ sub draw_map{
 	system $ui->{ cls_cmd } unless $debug;	
 	# draw hero
 	# this must set $hero->{on_terrain}
-	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = 'X';
+	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon};#'X';
 	# calculate offsets (same calculation is made in set_map_and_hero)
 	my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
 	my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
@@ -208,7 +208,7 @@ sub set_map_and_hero{
 				$ui->{map}[-1][0] 	= '#';
 				$ui->{map}[-1][-1] 	= '#';
 				# fake hero
-				$ui->{map}[-1][10] 	= 'X';
+				$ui->{map}[-1][10] 	= $ui->{hero_icon};#'X';
 			}			
 		}
 		my $original_map_w = $#{$ui->{map}->[0]} + 1;
@@ -307,6 +307,7 @@ sub validate_conf{
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
+	$conf{ hero_icon } = '@';
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
