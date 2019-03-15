@@ -26,15 +26,10 @@ sub run{
 		my $ui = shift;
 		$ui->set_map_and_hero();
 		# now BIG map, hero_pos and hero_side are initialized
-		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)
+		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)		
 		
-		
-		
-		print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" 
-				if $debug;
-		print 	"DEBUG: map extended:\n",
-					map{ join'',@$_,$/ } @{$ui->{map}}
-						if $debug > 1;
+		print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" if $debug;
+		print 	"DEBUG: map extended:\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
 	
 	$ui->set_map_offsets();
 	
@@ -46,16 +41,13 @@ sub run{
 			if( $ui->move( $key ) ){
 			
 				$ui->draw_map();
-				$ui->draw_menu( ["hero HP: 42","key $key was pressed:"] );
-			
+				$ui->draw_menu( ["hero HP: 42",
+									"hero at: $ui->{hero_x}-$ui->{hero_y}",
+									"key $key was pressed:"] );	
 
 			}
 			
-			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n"
-					if $debug;
-			
-		
-		
+			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;		
 		
 		}
 }
@@ -78,10 +70,7 @@ sub set_map_offsets{
 sub draw_map{
 	my $ui = shift;
 	# clear screen
-	system $ui->{ cls_cmd } unless $debug;
-	
-	
-	
+	system $ui->{ cls_cmd } unless $debug;	
 	# draw hero
 	# this must set $hero->{on_terrain}
 	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = 'X';
@@ -92,14 +81,12 @@ sub draw_map{
 	# print decoration first row
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
 	# print map body with decorations
-	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ # era $#map 
-	
+	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
 		print 	' ',$ui->{ dec_ver },
 				#@$row[ $ui->{map_off_x}..$ui->{map_off_x} + $ui->{map_area_w} - 1 ],
 				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
 				$ui->{ dec_ver },"\n"
-	}
-	
+	}	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 }
@@ -115,8 +102,7 @@ sub move{
 		){
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
-		$ui->{hero_y}--;
-		
+		$ui->{hero_y}--;		
         return 1;
     }
 	elsif ( $key eq 's' and  is_walkable(
@@ -126,8 +112,7 @@ sub move{
 		){
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
-		$ui->{hero_y}++;
-		
+		$ui->{hero_y}++;		
         return 1;
     }
 	elsif ( $key eq 'a' and  is_walkable(
@@ -137,8 +122,7 @@ sub move{
 		){
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
-		$ui->{hero_x}--;
-		
+		$ui->{hero_x}--;		
         return 1;
     }
 	elsif ( $key eq 'd' and  is_walkable(
@@ -148,8 +132,7 @@ sub move{
 		){
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
-		$ui->{hero_x}++;
-		
+		$ui->{hero_x}++;		
         return 1;
     }
 	else{
@@ -184,14 +167,13 @@ sub set_map_and_hero{
 			else{
 				#$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w })] } 0..$ui->{ map_area_h }-1];
 				$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w } ) ] } 0..$ui->{ map_area_h }   ];
-				$ui->{map}[0][0] = '#';
-				$ui->{map}[0][-1] = '#';
-				$ui->{map}[-1][0] = '#';
-				$ui->{map}[-1][-1] = '#';
+				$ui->{map}[0][0] 	= '#';
+				$ui->{map}[0][-1] 	= '#';
+				$ui->{map}[-1][0] 	= '#';
+				$ui->{map}[-1][-1] 	= '#';
 				# fake hero
-				$ui->{map}[-1][10] = 'X';
-			}
-			
+				$ui->{map}[-1][10] 	= 'X';
+			}			
 		}
 		# get hero position and side BEFORE enlarging
 		$ui->get_hero_pos();
@@ -217,8 +199,8 @@ sub set_map_and_hero{
 		push @map,map { [ ($ui->{ ext_tile }) x ($half_w+$ui->{ map_area_w }+$half_w) ]} 0..$ui->{ map_area_h}/2 ;
 		
 		@{$ui->{map}} = @map;
-		$ui->{hero_x} += $ui->{ map_area_w}/2 + 1;
-		$ui->{hero_y} += $ui->{ map_area_h}/2 + 1;
+		$ui->{hero_x} += int( $ui->{ map_area_w } / 2 ) + 1;#$ui->{ map_area_w}/2 + 1;
+		$ui->{hero_y} += int( $ui->{ map_area_h } / 2 ) + 1;#$ui->{ map_area_h}/2 + 1;
 	
 }
 sub get_hero_pos{
