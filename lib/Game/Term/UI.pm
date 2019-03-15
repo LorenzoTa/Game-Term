@@ -236,9 +236,8 @@ sub get_hero_pos{
 				if    ( $row == 0 )						{ $ui->{hero_side} = 'N' }
 				elsif ( $row == $#{$ui->{map}} )		{ $ui->{hero_side} = 'S' }
 				elsif ( $col == 0 )						{ $ui->{hero_side} = 'W' }
-				elsif ( $row == $#{$ui->{map}->[$row]} ){ $ui->{hero_side} = 'E' }
+				elsif ( $col == $#{$ui->{map}->[$row]} ){ $ui->{hero_side} = 'E' }
 				else									{ die "Hero side not found!" }
-				#return $pos,$side;
 			}				
 		}
 	}	
