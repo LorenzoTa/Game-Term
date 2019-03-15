@@ -9,7 +9,7 @@ ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 my $fake_map = 1;
-my $debug = 1;
+my $debug = 0;
 
 sub new{
 	my $class = shift;
@@ -95,15 +95,7 @@ sub move{
 	my $ui = shift;
 	my $key = shift;
 	#check if leaving the no_scroll area
-	if(	 
-		$ui->{hero_y} < $ui->{no_scroll_area}{min_y} or
-		$ui->{hero_y} > $ui->{no_scroll_area}{max_y} or
-		$ui->{hero_x} < $ui->{no_scroll_area}{min_x} or
-		$ui->{hero_x} > $ui->{no_scroll_area}{max_x}
 	
-	){
-		print "DEBUG: out of scrolling area\n" if $debug;
-	}
     # move with WASD
     if ( $key eq 'w' and  is_walkable(
 							# map coord as hero X - 1, hero Y
@@ -112,7 +104,8 @@ sub move{
 		){
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
-		$ui->{hero_y}--;		
+		$ui->{hero_y}--;
+		$ui->{map_off_y}-- if $ui->must_scroll();
         return 1;
     }
 	elsif ( $key eq 's' and  is_walkable(
@@ -122,7 +115,8 @@ sub move{
 		){
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
-		$ui->{hero_y}++;		
+		$ui->{hero_y}++;
+		$ui->{map_off_y}++ if $ui->must_scroll();		
         return 1;
     }
 	elsif ( $key eq 'a' and  is_walkable(
@@ -132,7 +126,8 @@ sub move{
 		){
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
-		$ui->{hero_x}--;		
+		$ui->{hero_x}--;
+		$ui->{map_off_x}-- if $ui->must_scroll();		
         return 1;
     }
 	elsif ( $key eq 'd' and  is_walkable(
@@ -142,7 +137,8 @@ sub move{
 		){
         #									THIS must be set to $hero->{on_terrain}
 		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
-		$ui->{hero_x}++;		
+		$ui->{hero_x}++;
+		$ui->{map_off_x}++ if $ui->must_scroll();				
         return 1;
     }
 	else{
@@ -150,6 +146,36 @@ sub move{
 		return 0;
 	}
 	
+}
+
+sub must_scroll{
+	my $ui = shift;
+	return 0 if $ui->{no_scroll};
+	return 1 if $ui->{scrolling};
+	if(	 
+		$ui->{hero_y} < $ui->{no_scroll_area}{min_y} or
+		$ui->{hero_y} > $ui->{no_scroll_area}{max_y} or
+		$ui->{hero_x} < $ui->{no_scroll_area}{min_x} or
+		$ui->{hero_x} > $ui->{no_scroll_area}{max_x} #and $ui->{scrolling} == 0
+	
+	){
+		print "DEBUG: OUT of scrolling area\n" if $debug;
+		$ui->{scrolling} = 1;
+		return 1;
+	}
+	# elsif(	 
+		# $ui->{hero_y} > $ui->{no_scroll_area}{min_y} or
+		# $ui->{hero_y} < $ui->{no_scroll_area}{max_y} or
+		# $ui->{hero_x} > $ui->{no_scroll_area}{min_x} or
+		# $ui->{hero_x} < $ui->{no_scroll_area}{max_x} and $ui->{scrolling} == 1
+	
+	# ){
+		# print "DEBUG: IN of scrolling area\n" if $debug;
+		# $ui->{scrolling} = 0;
+		# return 0;
+	# }
+	else { return 0 }
+
 }
 
 sub is_walkable{
@@ -284,6 +310,7 @@ sub validate_conf{
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
+	$conf{ scrolling } = 0;
 	$conf{ no_scroll } = 0;
 	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
 	
