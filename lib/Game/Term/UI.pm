@@ -5,6 +5,8 @@ use strict;
 use warnings;
 use Term::ReadKey;
 
+use Game::Term::Map;
+
 ReadMode 'cbreak';
 
 our $VERSION = '0.01';
@@ -24,6 +26,11 @@ sub new{
 
 sub run{
 		my $ui = shift;
+		
+		my $map = Game::Term::Map->new(  );
+		print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
+		$ui->{map} = $map->{data};
+		
 		$ui->set_map_and_hero();
 		# now BIG map, hero_pos and hero_side are initialized
 		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)		
@@ -62,7 +69,30 @@ sub set_map_offsets{
 		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
+	elsif ( $ui->{hero_side} eq 'N' ){
+		
+		$ui->{map_off_x} =   $ui->{hero_x} - 1 - $ui->{map_area_w} / 2;
+		$ui->{map_off_y} =   $ui->{hero_y}   ;# ????????????????
+		
+		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
+	}
+	elsif ( $ui->{hero_side} eq 'E' ){		
+		$ui->{map_off_x} = $ui->{hero_x} - $ui->{map_area_w} ;
+		#$ui->{map_off_y} = $ui->{hero_y} - 1 - 4 - $ui->{map_area_y} / 2; # ????????????????
+													########?????????????????
+		$ui->{map_off_y} = $ui->{map_area_y}  / 2 + ($ui->{hero_y} / 2  + 1); # ????????????????
+		
+		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
+	}
 	
+	elsif ( $ui->{hero_side} eq 'W' ){		
+		$ui->{map_off_x} = $ui->{hero_x} - 1 ; ###############NOOOOOOOOOOOOOO
+		#$ui->{map_off_y} = $ui->{hero_y} - 1 - 4 - $ui->{map_area_y} / 2; # ????????????????
+													########?????????????????
+		$ui->{map_off_y} = $ui->{map_area_y}  / 2 + ($ui->{hero_y} / 2  + 1); # ????????????????
+		
+		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
+	}
 	else{die}
 
 }
@@ -196,50 +226,39 @@ sub draw_menu{
 
 sub set_map_and_hero{
 	my $ui = shift;
-	unless (defined $ui->{ map }[0][0] ){
-			if ( $fake_map ) { @{$ui->{map}} = fake_map(); }
-			else{
-				$ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w } ) ] } 0..$ui->{ map_area_h }   ];
-				$ui->{map}[0][0] 	= '#';
-				$ui->{map}[0][-1] 	= '#';
-				$ui->{map}[-1][0] 	= '#';
-				$ui->{map}[-1][-1] 	= '#';
-				# fake hero
-				$ui->{map}[-1][10] 	= $ui->{hero_icon};#'X';
-			}			
-		}
-		my $original_map_w = $#{$ui->{map}->[0]} + 1;
-		my $original_map_h = $#{$ui->{map}} + 1;
-		print "DEBUG origial map was $original_map_w x $original_map_h\n" if $debug;
-		# get hero position and side BEFORE enlarging
-		$ui->get_hero_pos();
-				
-		# add empty spaces for a half in four directions
-		# same calculation is made in draw_map for offsets
-		my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
-		my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
-		
-		print "DEBUG: half: w: $half_w h: $half_h\n" if $debug > 1;
-		
-		# add at top
-		my @map = map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ; 
-		# at the center
-		foreach my $orig_map_row( @{$ui->{map}} ){
-			push @map,	[ 
-							($ui->{ ext_tile }) x $half_w,
-							@$orig_map_row,
-							($ui->{ ext_tile }) x $half_w
-						]
-		}
-		# add at bottom
-		push @map,map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ;
-		
-		@{$ui->{map}} = @map;
-		$ui->{hero_x} += $half_w; 
-		$ui->{hero_y} += $half_h; 
-		
-		$ui->set_no_scrolling_area( $half_w, $half_h );
-	
+
+	my $original_map_w = $#{$ui->{map}->[0]} + 1;
+	my $original_map_h = $#{$ui->{map}} + 1;
+	print "DEBUG origial map was $original_map_w x $original_map_h\n" if $debug;
+	# get hero position and side BEFORE enlarging
+	$ui->get_hero_pos();
+			
+	# add empty spaces for a half in four directions
+	# same calculation is made in draw_map for offsets
+	my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
+	my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
+
+	print "DEBUG: half: w: $half_w h: $half_h\n" if $debug > 1;
+
+	# add at top
+	my @map = map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ; 
+	# at the center
+	foreach my $orig_map_row( @{$ui->{map}} ){
+		push @map,	[ 
+						($ui->{ ext_tile }) x $half_w,
+						@$orig_map_row,
+						($ui->{ ext_tile }) x $half_w
+					]
+	}
+	# add at bottom
+	push @map,map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ;
+
+	@{$ui->{map}} = @map;
+	$ui->{hero_x} += $half_w; 
+	$ui->{hero_y} += $half_h; 
+
+	$ui->set_no_scrolling_area( $half_w, $half_h );
+
 }
 
 sub set_no_scrolling_area{
@@ -252,6 +271,26 @@ sub set_no_scrolling_area{
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
 		}
+		elsif ( $ui->{hero_side} eq 'N' ){
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + $half_h;
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y}; 
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
+			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
+		}
+		
+		elsif ( $ui->{hero_side} eq 'E' ){
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_y} / 4);
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_arya_w} / 4); 
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x};
+			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - $half_w;
+		}
+		elsif ( $ui->{hero_side} eq 'W' ){
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_y} / 4);
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_arya_w} / 4); 
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + $half_w;
+			$ui->{no_scroll_area}{min_x} = $ui->{hero_x};
+		}
+		else{die}
 	}
 	print "DEBUG: no_scroll area from $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
 			"to $ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n" if $debug;
@@ -287,7 +326,7 @@ sub get_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ map_area_w } //= 30;
+	$conf{ map_area_w } //= 80;
 	$conf{ map_area_h } //= 20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
@@ -311,49 +350,6 @@ sub validate_conf{
 }
 
 
-sub fake_map{
-
-	my $fake=<<EOM;
-01234567890123456789012345678901234567890123456789012345678901234567890123456789
-##    #########################                     ########         ###########
-##  #############################            ###    #########   ################
-    ############################################    #########   ################
-    #####                   ####################         ####   ########   #####
-    ###     ########           ################         #####   ###       ######
-          ##########                       ####         ####    ###      #######
-        #########     ###############      ####   ###   ####    ###      ##### #
-       ########     ###################     ###   ###   ###     ###      ####  #
-      ######       #####################    ###   ###   ####             #### ##
-     ######        #####          ######          ###   ############     #### ##
-     ####          ####              ###         ####   ############     #######
-     ####          ###                   ############    ###########      ######
-     #####                              #############                     #### #
-     #####                              ####################       ###     #####
-      ####     #######                        ################     #####      ##
-              ########             #####      #################    #######    ##
-   #          ########             ########              ######     ######     #
-        #     ####                 #########               #####     ###########
-    #         ###         ######     O######                #####      #########
-         #    ###         #######       ####                 ####      #########
-              ####        #######       ####     #####       ####           ####
-   #  ###     ######      #######      ####      #####        ###       ########
-      ###     ########                #####      #####      #####      #########
-      ####      #########            ######     ####       ######      #########
-      #####      #########################     #####       ######      #########
-      #####        ######################      ######      ####             ####
-       ####            #################       #######                      ####
-       ####                                    #######                 ###  ####
-       ############################                ###                 ###  ####
- #     ############################      ########                      ###  ####
-###    012345678901234#############      ########         ######################
-###  X                                                ##########################
-EOM
-	my @map;
-	foreach my $row( split "\n", $fake){
-		push @map,[ split '', $row ]
-	}
-	return @map;
-}	
 
 1; # End of Game::Term::UI
 __DATA__
