@@ -1,0 +1,6 @@
+
+- print offsets are correct only for the S type maps 80 * 20 with game window 80 * 20
+ but with both 40 * 20 also N are ok
+ E and W maps are wrong in bottom 2-3 rows
+Use of uninitialized value in print at .\lib/Game/Term/UI.pm line 116. (sub draw_map)
+ 
