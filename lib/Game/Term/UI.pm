@@ -295,7 +295,7 @@ sub set_no_scrolling_area{
 	my $ui = shift;
 	my ( $half_w, $half_h ) = @_;
 	if ( $ui->{no_scroll} == 0 ){
-		if ( $ui->{hero_side} eq 'S' ){  # S is ok
+		if ( $ui->{hero_side} eq 'S' ){  
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
 			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - $half_h;
 			
@@ -303,11 +303,12 @@ sub set_no_scrolling_area{
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
 			
 		}
-		elsif ( $ui->{hero_side} eq 'N' ){ # N seems ok
-			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + $half_h;
-			$ui->{no_scroll_area}{min_y} = $ui->{hero_y}; 
-			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
+		elsif ( $ui->{hero_side} eq 'N' ){ 
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y}; 
+			
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + $half_h;			
 		}
 		
 		elsif ( $ui->{hero_side} eq 'E' ){
@@ -318,19 +319,11 @@ sub set_no_scrolling_area{
 			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4 );						
 		}
 		elsif ( $ui->{hero_side} eq 'W' ){
-			# $ui->{no_scroll_area}{min_x} = $ui->{hero_x} +  $half_w;
-			# $ui->{no_scroll_area}{min_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4); 
-			
-			# $ui->{no_scroll_area}{max_x} = $ui->{hero_x} ;
-			# $ui->{no_scroll_area}{max_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4);
-			
-			#
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} ;
 			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4);
 			
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} +  $half_w;
-			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4);
-			
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4);			
 		}
 		else{die}
 	}
@@ -372,8 +365,8 @@ sub get_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ map_area_w } //= 20 ;
-	$conf{ map_area_h } //=  10;
+	$conf{ map_area_w } //= 80;
+	$conf{ map_area_h } //=  20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
 	$conf{ dec_hor }     //= '-';
