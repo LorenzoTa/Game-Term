@@ -10,8 +10,8 @@ use Game::Term::Map;
 ReadMode 'cbreak';
 
 our $VERSION = '0.01';
-my $fake_map = 1;
-my $debug = 0;
+#my $fake_map = 1;
+my $debug = 1;
 
 sub new{
 	my $class = shift;

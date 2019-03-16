@@ -3,4 +3,5 @@
  but with both 40 * 20 also N are ok
  E and W maps are wrong in bottom 2-3 rows
 Use of uninitialized value in print at .\lib/Game/Term/UI.pm line 116. (sub draw_map)
+the error must be in set_map_offsets sub.
  
