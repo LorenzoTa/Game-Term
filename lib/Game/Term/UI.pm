@@ -326,8 +326,8 @@ sub get_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ map_area_w } //= 20;
-	$conf{ map_area_h } //= 10;
+	$conf{ map_area_w } //= 80;
+	$conf{ map_area_h } //= 20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
 	$conf{ dec_hor }     //= '-';
