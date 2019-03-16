@@ -12,7 +12,7 @@ ReadMode 'cbreak';
 our $VERSION = '0.01';
 #my $fake_map = 1;
 my $debug = 0;
-my $noscroll_debug = 1;
+my $noscroll_debug = 0;
 
 sub new{
 	my $class = shift;
@@ -125,19 +125,13 @@ sub draw_map{
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
 	# print map body with decorations
 	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
-		# {local $@;
-		# eval {
+		
 		no warnings qw(uninitialized);
 				print 	' ',$ui->{ dec_ver },
 				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
 				$ui->{ dec_ver },"\n";
-		# };
-		# if ($@){
-			# die "ERROR in draw map:\n",
-					# #"ROW current  0 .. $#{$row}\n",
-				# "OFF_X used in print: $ui->{map_off_x} + 1 .. $ui->{map_off_x} + $ui->{map_area_w}\n";
-		# }
-		# }#end of local $@
+		
+		
 	}	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
@@ -284,11 +278,6 @@ sub set_map_and_hero{
 
 	$ui->set_no_scrolling_area( $half_w, $half_h );
 	
-	# if ($noscroll_debug){
-		 # $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '.';
-		 # $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '.';
-	# }
-
 }
 
 sub set_no_scrolling_area{
@@ -365,8 +354,8 @@ sub get_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ map_area_w } //= 80;
-	$conf{ map_area_h } //=  20;
+	$conf{ map_area_w } //= 20; #80;
+	$conf{ map_area_h } //=  10; #20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
 	$conf{ dec_hor }     //= '-';

@@ -1,7 +1,7 @@
 
-- print offsets are correct only for the S type maps 80 * 20 with game window 80 * 20
- but with both 40 * 20 also N are ok
- E and W maps are wrong in bottom 2-3 rows
-Use of uninitialized value in print at .\lib/Game/Term/UI.pm line 116. (sub draw_map)
-the error must be in set_map_offsets sub.	
- 
+BUG: Use of uninitialized value in print at... sub draw_map appears
+ONLY in N and W maps IF exiting no_scroll are from the same side of entrance
+AND going then in 90 direction til end
+
+
+
