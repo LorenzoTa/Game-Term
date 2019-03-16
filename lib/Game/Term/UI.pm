@@ -226,50 +226,39 @@ sub draw_menu{
 
 sub set_map_and_hero{
 	my $ui = shift;
-	# unless (defined $ui->{ map }[0][0] ){
-			# if ( $fake_map ) { @{$ui->{map}} = fake_map(); }
-			# else{
-				# $ui->{map} =[ map{ [(' ') x ($ui->{ map_area_w } ) ] } 0..$ui->{ map_area_h }   ];
-				# $ui->{map}[0][0] 	= '#';
-				# $ui->{map}[0][-1] 	= '#';
-				# $ui->{map}[-1][0] 	= '#';
-				# $ui->{map}[-1][-1] 	= '#';
-				# # fake hero
-				# $ui->{map}[-1][10] 	= $ui->{hero_icon};#'X';
-			# }			
-		# }
-		my $original_map_w = $#{$ui->{map}->[0]} + 1;
-		my $original_map_h = $#{$ui->{map}} + 1;
-		print "DEBUG origial map was $original_map_w x $original_map_h\n" if $debug;
-		# get hero position and side BEFORE enlarging
-		$ui->get_hero_pos();
-				
-		# add empty spaces for a half in four directions
-		# same calculation is made in draw_map for offsets
-		my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
-		my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
-		
-		print "DEBUG: half: w: $half_w h: $half_h\n" if $debug > 1;
-		
-		# add at top
-		my @map = map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ; 
-		# at the center
-		foreach my $orig_map_row( @{$ui->{map}} ){
-			push @map,	[ 
-							($ui->{ ext_tile }) x $half_w,
-							@$orig_map_row,
-							($ui->{ ext_tile }) x $half_w
-						]
-		}
-		# add at bottom
-		push @map,map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ;
-		
-		@{$ui->{map}} = @map;
-		$ui->{hero_x} += $half_w; 
-		$ui->{hero_y} += $half_h; 
-		
-		$ui->set_no_scrolling_area( $half_w, $half_h );
-	
+
+	my $original_map_w = $#{$ui->{map}->[0]} + 1;
+	my $original_map_h = $#{$ui->{map}} + 1;
+	print "DEBUG origial map was $original_map_w x $original_map_h\n" if $debug;
+	# get hero position and side BEFORE enlarging
+	$ui->get_hero_pos();
+			
+	# add empty spaces for a half in four directions
+	# same calculation is made in draw_map for offsets
+	my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
+	my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
+
+	print "DEBUG: half: w: $half_w h: $half_h\n" if $debug > 1;
+
+	# add at top
+	my @map = map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ; 
+	# at the center
+	foreach my $orig_map_row( @{$ui->{map}} ){
+		push @map,	[ 
+						($ui->{ ext_tile }) x $half_w,
+						@$orig_map_row,
+						($ui->{ ext_tile }) x $half_w
+					]
+	}
+	# add at bottom
+	push @map,map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ;
+
+	@{$ui->{map}} = @map;
+	$ui->{hero_x} += $half_w; 
+	$ui->{hero_y} += $half_h; 
+
+	$ui->set_no_scrolling_area( $half_w, $half_h );
+
 }
 
 sub set_no_scrolling_area{
@@ -361,49 +350,6 @@ sub validate_conf{
 }
 
 
-sub fake_map{
-
-	my $fake=<<EOM;
-01234567890123456789012345678901234567890123456789012345678901234567890123456789
-##    #########################                     ########         ###########
-##  #############################            ###    #########   ################
-    ############################################    #########   ################
-    #####                   ####################         ####   ########   #####
-    ###     ########           ################         #####   ###       ######
-          ##########                       ####         ####    ###      #######
-        #########     ###############      ####   ###   ####    ###      ##### #
-       ########     ###################     ###   ###   ###     ###      ####  #
-      ######       #####################    ###   ###   ####             #### ##
-     ######        #####          ######          ###   ############     #### ##
-     ####          ####              ###         ####   ############     #######
-     ####          ###                   ############    ###########      ######
-     #####                              #############                     #### #
-     #####                              ####################       ###     #####
-      ####     #######                        ################     #####      ##
-              ########             #####      #################    #######    ##
-   #          ########             ########              ######     ######     #
-        #     ####                 #########               #####     ###########
-    #         ###         ######     O######                #####      #########
-         #    ###         #######       ####                 ####      #########
-              ####        #######       ####     #####       ####           ####
-   #  ###     ######      #######      ####      #####        ###       ########
-      ###     ########                #####      #####      #####      #########
-      ####      #########            ######     ####       ######      #########
-      #####      #########################     #####       ######      #########
-      #####        ######################      ######      ####             ####
-       ####            #################       #######                      ####
-       ####                                    #######                 ###  ####
-       ############################                ###                 ###  ####
- #     ############################      ########                      ###  ####
-###    012345678901234#############      ########         ######################
-###  X                                                ##########################
-EOM
-	my @map;
-	foreach my $row( split "\n", $fake){
-		push @map,[ split '', $row ]
-	}
-	return @map;
-}	
 
 1; # End of Game::Term::UI
 __DATA__
