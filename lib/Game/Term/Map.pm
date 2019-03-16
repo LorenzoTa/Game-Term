@@ -20,7 +20,7 @@ sub new{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ fake_map } //= 3;
+	$conf{ fake_map } //= ;
 	$conf{ fake_x } //= 80;
 	$conf{ fake_y } //= 20;
 	
@@ -31,7 +31,7 @@ sub validate_conf{
 sub fake_map{
 	my ($type, $x, $y) = @_;
 	my $map = [];
-	if ($type == 1){ # hero at S
+	if ($type =~ /S/i){ # hero at S
 		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
@@ -40,7 +40,7 @@ sub fake_map{
 				# fake hero
 				$$map[-1][10] 	=  'X' ;#'X';
 	}
-	elsif ($type == 2){ # hero at N
+	elsif ($type =~ /N/i){ # hero at N
 		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
@@ -49,7 +49,7 @@ sub fake_map{
 				# fake hero
 				$$map[0][10] 	=  'X' ;#'X';
 	}
-	elsif ($type == 3){ # hero at E
+	elsif ($type =~ /E/i){ # hero at E
 		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
@@ -58,7 +58,7 @@ sub fake_map{
 				# fake hero
 				$$map[5][-1] 	=  'X' ;#'X';
 	}
-	elsif ($type == 4){ # hero at w
+	elsif ($type =~ /W/i){ # hero at w
 		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
@@ -67,7 +67,7 @@ sub fake_map{
 				# fake hero
 				$$map[5][0] 	=  'X' ;#'X';
 	}
-	elsif ($type == 5){ 
+	elsif ($type =~ /one/i){ 
 		my $fake=<<EOM;
 01234567890123456789012345678901234567890123456789012345678901234567890123456789
 ##    #########################                     ########         ###########
