@@ -11,7 +11,8 @@ ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 #my $fake_map = 1;
-my $debug = 1;
+my $debug = 0;
+my $noscroll_debug = 1;
 
 sub new{
 	my $class = shift;
@@ -111,9 +112,18 @@ sub draw_map{
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
 	# print map body with decorations
 	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
-		print 	' ',$ui->{ dec_ver },
+		{local $@;
+		eval {
+				print 	' ',$ui->{ dec_ver },
 				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
-				$ui->{ dec_ver },"\n"
+				$ui->{ dec_ver },"\n";
+		};
+		if ($@){
+			die "ERROR in draw map:\n",
+					#"ROW current  0 .. $#{$row}\n",
+				"OFF_X used in print: $ui->{map_off_x} + 1 .. $ui->{map_off_x} + $ui->{map_area_w}\n";
+		}
+		}#end of local $@
 	}	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
@@ -209,6 +219,7 @@ sub must_scroll{
 sub is_walkable{
 	my $tile = shift;
 	if( $tile eq ' ' ){ return 1 }
+	elsif( $tile eq '.' ){ return 1 }
 	else{return 0}
 }
 		
@@ -258,6 +269,11 @@ sub set_map_and_hero{
 	$ui->{hero_y} += $half_h; 
 
 	$ui->set_no_scrolling_area( $half_w, $half_h );
+	
+	if ($noscroll_debug){
+		 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '.';
+		 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '.';
+	}
 
 }
 
@@ -299,7 +315,11 @@ sub set_no_scrolling_area{
 	local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '-';
 	
 	print 	"DEBUG: map extended with no_scroll vertexes:\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
-
+	
+	# if ($noscroll_debug){
+		 # $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '.';
+		 # $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '.';
+	# }
 }
 
 sub get_hero_pos{
@@ -326,8 +346,8 @@ sub get_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ map_area_w } //= 40;
-	$conf{ map_area_h } //= 20;
+	$conf{ map_area_w } //= 20;
+	$conf{ map_area_h } //= 10;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
 	$conf{ dec_hor }     //= '-';
