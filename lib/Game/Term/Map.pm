@@ -21,8 +21,8 @@ sub new{
 sub validate_conf{
 	my %conf = @_;
 	$conf{ fake_map } //= 4;
-	$conf{ fake_x } //= 20;
-	$conf{ fake_y } //= 10;
+	$conf{ fake_x } //= 40;
+	$conf{ fake_y } //= 20;
 	
 	$conf{data} = fake_map( $conf{ fake_map },$conf{ fake_x },$conf{ fake_y } );
 	return %conf;

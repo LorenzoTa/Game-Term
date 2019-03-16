@@ -298,7 +298,7 @@ sub set_no_scrolling_area{
 		elsif ( $ui->{hero_side} eq 'W' ){
 			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_y} / 4);
 			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_arya_w} / 4); 
-			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} - $half_w;
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + $half_w;
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x};
 		}
 		else{die}
