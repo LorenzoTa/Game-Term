@@ -46,10 +46,23 @@ sub run{
 			my $key = ReadKey(0);
 			
 			if( $ui->move( $key ) ){
-			
+				
 				$ui->draw_map();
+				
+	if ($noscroll_debug){
+		 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '.';
+		 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '.';
+		 #print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n";
+		 print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
+				"NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
+				"$ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n";
+		 print "OFF_Y used in print: $ui->{map_off_y} .. $ui->{map_off_y} + $ui->{map_area_h}\n";
+		 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
+	}
+			
+			
 				$ui->draw_menu( ["hero HP: 42",
-									"hero at: $ui->{hero_x}-$ui->{hero_y}",
+									"hero at: $ui->{hero_y}-$ui->{hero_x}",
 									"key $key was pressed:"] );	
 
 			}
@@ -112,18 +125,19 @@ sub draw_map{
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
 	# print map body with decorations
 	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
-		{local $@;
-		eval {
+		# {local $@;
+		# eval {
+		no warnings qw(uninitialized);
 				print 	' ',$ui->{ dec_ver },
 				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
 				$ui->{ dec_ver },"\n";
-		};
-		if ($@){
-			die "ERROR in draw map:\n",
-					#"ROW current  0 .. $#{$row}\n",
-				"OFF_X used in print: $ui->{map_off_x} + 1 .. $ui->{map_off_x} + $ui->{map_area_w}\n";
-		}
-		}#end of local $@
+		# };
+		# if ($@){
+			# die "ERROR in draw map:\n",
+					# #"ROW current  0 .. $#{$row}\n",
+				# "OFF_X used in print: $ui->{map_off_x} + 1 .. $ui->{map_off_x} + $ui->{map_area_w}\n";
+		# }
+		# }#end of local $@
 	}	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
@@ -270,10 +284,10 @@ sub set_map_and_hero{
 
 	$ui->set_no_scrolling_area( $half_w, $half_h );
 	
-	if ($noscroll_debug){
-		 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '.';
-		 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '.';
-	}
+	# if ($noscroll_debug){
+		 # $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '.';
+		 # $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '.';
+	# }
 
 }
 
@@ -281,13 +295,15 @@ sub set_no_scrolling_area{
 	my $ui = shift;
 	my ( $half_w, $half_h ) = @_;
 	if ( $ui->{no_scroll} == 0 ){
-		if ( $ui->{hero_side} eq 'S' ){
-			$ui->{no_scroll_area}{max_y} = $ui->{hero_y};
-			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - $half_h;
-			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
+		if ( $ui->{hero_side} eq 'S' ){  # S is ok
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - $half_h;
+			
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y};
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
+			
 		}
-		elsif ( $ui->{hero_side} eq 'N' ){
+		elsif ( $ui->{hero_side} eq 'N' ){ # N seems ok
 			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + $half_h;
 			$ui->{no_scroll_area}{min_y} = $ui->{hero_y}; 
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
@@ -295,16 +311,26 @@ sub set_no_scrolling_area{
 		}
 		
 		elsif ( $ui->{hero_side} eq 'E' ){
-			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_y} / 4);
-			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_arya_w} / 4); 
-			$ui->{no_scroll_area}{max_x} = $ui->{hero_x};
-			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - $half_w;
+			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - $half_w;#
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4)  ;
+			
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} ;
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4 );						
 		}
 		elsif ( $ui->{hero_side} eq 'W' ){
-			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_y} / 4);
-			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_arya_w} / 4); 
-			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + $half_w;
-			$ui->{no_scroll_area}{min_x} = $ui->{hero_x};
+			# $ui->{no_scroll_area}{min_x} = $ui->{hero_x} +  $half_w;
+			# $ui->{no_scroll_area}{min_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4); 
+			
+			# $ui->{no_scroll_area}{max_x} = $ui->{hero_x} ;
+			# $ui->{no_scroll_area}{max_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4);
+			
+			#
+			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} ;
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4);
+			
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} +  $half_w;
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4);
+			
 		}
 		else{die}
 	}
@@ -346,8 +372,8 @@ sub get_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ map_area_w } //= 20;
-	$conf{ map_area_h } //= 10;
+	$conf{ map_area_w } //= 20 ;
+	$conf{ map_area_h } //=  10;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
 	$conf{ dec_hor }     //= '-';
