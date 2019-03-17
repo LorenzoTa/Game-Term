@@ -20,7 +20,7 @@ sub new{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ fake_map } //= 'n' ;
+	$conf{ fake_map } //= 's' ;
 	$conf{ fake_x } //= 30; #80;
 	$conf{ fake_y } //= 20; #20;
 	
