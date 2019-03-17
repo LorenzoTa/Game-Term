@@ -50,8 +50,8 @@ sub run{
 				$ui->draw_map();
 				
 	if ($noscroll_debug){
-		 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '.';
-		 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '.';
+		 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '+';
+		 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '+';
 		 #print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n";
 		 print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
 				"NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
@@ -73,38 +73,25 @@ sub run{
 }
 
 sub set_map_offsets{
-	my $ui = shift;
-	
-	
-	if ( $ui->{hero_side} eq 'S' ){
-		
-		$ui->{map_off_x} =   $ui->{hero_x} - 1 - $ui->{map_area_w} / 2;
-		$ui->{map_off_y} =   $ui->{hero_y} - $ui->{map_area_h};
-		
+	my $ui = shift;	
+	if ( $ui->{hero_side} eq 'S' ){		
+		$ui->{map_off_x} =  $ui->{hero_x} - $ui->{map_area_w} / 2; 
+		$ui->{map_off_y} =  $ui->{hero_y} - $ui->{map_area_h} ;		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
-	elsif ( $ui->{hero_side} eq 'N' ){
-		
-		$ui->{map_off_x} =   $ui->{hero_x} - 1 - $ui->{map_area_w} / 2;
-		$ui->{map_off_y} =   $ui->{hero_y}   ;# ????????????????
-		
+	elsif ( $ui->{hero_side} eq 'N' ){		
+		$ui->{map_off_x} =  $ui->{hero_x} - $ui->{map_area_w} / 2;
+		$ui->{map_off_y} =  $ui->{hero_y}   ;		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
 	elsif ( $ui->{hero_side} eq 'E' ){		
 		$ui->{map_off_x} = $ui->{hero_x} - $ui->{map_area_w} ;
-		#$ui->{map_off_y} = $ui->{hero_y} - 1 - 4 - $ui->{map_area_y} / 2; # ????????????????
-													########?????????????????
-		$ui->{map_off_y} = $ui->{map_area_y}  / 2 + ($ui->{hero_y} / 2  + 1); # ????????????????
-		
+		$ui->{map_off_y} =  $ui->{hero_y} - $ui->{map_area_h} / 2; # ok ma no ... f di hero.. $ui->{map_area_h} + 1;
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
-	}
-	
+	}	
 	elsif ( $ui->{hero_side} eq 'W' ){		
-		$ui->{map_off_x} = $ui->{hero_x} - 1 ; ###############NOOOOOOOOOOOOOO
-		#$ui->{map_off_y} = $ui->{hero_y} - 1 - 4 - $ui->{map_area_y} / 2; # ????????????????
-													########?????????????????
-		$ui->{map_off_y} = $ui->{map_area_y}  / 2 + ($ui->{hero_y} / 2  + 1); # ????????????????
-		
+		$ui->{map_off_x} = $ui->{hero_x} - 1; # ???? 
+		$ui->{map_off_y} = $ui->{hero_y} - $ui->{map_area_h} / 2;		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
 	else{die}
@@ -117,16 +104,13 @@ sub draw_map{
 	# draw hero
 	# this must set $hero->{on_terrain}
 	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
-	# calculate offsets (same calculation is made in set_map_and_hero)
-	my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
-	my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
 	# MAP AREA:
 	# print decoration first row
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
 	# print map body with decorations
 	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
 		
-		no warnings qw(uninitialized);
+		#no warnings qw(uninitialized);
 				print 	' ',$ui->{ dec_ver },
 				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
 				$ui->{ dec_ver },"\n";
@@ -227,7 +211,7 @@ sub must_scroll{
 sub is_walkable{
 	my $tile = shift;
 	if( $tile eq ' ' ){ return 1 }
-	elsif( $tile eq '.' ){ return 1 }
+	elsif( $tile eq '+' ){ return 1 }
 	else{return 0}
 }
 		
@@ -252,66 +236,57 @@ sub set_map_and_hero{
 	# get hero position and side BEFORE enlarging
 	$ui->get_hero_pos();
 			
-	# add empty spaces for a half in four directions
-	# same calculation is made in draw_map for offsets
-	my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
-	my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
-
-	print "DEBUG: half: w: $half_w h: $half_h\n" if $debug > 1;
-
 	# add at top
-	my @map = map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ; 
+	my @map = map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ; 
 	# at the center
 	foreach my $orig_map_row( @{$ui->{map}} ){
 		push @map,	[ 
-						($ui->{ ext_tile }) x $half_w,
-						@$orig_map_row,
-						($ui->{ ext_tile }) x $half_w
+						($ui->{ ext_tile }) x $ui->{ map_area_w },
+							@$orig_map_row,
+						($ui->{ ext_tile }) x $ui->{ map_area_w }
 					]
 	}
 	# add at bottom
-	push @map,map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ;
-
+	push @map,map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ;
+	
 	@{$ui->{map}} = @map;
-	$ui->{hero_x} += $half_w; 
-	$ui->{hero_y} += $half_h; 
+	$ui->{hero_x} += $ui->{ map_area_w } ; #+ 1; 
+	$ui->{hero_y} += $ui->{ map_area_h } + 1; 
 
-	$ui->set_no_scrolling_area( $half_w, $half_h );
+	$ui->set_no_scrolling_area();
 	
 }
 
 sub set_no_scrolling_area{
 	my $ui = shift;
-	my ( $half_w, $half_h ) = @_;
+	
 	if ( $ui->{no_scroll} == 0 ){
 		if ( $ui->{hero_side} eq 'S' ){  
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
-			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - $half_h;
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 2);
 			
 			$ui->{no_scroll_area}{max_y} = $ui->{hero_y};
-			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
-			
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);			
 		}
 		elsif ( $ui->{hero_side} eq 'N' ){ 
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
 			$ui->{no_scroll_area}{min_y} = $ui->{hero_y}; 
 			
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
-			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + $half_h;			
-		}
-		
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 2);				
+		}		
 		elsif ( $ui->{hero_side} eq 'E' ){
-			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - $half_w;#
-			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4)  ;
+			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 2);
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4);
 			
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} ;
 			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4 );						
 		}
 		elsif ( $ui->{hero_side} eq 'W' ){
-			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} ;
+			$ui->{no_scroll_area}{min_x} = $ui->{hero_x};
 			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4);
 			
-			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} +  $half_w;
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 2);
 			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4);			
 		}
 		else{die}
@@ -319,22 +294,16 @@ sub set_no_scrolling_area{
 	print "DEBUG: no_scroll area from $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
 			"to $ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n" if $debug;
 	
-	local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '-';
-	local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '-';
+	local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '+';
+	local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '+';
 	
 	print 	"DEBUG: map extended with no_scroll vertexes:\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
 	
-	# if ($noscroll_debug){
-		 # $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '.';
-		 # $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '.';
-	# }
 }
 
 sub get_hero_pos{
 	my $ui = shift;
 	# hero position MUST be on a side and NEVER on a corner
-	my $pos;
-	my $side;
 	print "DEBUG: original map size; rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n" if $debug;
 	foreach my $row ( 0..$#{$ui->{map}} ){
 		foreach my $col ( 0..$#{$ui->{map}->[$row]} ){
