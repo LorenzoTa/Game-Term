@@ -309,7 +309,7 @@ sub set_map_and_hero{
 
 	# add at top
 # my @map = map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ; 
-	my @map = map { [ ($ui->{ ext_tile }) x (  $ui->{ map_area_w } * 3 ) ]} 0..$ui->{ map_area_h } ; 
+	my @map = map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ; 
 	# at the center
 	foreach my $orig_map_row( @{$ui->{map}} ){
 		push @map,	[ 
@@ -320,7 +320,7 @@ sub set_map_and_hero{
 	}
 	# add at bottom
 # push @map,map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ;
-	push @map,map { [ ($ui->{ ext_tile }) x ( $ui->{ map_area_w } * 3 ) ]} 0..$ui->{ map_area_h } ;
+	push @map,map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ;
 	
 	@{$ui->{map}} = @map;
 # $ui->{hero_x} += $half_w; 
