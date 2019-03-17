@@ -20,7 +20,7 @@ sub new{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ fake_map } //= 'w' ;
+	$conf{ fake_map } //= 's' ;
 	$conf{ fake_x } //= 30; #80;
 	$conf{ fake_y } //= 20; #20;
 	
@@ -38,7 +38,7 @@ sub fake_map{
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[-1][10] 	= 'X' ;#'X';
+				$$map[-1][ int($x/2) ] 	= 'X' ;#'X';
 	}
 	elsif ($type =~ /^N/i){ # hero at N
 		$map = [ map{ [(' ') x $x  ] } 0..$y   ];

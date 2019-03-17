@@ -112,12 +112,6 @@ sub set_map_offsetsORIGINAL{
 }
 sub set_map_offsets{
 	my $ui = shift;	
-	# my $larger_map_w = $#{$ui->{map}->[0]} + 1;
-	# my $larger_map_h = $#{$ui->{map}} + 1;
-	
-	# $ui->{map_off_x} =    $ui->{map_area_w} - 1;
-		# $ui->{map_off_y} =    $ui->{map_area_h} + 1;
-	# return;
 	
 	#############################
 	
@@ -125,7 +119,7 @@ sub set_map_offsets{
 		# $ui->{map_off_x} =    $ui->{hero_x} - 12;
 		# $ui->{map_off_y} =    $ui->{hero_y} - 10;
 		
-		$ui->{map_off_x} =    $ui->{map_area_w} - 1 ;#+ $ui->{hero_w};
+		$ui->{map_off_x} =    $ui->{hero_x} - $ui->{map_area_w} / 2; #$ui->{map_area_w} - 1 ;#+ $ui->{hero_w};
 		$ui->{map_off_y} =    $ui->{hero_y} - $ui->{map_area_h} ;
 		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n",
