@@ -146,10 +146,8 @@ sub set_map_offsets{
 	}
 	
 	elsif ( $ui->{hero_side} eq 'W' ){		
-		$ui->{map_off_x} = $ui->{hero_x} - 1 ; ###############NOOOOOOOOOOOOOO
-		#$ui->{map_off_y} = $ui->{hero_y} - 1 - 4 - $ui->{map_area_y} / 2; # ????????????????
-													########?????????????????
-		$ui->{map_off_y} = $ui->{map_area_y}  / 2 + ($ui->{hero_y} / 2  + 1); # ????????????????
+		$ui->{map_off_x} = $ui->{map_area_w} - 1 ; 
+		$ui->{map_off_y} = $ui->{hero_y} - $ui->{map_area_h} / 2;
 		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
