@@ -4,6 +4,7 @@ use 5.014;
 use strict;
 use warnings;
 use Term::ReadKey;
+use Term::ANSIColor ;#qw(:constants);
 
 use Game::Term::Map;
 
@@ -13,6 +14,21 @@ our $VERSION = '0.01';
 #my $fake_map = 1;
 my $debug = 0;
 my $noscroll_debug = 0;
+
+
+# render is class data
+my %render = (
+
+	X		=> sub{ color('bold red'),$_[0],color('reset') },
+	chr(2)  => sub{ color('bold red'),$_[0],color('reset') },
+	t		=> sub{ color('bold green'),chr(6),color('reset') },
+	T		=> sub{ color('green'),chr(5),color('reset') },
+	m		=> sub{ color('bold red'),$_[0],color('reset') },
+	M		=> sub{ color('bold red'),$_[0],color('reset') },
+	w		=> sub{ color('bold blue'),'~',color('reset') },
+	W		=> sub{ color('blue'),'~',color('reset') },
+	#'~'		=> sub{ color('blue'),$_[0],color('reset') },
+);
 
 sub new{
 	my $class = shift;
@@ -111,16 +127,26 @@ sub draw_map{
 	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
 		
 		#no warnings qw(uninitialized);
-				print 	' ',$ui->{ dec_ver },
+				#print 	
+				render (' ',$ui->{ dec_ver },
 				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
-				$ui->{ dec_ver },"\n";
+				$ui->{ dec_ver },"\n"
+				)
+				;
 		
 		
 	}	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 }
-
+sub render{
+	#my $ui = shift;
+	 print map{
+		#s/X/BOLD RED 'X', RESET/
+		 # ok BOLD RED $_, RESET
+		 $render{$_} ? $render{$_}->($_)  : $_ 
+	}@_;
+}
 sub move{
 	my $ui = shift;
 	my $key = shift;
@@ -224,8 +250,6 @@ sub draw_menu{
 	# menu fake data
 	print ' ',$ui->{ dec_ver }.$_."\n" for @$messages;
 }
-
-
 
 sub set_map_and_hero{
 	my $ui = shift;
@@ -342,6 +366,8 @@ sub validate_conf{
 	$conf{ no_scroll } = 0;
 	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
 	
+	#$conf{ render } = { X => BOLD RED 'X', RESET};
+	
 		
 	return %conf;
 }
@@ -354,6 +380,12 @@ perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new(); print
 perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new();$ui->run"
 
 perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new();$ui->run"
+
+perl -e "print qq(\e[31mCOLORED\e[0m)"
+
+perl -E "print qq(\e[$_),'m',qq( $_ ),qq(\e[0m) for 4..7,31..36,41..47"
+
+
 
 =head1 NAME
 

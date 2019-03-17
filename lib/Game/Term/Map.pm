@@ -20,7 +20,7 @@ sub new{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ fake_map } //= 'w' ;
+	$conf{ fake_map } //= 'render' ;
 	$conf{ fake_x } //= 20; #80;
 	$conf{ fake_y } //= 10; #20;
 	
@@ -103,11 +103,27 @@ X             ########             #####      #################    #######
 ###    012345678901234#############      ########         ######################
 ###                                                   ##########################
 EOM
-	#my @map;
-	foreach my $row( split "\n", $fake){
-		push @$map,[ split '', $row ]
+		foreach my $row( split "\n", $fake){
+			push @$map,[ split '', $row ]
+		}
 	}
-	#return @map;
+	elsif ($type =~ /^render/i){ 
+		my $fake=<<EOM;
+#                  #
+     t     T        
+        tTT t       
+          tT        
+                    
+               nN   
+    wW              
+         mM   ww    
+             wWwW   
+                    
+#        X         #
+EOM
+	foreach my $row( split "\n", $fake){
+			push @$map,[ split '', $row ]
+		}
 	}
 	else{die}
 	return $map;
