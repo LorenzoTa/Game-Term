@@ -11,8 +11,8 @@ ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 #my $fake_map = 1;
-my $debug = 2;
-my $noscroll_debug = 1;
+my $debug = 0;
+my $noscroll_debug = 0;
 
 sub new{
 	my $class = shift;
@@ -50,8 +50,8 @@ sub run{
 				$ui->draw_map();
 				
 	if ($noscroll_debug){
-		 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '.';
-		 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '.';
+		 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '+';
+		 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '+';
 		 #print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n";
 		 print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
 				"NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
@@ -211,7 +211,7 @@ sub must_scroll{
 sub is_walkable{
 	my $tile = shift;
 	if( $tile eq ' ' ){ return 1 }
-	elsif( $tile eq '.' ){ return 1 }
+	elsif( $tile eq '+' ){ return 1 }
 	else{return 0}
 }
 		
@@ -253,17 +253,17 @@ sub set_map_and_hero{
 	$ui->{hero_x} += $ui->{ map_area_w } ; #+ 1; 
 	$ui->{hero_y} += $ui->{ map_area_h } + 1; 
 
-	$ui->set_no_scrolling_area( $original_map_w, $original_map_h );
+	$ui->set_no_scrolling_area();
 	
 }
 
 sub set_no_scrolling_area{
 	my $ui = shift;
-	my ( $half_w, $half_h ) = @_; # BAD NAMED: now are $original_map_w and $original_map_h !!
+	
 	if ( $ui->{no_scroll} == 0 ){
 		if ( $ui->{hero_side} eq 'S' ){  
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
-			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - $half_h;
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 2);
 			
 			$ui->{no_scroll_area}{max_y} = $ui->{hero_y};
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);			
@@ -273,20 +273,20 @@ sub set_no_scrolling_area{
 			$ui->{no_scroll_area}{min_y} = $ui->{hero_y}; 
 			
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
-			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + $half_h;			
+			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 2);				
 		}		
 		elsif ( $ui->{hero_side} eq 'E' ){
-			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - $half_w;#
-			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4)  ;
+			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 2);
+			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4);
 			
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} ;
 			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4 );						
 		}
 		elsif ( $ui->{hero_side} eq 'W' ){
-			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} ;
+			$ui->{no_scroll_area}{min_x} = $ui->{hero_x};
 			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4);
 			
-			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} +  $half_w;
+			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 2);
 			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4);			
 		}
 		else{die}
@@ -294,15 +294,11 @@ sub set_no_scrolling_area{
 	print "DEBUG: no_scroll area from $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
 			"to $ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n" if $debug;
 	
-	local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '-';
-	local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '-';
+	local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '+';
+	local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '+';
 	
 	print 	"DEBUG: map extended with no_scroll vertexes:\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
 	
-	# if ($noscroll_debug){
-		 # $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '.';
-		 # $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '.';
-	# }
 }
 
 sub get_hero_pos{
