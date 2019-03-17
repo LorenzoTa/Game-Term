@@ -11,7 +11,7 @@ ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 #my $fake_map = 1;
-my $debug = 0;
+my $debug = 2;
 my $noscroll_debug = 0;
 
 sub new{
@@ -72,7 +72,7 @@ sub run{
 		}
 }
 
-sub set_map_offsets{
+sub set_map_offsetsORIGINAL{
 	my $ui = shift;
 	
 	
@@ -110,6 +110,54 @@ sub set_map_offsets{
 	else{die}
 
 }
+sub set_map_offsets{
+	my $ui = shift;	
+	# my $larger_map_w = $#{$ui->{map}->[0]} + 1;
+	# my $larger_map_h = $#{$ui->{map}} + 1;
+	
+	# $ui->{map_off_x} =    $ui->{map_area_w} - 1;
+		# $ui->{map_off_y} =    $ui->{map_area_h} + 1;
+	# return;
+	
+	#############################
+	
+	if ( $ui->{hero_side} eq 'S' ){		
+		# $ui->{map_off_x} =    $ui->{hero_x} - 12;
+		# $ui->{map_off_y} =    $ui->{hero_y} - 10;
+		
+		$ui->{map_off_x} =    $ui->{map_area_w} - 1 + $ui->{hero_w};
+		$ui->{map_off_y} =    $ui->{hero_y} - $ui->{map_area_h} ;
+		
+		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n",
+				"hero x $ui->{hero_x} hero y $ui->{hero_y}\n" if $debug;
+	}
+	elsif ( $ui->{hero_side} eq 'N' ){
+		
+		$ui->{map_off_x} =   $ui->{hero_x} - 1 - $ui->{map_area_w} / 2;
+		$ui->{map_off_y} =   $ui->{hero_y}   ;# ????????????????
+		
+		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
+	}
+	elsif ( $ui->{hero_side} eq 'E' ){		
+		$ui->{map_off_x} = $ui->{hero_x} - $ui->{map_area_w} ;
+		#$ui->{map_off_y} = $ui->{hero_y} - 1 - 4 - $ui->{map_area_y} / 2; # ????????????????
+													########?????????????????
+		$ui->{map_off_y} = $ui->{map_area_y}  / 2 + ($ui->{hero_y} / 2  + 1); # ????????????????
+		
+		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
+	}
+	
+	elsif ( $ui->{hero_side} eq 'W' ){		
+		$ui->{map_off_x} = $ui->{hero_x} - 1 ; ###############NOOOOOOOOOOOOOO
+		#$ui->{map_off_y} = $ui->{hero_y} - 1 - 4 - $ui->{map_area_y} / 2; # ????????????????
+													########?????????????????
+		$ui->{map_off_y} = $ui->{map_area_y}  / 2 + ($ui->{hero_y} / 2  + 1); # ????????????????
+		
+		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
+	}
+	else{die}
+
+}
 sub draw_map{
 	my $ui = shift;
 	# clear screen
@@ -117,9 +165,10 @@ sub draw_map{
 	# draw hero
 	# this must set $hero->{on_terrain}
 	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
-	# calculate offsets (same calculation is made in set_map_and_hero)
-	my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
-	my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
+# # calculate offsets (same calculation is made in set_map_and_hero)
+# NO MORE USED?
+# my $off_x = int( $ui->{ map_area_w } / 2 ) + 1;
+# my $off_y = int( $ui->{ map_area_h } / 2 ) + 1;
 	# MAP AREA:
 	# print decoration first row
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
@@ -253,36 +302,40 @@ sub set_map_and_hero{
 	$ui->get_hero_pos();
 			
 	# add empty spaces for a half in four directions
-	# same calculation is made in draw_map for offsets
-	my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
-	my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
-
-	print "DEBUG: half: w: $half_w h: $half_h\n" if $debug > 1;
+# # same calculation is made in draw_map for offsets
+# my $half_w = int( $ui->{ map_area_w } / 2 ) + 1;
+# my $half_h = int( $ui->{ map_area_h } / 2 ) + 1;
+# print "DEBUG: half: w: $half_w h: $half_h\n" if $debug > 1;
 
 	# add at top
-	my @map = map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ; 
+# my @map = map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ; 
+	my @map = map { [ ($ui->{ ext_tile }) x (  $ui->{ map_area_w } * 3 ) ]} 0..$ui->{ map_area_h } ; 
 	# at the center
 	foreach my $orig_map_row( @{$ui->{map}} ){
 		push @map,	[ 
-						($ui->{ ext_tile }) x $half_w,
-						@$orig_map_row,
-						($ui->{ ext_tile }) x $half_w
+						($ui->{ ext_tile }) x $ui->{ map_area_w },
+							@$orig_map_row,
+						($ui->{ ext_tile }) x $ui->{ map_area_w }
 					]
 	}
 	# add at bottom
-	push @map,map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ;
-
+# push @map,map { [ ($ui->{ ext_tile }) x ($half_w + $original_map_w + $half_w) ]} 0..$half_h-1 ;
+	push @map,map { [ ($ui->{ ext_tile }) x ( $ui->{ map_area_w } * 3 ) ]} 0..$ui->{ map_area_h } ;
+	
 	@{$ui->{map}} = @map;
-	$ui->{hero_x} += $half_w; 
-	$ui->{hero_y} += $half_h; 
+# $ui->{hero_x} += $half_w; 
+# $ui->{hero_y} += $half_h; 
+	$ui->{hero_x} += $ui->{ map_area_w } ; #+ 1; 
+	$ui->{hero_y} += $ui->{ map_area_h } + 1; 
 
-	$ui->set_no_scrolling_area( $half_w, $half_h );
+# $ui->set_no_scrolling_area( $half_w, $half_h );
+		$ui->set_no_scrolling_area( $original_map_w, $original_map_h );
 	
 }
 
 sub set_no_scrolling_area{
 	my $ui = shift;
-	my ( $half_w, $half_h ) = @_;
+	my ( $half_w, $half_h ) = @_; # BAD NAMED: now are $original_map_w and $original_map_h !!
 	if ( $ui->{no_scroll} == 0 ){
 		if ( $ui->{hero_side} eq 'S' ){  
 			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
@@ -333,8 +386,6 @@ sub set_no_scrolling_area{
 sub get_hero_pos{
 	my $ui = shift;
 	# hero position MUST be on a side and NEVER on a corner
-	my $pos;
-	my $side;
 	print "DEBUG: original map size; rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n" if $debug;
 	foreach my $row ( 0..$#{$ui->{map}} ){
 		foreach my $col ( 0..$#{$ui->{map}->[$row]} ){
