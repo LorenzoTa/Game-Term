@@ -12,7 +12,7 @@ ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 #my $fake_map = 1;
-my $debug = 0;
+my $debug = 2;
 my $noscroll_debug = 0;
 
 
@@ -73,6 +73,13 @@ sub run{
 		$ui->{map} = $map->{data};
 		
 		$ui->set_map_and_hero();
+		
+		# $ui->{map}[ $ui->{real_map_first}{x} ][ $ui->{real_map_first}{y} ]='z';
+		# $ui->{map}[ $ui->{real_map_last}{x} ][ $ui->{real_map_first}{y} ]='z';
+		$ui->{map}[ $ui->{real_map_first}{y} ][ $ui->{real_map_first}{x} ]='z';
+		$ui->{map}[ $ui->{real_map_last}{y} ][ $ui->{real_map_last}{x} ]='z';
+		print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
+				" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
 		# now BIG map, hero_pos and hero_side are initialized
 		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)		
 		
@@ -296,9 +303,19 @@ sub set_map_and_hero{
 	push @map,map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ;
 	
 	@{$ui->{map}} = @map;
+	
+	# set hero coordinates
 	$ui->{hero_x} += $ui->{ map_area_w } ; #+ 1; 
 	$ui->{hero_y} += $ui->{ map_area_h } + 1; 
-
+	
+	# set top left corner coordinates (of the real map data)
+	$ui->{real_map_first}{x} = $ui->{ map_area_w } ;
+	$ui->{real_map_first}{y} = $ui->{ map_area_h } + 1;
+	
+	# set bottom right corner coordinates
+	$ui->{real_map_last}{x} = $ui->{real_map_first}{x} + $ui->{ map_area_w } - 1; 
+	$ui->{real_map_last}{y} = $ui->{real_map_first}{y} + $ui->{ map_area_h } ; 
+	
 	$ui->set_no_scrolling_area();
 	
 }
@@ -345,6 +362,8 @@ sub set_no_scrolling_area{
 	
 	print 	"DEBUG: map extended with no_scroll vertexes:\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
 	
+	
+	
 }
 
 sub set_hero_pos{
@@ -373,6 +392,10 @@ sub validate_conf{
 	$conf{ map_area_h } //=  10; #20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
+	# set internally to get coord of the first element of the map
+	$conf{ real_map_first} = { x => undef, y => undef };
+	# set internally to get coord of the last element of the map
+	$conf{ real_map_last} = { x => undef, y => undef };
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
 	$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
