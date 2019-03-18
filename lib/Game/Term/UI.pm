@@ -89,7 +89,7 @@ sub run{
 				
 				$ui->draw_map();
 				
-	if ($noscroll_debug){
+		if ($noscroll_debug){
 		 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '+';
 		 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '+';
 		 #print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n";
@@ -100,13 +100,11 @@ sub run{
 		 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
 	}
 			
-			
-				$ui->draw_menu( ["hero HP: 42",
+			$ui->draw_menu( ["hero HP: 42",
 									"hero at: $ui->{hero_y}-$ui->{hero_x}",
 									"key $key was pressed:"] );	
 
 			}
-			
 			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;		
 		
 		}
@@ -282,7 +280,7 @@ sub set_map_and_hero{
 	my $original_map_h = $#{$ui->{map}} + 1;
 	print "DEBUG origial map was $original_map_w x $original_map_h\n" if $debug;
 	# get hero position and side BEFORE enlarging
-	$ui->get_hero_pos();
+	$ui->set_hero_pos();
 			
 	# add at top
 	my @map = map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ; 
@@ -349,7 +347,7 @@ sub set_no_scrolling_area{
 	
 }
 
-sub get_hero_pos{
+sub set_hero_pos{
 	my $ui = shift;
 	# hero position MUST be on a side and NEVER on a corner
 	print "DEBUG: original map size; rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n" if $debug;
