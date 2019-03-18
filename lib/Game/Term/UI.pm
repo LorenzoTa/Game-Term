@@ -23,11 +23,35 @@ my %render = (
 	chr(2)  => sub{ color('bold red'),$_[0],color('reset') },
 	t		=> sub{ color('bold green'),chr(6),color('reset') },
 	T		=> sub{ color('green'),chr(5),color('reset') },
-	m		=> sub{ color('bold red'),$_[0],color('reset') },
-	M		=> sub{ color('bold red'),$_[0],color('reset') },
-	w		=> sub{ color('bold blue'),'~',color('reset') },
-	W		=> sub{ color('blue'),'~',color('reset') },
+	#m		=> sub{ color('magenta'),$_[0],color('reset') },
+	#M		=> sub{ color('bold magenta'),$_[0],color('reset') },
+	w		=> sub{ color('bold cyan'),'~',color('reset') },
+	W		=> sub{ color('cyan'),'~',color('reset') },
+	n		=> sub{ color('yellow'),'n',color('reset') },
+	N		=> sub{ color('bold yellow'),'N',color('reset') },
+	a		=> sub{ qq(\e[37ma\e[0m) },
+	A		=> sub{ qq(\e[1;37mA\e[0m) },
+	# basic color (on windows) are 16:
+	# from 30 to 37 preceede or not by 1; to be bright
+	d		=> sub{ qq(\e[30m$_[0]\e[0m) },
+	D		=> sub{ qq(\e[1;30m$_[0]\e[0m) },
+	f		=> sub{ qq(\e[31m$_[0]\e[0m) },
+	F		=> sub{ qq(\e[1;31m$_[0]\e[0m) },
+	g		=> sub{ qq(\e[32m$_[0]\e[0m) },
+	G		=> sub{ qq(\e[1;32m$_[0]\e[0m) },
+	h		=> sub{ qq(\e[33m$_[0]\e[0m) },
+	H		=> sub{ qq(\e[1;33m$_[0]\e[0m) },
+	j		=> sub{ qq(\e[34m$_[0]\e[0m) },
+	H		=> sub{ qq(\e[1;34m$_[0]\e[0m) },
+	k		=> sub{ qq(\e[35m$_[0]\e[0m) },
+	K		=> sub{ qq(\e[1;35m$_[0]\e[0m) },
+	l		=> sub{ qq(\e[36m$_[0]\e[0m) },
+	L		=> sub{ qq(\e[1;36m$_[0]\e[0m) },
+	m		=> sub{ qq(\e[37m$_[0]\e[0m) },
+	M		=> sub{ qq(\e[1;37m$_[0]\e[0m) },
 	#'~'		=> sub{ color('blue'),$_[0],color('reset') },
+	
+	
 );
 
 sub new{
@@ -385,7 +409,7 @@ perl -e "print qq(\e[31mCOLORED\e[0m)"
 
 perl -E "print qq(\e[$_),'m',qq( $_ ),qq(\e[0m) for 4..7,31..36,41..47"
 
-
+colortools\ColorTool.exe  -c
 
 =head1 NAME
 

@@ -112,8 +112,8 @@ EOM
 #                  #
      t     T        
         tTT t       
-          tT        
-                    
+    aA    tT        
+dDfFgGhHjJkKlLmM    
                nN   
     wW              
          mM   ww    
