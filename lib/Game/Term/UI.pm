@@ -17,7 +17,7 @@ my $noscroll_debug = 0;
 
 
 # Linux BRIGHT_GREEN  => windows BOLD.GREEN
-
+#perl -e "use Term::ANSIColor qw(:constants); $B_GREEN = $^O eq 'Linux' ? BRIGHT_GREEN : BOLD GREEN; print $B_GREEN, 32323, RESET"
 my %terrain = (
 # letter used in map, descr  possible renders,  possible fg colors,   speed penality
 	#t => [  'walkable wood', [qw(O o . o O O)], [qw(\e[32m \e[1;32m \e[32m)], 0.3 ],
