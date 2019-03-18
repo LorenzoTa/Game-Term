@@ -5,54 +5,65 @@ use strict;
 use warnings;
 use Term::ReadKey;
 use Term::ANSIColor ;#qw(:constants);
-
+use Term::ANSIColor qw(:constants);
 use Game::Term::Map;
 
 ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 #my $fake_map = 1;
-my $debug = 2;
+my $debug = 0;
 my $noscroll_debug = 0;
 
 
-# render is class data
-my %render = (
+# Linux BRIGHT_GREEN  => windows BOLD.GREEN
 
-	X		=> sub{ color('bold red'),$_[0],color('reset') },
-	chr(2)  => sub{ color('bold red'),$_[0],color('reset') },
-	t		=> sub{ color('bold green'),chr(6),color('reset') },
-	T		=> sub{ color('green'),chr(5),color('reset') },
-	#m		=> sub{ color('magenta'),$_[0],color('reset') },
-	#M		=> sub{ color('bold magenta'),$_[0],color('reset') },
-	w		=> sub{ color('bold cyan'),'~',color('reset') },
-	W		=> sub{ color('cyan'),'~',color('reset') },
-	n		=> sub{ color('yellow'),'n',color('reset') },
-	N		=> sub{ color('bold yellow'),'N',color('reset') },
-	a		=> sub{ qq(\e[37ma\e[0m) },
-	A		=> sub{ qq(\e[1;37mA\e[0m) },
-	# basic color (on windows) are 16:
-	# from 30 to 37 preceede or not by 1; to be bright
-	d		=> sub{ qq(\e[30m$_[0]\e[0m) },
-	D		=> sub{ qq(\e[1;30m$_[0]\e[0m) },
-	f		=> sub{ qq(\e[31m$_[0]\e[0m) },
-	F		=> sub{ qq(\e[1;31m$_[0]\e[0m) },
-	g		=> sub{ qq(\e[32m$_[0]\e[0m) },
-	G		=> sub{ qq(\e[1;32m$_[0]\e[0m) },
-	h		=> sub{ qq(\e[33m$_[0]\e[0m) },
-	H		=> sub{ qq(\e[1;33m$_[0]\e[0m) },
-	j		=> sub{ qq(\e[34m$_[0]\e[0m) },
-	J		=> sub{ qq(\e[1;34m$_[0]\e[0m) },
-	k		=> sub{ qq(\e[35m$_[0]\e[0m) },
-	K		=> sub{ qq(\e[1;35m$_[0]\e[0m) },
-	l		=> sub{ qq(\e[36m$_[0]\e[0m) },
-	L		=> sub{ qq(\e[1;36m$_[0]\e[0m) },
-	m		=> sub{ qq(\e[37m$_[0]\e[0m) },
-	M		=> sub{ qq(\e[1;37m$_[0]\e[0m) },
-	#'~'		=> sub{ color('blue'),$_[0],color('reset') },
-	
-	
+my %terrain = (
+# letter used in map, descr  possible renders,  possible fg colors,   speed penality
+	#t => [  'walkable wood', [qw(O o . o O O)], [qw(\e[32m \e[1;32m \e[32m)], 0.3 ],
+	t => [  'walkable wood', [qw(O o 0 o O O)], [ BOLD.GREEN , GREEN ], 0.3 ],
+# letter used in map, descr    one render!,  one color!,   speed penality: > 4 unwalkable
+	T => [  'unwalkable wood', 'Q',          GREEN,     5 ],
+
 );
+    
+# render is class data
+# my %render = (
+
+	# X		=> sub{ color('bold red'),$_[0],color('reset') },
+	# chr(2)  => sub{ color('bold red'),$_[0],color('reset') },
+	# # t		=> sub{ color('bold green'),chr(6),color('reset') },
+	# # T		=> sub{ color('green'),chr(5),color('reset') },
+	# # #m		=> sub{ color('magenta'),$_[0],color('reset') },
+	# # #M		=> sub{ color('bold magenta'),$_[0],color('reset') },
+	# # w		=> sub{ color('bold cyan'),'~',color('reset') },
+	# # W		=> sub{ color('cyan'),'~',color('reset') },
+	# # n		=> sub{ color('yellow'),'n',color('reset') },
+	# # N		=> sub{ color('bold yellow'),'N',color('reset') },
+	# # a		=> sub{ qq(\e[37ma\e[0m) },
+	# # A		=> sub{ qq(\e[1;37mA\e[0m) },
+	# # basic color (on windows) are 16:
+	# # from 30 to 37 preceede or not by 1; to be bright
+	# d		=> sub{ qq(\e[30m$_[0]\e[0m) },
+	# D		=> sub{ qq(\e[1;30m$_[0]\e[0m) },
+	# f		=> sub{ qq(\e[31m$_[0]\e[0m) },
+	# F		=> sub{ qq(\e[1;31m$_[0]\e[0m) },
+	# g		=> sub{ qq(\e[32m$_[0]\e[0m) },
+	# G		=> sub{ qq(\e[1;32m$_[0]\e[0m) },
+	# h		=> sub{ qq(\e[33m$_[0]\e[0m) },
+	# H		=> sub{ qq(\e[1;33m$_[0]\e[0m) },
+	# j		=> sub{ qq(\e[34m$_[0]\e[0m) },
+	# J		=> sub{ qq(\e[1;34m$_[0]\e[0m) },
+	# k		=> sub{ qq(\e[35m$_[0]\e[0m) },
+	# K		=> sub{ qq(\e[1;35m$_[0]\e[0m) },
+	# l		=> sub{ qq(\e[36m$_[0]\e[0m) },
+	# L		=> sub{ qq(\e[1;36m$_[0]\e[0m) },
+	# m		=> sub{ qq(\e[37m$_[0]\e[0m) },
+	# M		=> sub{ qq(\e[1;37m$_[0]\e[0m) },
+	# #'~'		=> sub{ color('blue'),$_[0],color('reset') },
+	
+	
+# );
 
 sub new{
 	my $class = shift;
@@ -72,10 +83,11 @@ sub run{
 		print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
 		$ui->{map} = $map->{data};
 		
+		# enlarge the map to be scrollable
+		# set the hero's coordinates
+		# set real_map_first and real_map_last x,y
 		$ui->set_map_and_hero();
 		
-		# $ui->{map}[ $ui->{real_map_first}{x} ][ $ui->{real_map_first}{y} ]='z';
-		# $ui->{map}[ $ui->{real_map_last}{x} ][ $ui->{real_map_first}{y} ]='z';
 		$ui->{map}[ $ui->{real_map_first}{y} ][ $ui->{real_map_first}{x} ]='z';
 		$ui->{map}[ $ui->{real_map_last}{y} ][ $ui->{real_map_last}{x} ]='z';
 		print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
@@ -173,7 +185,8 @@ sub render{
 	 print map{
 		#s/X/BOLD RED 'X', RESET/
 		 # ok BOLD RED $_, RESET
-		 $render{$_} ? $render{$_}->($_)  : $_ 
+		 #$render{$_} ? $render{$_}->($_)  : $_ 
+		 "$_"
 	}@_;
 }
 sub move{
@@ -285,10 +298,10 @@ sub set_map_and_hero{
 
 	my $original_map_w = $#{$ui->{map}->[0]} + 1;
 	my $original_map_h = $#{$ui->{map}} + 1;
-	print "DEBUG origial map was $original_map_w x $original_map_h\n" if $debug;
+	print "DEBUG: origial map was $original_map_w x $original_map_h\n" if $debug;
 	# get hero position and side BEFORE enlarging
 	$ui->set_hero_pos();
-			
+	
 	# add at top
 	my @map = map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ; 
 	# at the center
@@ -314,12 +327,46 @@ sub set_map_and_hero{
 	
 	# set bottom right corner coordinates
 	$ui->{real_map_last}{x} = $ui->{real_map_first}{x} + $ui->{ map_area_w } - 1; 
-	$ui->{real_map_last}{y} = $ui->{real_map_first}{y} + $ui->{ map_area_h } ; 
+	$ui->{real_map_last}{y} = $ui->{real_map_first}{y} + $ui->{ map_area_h } ;
+
+	# beautify map 
+	$ui->beautify_map();
+		
 	
 	$ui->set_no_scrolling_area();
 	
 }
+sub beautify_map{
+# letter used in map, descr  possible renders,  possible fg colors,   speed penality
+#	t => [  'walkable wood', [qw(O o . o O O)], [qw(\e[32m \e[1;32m \e[32m)], 0.3 ],
+# letter used in map, descr    one render!,  one color!,   speed penality: > 4 unwalkable
+#	T => [  'unwalkable wood', 'O',          '\e[32m',     5 ],
 
+	my $ui = shift;
+	foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y} ){
+		foreach my $col( $ui->{real_map_first}{x} .. $ui->{real_map_last}{x} ){
+			#$ui->{map}[$row][$col] = 'S';
+			if(exists $terrain{ $ui->{map}[$row][$col] } ){
+				my $color = ref $terrain{ $ui->{map}[$row][$col] }[2] eq 'ARRAY' 	?
+					$terrain{ $ui->{map}[$row][$col] }[2]->
+						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[2]}+1))]  :
+							$terrain{ $ui->{map}[$row][$col] }[2]  					;
+				my $render = ref $terrain{ $ui->{map}[$row][$col] }[1] eq 'ARRAY' 	?
+					$terrain{ $ui->{map}[$row][$col] }[1]->
+						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[1]}+1))]  :
+							$terrain{ $ui->{map}[$row][$col] }[1]  					;			
+				# ok $ui->{map}[$row][$col] = "\e[32mO\e[0m";
+				# ok $ui->{map}[$row][$col] = colored(['bold','green'],'O').color('reset');
+				# ok $ui->{map}[$row][$col] = color('bold green').'O'.color('reset');
+				# ok $ui->{map}[$row][$col] = BOLD GREEN.'O'.RESET; 
+				$ui->{map}[$row][$col] = $color.$render.RESET;				
+			}
+			
+		}
+	
+	}
+
+}
 sub set_no_scrolling_area{
 	my $ui = shift;
 	
@@ -360,7 +407,7 @@ sub set_no_scrolling_area{
 	local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '+';
 	local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '+';
 	
-	print 	"DEBUG: map extended with no_scroll vertexes:\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
+	print 	"DEBUG: map extended with no_scroll vertexes (+ signs):\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
 	
 	
 	

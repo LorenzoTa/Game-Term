@@ -20,7 +20,7 @@ sub new{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ fake_map } //= 'render' ;
+	$conf{ fake_map } //= 'one' ;
 	$conf{ fake_x } //= 20; #80;
 	$conf{ fake_y } //= 10; #20;
 	
@@ -70,38 +70,38 @@ sub fake_map{
 	elsif ($type =~ /^one/i){ 
 		my $fake=<<EOM;
 01234567890123456789012345678901234567890123      012345678901234567890123456789
-##    #########################                     ########         ###########
-##  #############################            ###    #########   ################
-    ############################################    #########   ################
-    #####                   ####################         ####   ########   #####
-    ###     ########           ################         #####   ###       ######
-          ##########                       ####         ####    ###      #######
-        #########     ###############      ####   ###   ####    ###      ##### #
-       ########     ###################     ###   ###   ###     ###      ####  #
-      ######       #####################    ###   ###   ####             #### ##
-     ######        #####          ######          ###   ############     #### ##
-     ####          ####              ###         ####   ############     #######
-     ####          ###                   ############    ###########      ######
-     #####                              #############                     #### #
-     #####                              ####################       ###     #####
-      ####     #######                        ################     #####      ##
-X             ########             #####      #################    #######      
-   #          ########             ########              ######     ######     #
-        #     ####                 #########               #####     ###########
-    #         ###         ######     O######                #####      #########
-         #    ###         #######       ####                 ####      #########
-              ####        #######       ####     #####       ####           ####
-   #  ###     ######      #######      ####      #####        ###       ########
-      ###     ########                #####      #####      #####      #########
-      ####      #########            ######     ####       ######      #########
-      #####      #########################     #####       ######      #########
-      #####        ######################      ######      ####             ####
-       ####            #################       #######                      ####
-       ####                                    #######                 ###  ####
-       ############################                ###                 ###  ####
- #     ############################      ########                      ###  ####
-###    012345678901234#############      ########         ######################
-###                                                   ##########################
+tt    ttttttttttttttttttttttttt                     tttttttt         ttttttttttt
+tt  ttttttttttttttttttttttttttttt            ttt    ttttttttt   tttttttttttttttt
+    tttttttttttttttttttttttttttttttttttttttttttt    ttttttttt   tttttttttttttttt
+    ttttt                   tttttttttttttttttttt         tttt   tttttttt   ttttt
+    ttt     tttttttt           tttttttttttttttt         ttttt   ttt       tttttt
+          tttttttttt                       tttt         tttt    ttt      ttttttt
+        ttttttttt     ttttttttttttttt      tttt   ttt   tttt    ttt      ttttt t
+       tttttttt     ttttttttttttttttttt     ttt   ttt   ttt     ttt      tttt  t
+      tttttt       ttttttttttttttttttttt    ttt   ttt   tttt             tttt tt
+     tttttt        ttttt          tttttt          ttt   tttttttttttt     tttt tt
+     tttt          tttt              ttt         tttt   tttttttttttt     ttttttt
+     tttt          ttt                   tttttttttttt    ttttttttttt      tttttt
+     ttttt                              ttttttttttttt                     tttt t
+     ttttt                              tttttttttttttttttttt       ttt     ttttt
+      tttt     ttttttt                        tttttttttttttttt     ttttt      tt
+X             tttttttt             ttttt      ttttttttttttttttt    ttttttt      
+   t          tttttttt             tttttttt              tttttt     tttttt     t
+        t     tttt                 ttttttttt               ttttt     ttttttttttt
+    t         ttt         tttttt     Otttttt                ttttt      ttttttttt
+         t    ttt         ttttttt       tttt                 tttt      ttttttttt
+              tttt        ttttttt       tttt     ttttt       tttt           tttt
+   t  ttt     tttttt      ttttttt      tttt      ttttt        ttt       tttttttt
+      ttt     tttttttt                ttttt      ttttt      ttttt      ttttttttt
+      tttt      ttttttttt            tttttt     tttt       tttttt      ttttttttt
+      ttttt      ttttttttttttttttttttttttt     ttttt       tttttt      ttttttttt
+      ttttt        tttttttttttttttttttttt      tttttt      tttt             tttt
+       tttt            ttttttttttttttttt       ttttttt                      tttt
+       tttt                                    ttttttt                 ttt  tttt
+       tttttttttttttttttttttttttttt                ttt                 ttt  tttt
+ t     tttttttttttttttttttttttttttt      tttttttt                      ttt  tttt
+ttt    012345678901234ttttttttttttt      tttttttt         tttttttttttttttttttttt
+ttt                                                   tttttttttttttttttttttttttt
 EOM
 		foreach my $row( split "\n", $fake){
 			push @$map,[ split '', $row ]
@@ -110,11 +110,11 @@ EOM
 	elsif ($type =~ /^render/i){ 
 		my $fake=<<EOM;
 #                  #
-     t     T        
-        tTT t       
-    aA    tT        
-dDfFgGhHjJkKlLmM    
-               nN   
+     tttt  T        
+ ttt    tTT t       
+    tt    tT        
+tttttttttttttttt    
+  ttt   tt      nN  
     wW              
          mM   ww    
              wWwW   
