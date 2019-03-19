@@ -12,16 +12,10 @@ use Game::Term::Map;
 ReadMode 'cbreak';
 
 our $VERSION = '0.01';
-#my $fake_map = 1;
+
 my $debug = 0;
 my $noscroll_debug = 0;
 
-
-# my %colors = (
-
-	# B_GREEN => ($^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN),
-
-# );
 
 # CLEAR           RESET             BOLD            DARK
 # FAINT           ITALIC            UNDERLINE       UNDERSCORE
@@ -42,7 +36,6 @@ use constant {
 };
 
 # Linux BRIGHT_GREEN  => windows BOLD.GREEN
-#perl -e "use Term::ANSIColor qw(:constants); $B_GREEN = $^O eq 'Linux' ? BRIGHT_GREEN : BOLD GREEN; print $B_GREEN, 32323, RESET"
 my %terrain = (
 #		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
@@ -536,6 +529,7 @@ perl -E "print qq(\e[$_),'m',qq( $_ ),qq(\e[0m) for 4..7,31..36,41..47"
 
 
 perl -we "use strict; use warnings; use Term::ANSIColor qw(:constants); my %colors = (B_GREEN => $^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN); my $bg = ON_GREEN; print $bg.$colors{B_GREEN}, 32323, RESET"
+perl -e "use Term::ANSIColor qw(:constants); $B_GREEN = $^O eq 'Linux' ? BRIGHT_GREEN : BOLD GREEN; print $B_GREEN, 32323, RESET"
 
 perl -we "use strict; use warnings; use Term::ANSIColor 4.00 qw(RESET :constants :constants256); my %colors = (B_GREEN => $^O eq 'MSWin32' ? ANSI123: BRIGHT_GREEN); my $bg = ON_RED; print UNDERLINE.$bg.$colors{B_GREEN}, 32323, RESET"
 
