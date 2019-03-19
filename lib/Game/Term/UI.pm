@@ -29,7 +29,7 @@ use constant {
 # Linux BRIGHT_GREEN  => windows BOLD.GREEN
 #perl -e "use Term::ANSIColor qw(:constants); $B_GREEN = $^O eq 'Linux' ? BRIGHT_GREEN : BOLD GREEN; print $B_GREEN, 32323, RESET"
 my %terrain = (
-#		     0               1                  2                    3          4
+#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
 	t => [  'walkable wood', [qw(O o 0 o O O)], [ B_GREEN , GREEN ], '',        0.3 ],
 # letter used in map, descr    one render!,  one color!, bg color,  speed penality: > 4 unwalkable
@@ -458,8 +458,8 @@ sub set_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ map_area_w } //= 20; #80;
-	$conf{ map_area_h } //=  10; #20;
+	$conf{ map_area_w } //= 50; #80;
+	$conf{ map_area_h } //=  20; #20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
 	# set internally to get coord of the first element of the map
