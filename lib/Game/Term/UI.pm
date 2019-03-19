@@ -4,8 +4,9 @@ use 5.014;
 use strict;
 use warnings;
 use Term::ReadKey;
-use Term::ANSIColor ;#qw(:constants);
-use Term::ANSIColor qw(:constants);
+
+use Term::ANSIColor qw(RESET :constants :constants256);
+
 use Game::Term::Map;
 
 ReadMode 'cbreak';
@@ -22,6 +23,20 @@ my $noscroll_debug = 0;
 
 # );
 
+# CLEAR           RESET             BOLD            DARK
+# FAINT           ITALIC            UNDERLINE       UNDERSCORE
+# BLINK           REVERSE           CONCEALED
+ 
+# BLACK           RED               GREEN           YELLOW
+# BLUE            MAGENTA           CYAN            WHITE
+# BRIGHT_BLACK    BRIGHT_RED        BRIGHT_GREEN    BRIGHT_YELLOW
+# BRIGHT_BLUE     BRIGHT_MAGENTA    BRIGHT_CYAN     BRIGHT_WHITE
+ 
+# ON_BLACK        ON_RED            ON_GREEN        ON_YELLOW
+# ON_BLUE         ON_MAGENTA        ON_CYAN         ON_WHITE
+# ON_BRIGHT_BLACK ON_BRIGHT_RED     ON_BRIGHT_GREEN ON_BRIGHT_YELLOW
+# ON_BRIGHT_BLUE  ON_BRIGHT_MAGENTA ON_BRIGHT_CYAN  ON_BRIGHT_WHITE
+
 use constant {
     B_GREEN => ($^O eq 'MSWin32' ? BOLD.GREEN : BRIGHT_GREEN),
 };
@@ -31,9 +46,11 @@ use constant {
 my %terrain = (
 #		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
-	t => [  'walkable wood', [qw(O o 0 o O O)], [ B_GREEN , GREEN ], '',        0.3 ],
+	#t => [  'walkable wood', [qw(O o 0 o O O)], [ B_GREEN , GREEN ], '',        0.3 ],
+	t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	
 # letter used in map, descr    one render!,  one color!, bg color,  speed penality: > 4 unwalkable
-	T => [  'unwalkable wood', 'Q',          [B_GREEN , YELLOW],  	 [ON_GREEN , ON_BLACK ],       5 ],
+	T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  	 UNDERLINE,       5 ],
 
 );
     
@@ -503,6 +520,11 @@ perl -E "print qq(\e[$_),'m',qq( $_ ),qq(\e[0m) for 4..7,31..36,41..47"
 
 perl -we "use strict; use warnings; use Term::ANSIColor qw(:constants); my %colors = (B_GREEN => $^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN); my $bg = ON_GREEN; print $bg.$colors{B_GREEN}, 32323, RESET"
 
+perl -we "use strict; use warnings; use Term::ANSIColor 4.00 qw(RESET :constants :constants256); my %colors = (B_GREEN => $^O eq 'MSWin32' ? ANSI123: BRIGHT_GREEN); my $bg = ON_RED; print UNDERLINE.$bg.$colors{B_GREEN}, 32323, RESET"
+
+perl -we "use strict; use warnings; use Term::ANSIColor 4.00 qw(RESET :constants :constants256); my %colors = (B_GREEN => $^O eq 'MSWin32' ? ANSI27: BRIGHT_GREEN); my $bg = ''; print UNDERLINE.$bg.$colors{B_GREEN}, 32323, RESET"
+
+https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences/33206814
 
 colortools\ColorTool.exe  -c
 
