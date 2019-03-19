@@ -33,7 +33,7 @@ my %terrain = (
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
 	t => [  'walkable wood', [qw(O o 0 o O O)], [ B_GREEN , GREEN ], '',        0.3 ],
 # letter used in map, descr    one render!,  one color!, bg color,  speed penality: > 4 unwalkable
-	T => [  'unwalkable wood', 'Q',          [B_GREEN , YELLOW],  	 ON_GREEN,       5 ],
+	T => [  'unwalkable wood', 'Q',          [B_GREEN , YELLOW],  	 [ON_GREEN , ON_BLACK ],       5 ],
 
 );
     
@@ -362,7 +362,12 @@ sub beautify_map{
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[2]}+1))]  :
 							$terrain{ $ui->{map}[$row][$col] }[2]  					;
 							
-				my $bg_color = $terrain{ $ui->{map}[$row][$col] }[3];
+				my $bg_color = ref $terrain{ $ui->{map}[$row][$col] }[3] eq 'ARRAY' 	?
+					$terrain{ $ui->{map}[$row][$col] }[3]->
+						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[3]}+1))]  :
+							$terrain{ $ui->{map}[$row][$col] }[3]  					;
+				
+				$terrain{ $ui->{map}[$row][$col] }[3];
 				
 				my $render = ref $terrain{ $ui->{map}[$row][$col] }[1] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[1]->
