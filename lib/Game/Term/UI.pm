@@ -5,6 +5,8 @@ use strict;
 use warnings;
 use Term::ReadKey;
 
+use Term::ANSIColor qw(RESET :constants :constants256);
+
 use Game::Term::Map;
 
 ReadMode 'cbreak';
@@ -13,6 +15,82 @@ our $VERSION = '0.01';
 #my $fake_map = 1;
 my $debug = 0;
 my $noscroll_debug = 0;
+
+
+# my %colors = (
+
+	# B_GREEN => ($^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN),
+
+# );
+
+# CLEAR           RESET             BOLD            DARK
+# FAINT           ITALIC            UNDERLINE       UNDERSCORE
+# BLINK           REVERSE           CONCEALED
+ 
+# BLACK           RED               GREEN           YELLOW
+# BLUE            MAGENTA           CYAN            WHITE
+# BRIGHT_BLACK    BRIGHT_RED        BRIGHT_GREEN    BRIGHT_YELLOW
+# BRIGHT_BLUE     BRIGHT_MAGENTA    BRIGHT_CYAN     BRIGHT_WHITE
+ 
+# ON_BLACK        ON_RED            ON_GREEN        ON_YELLOW
+# ON_BLUE         ON_MAGENTA        ON_CYAN         ON_WHITE
+# ON_BRIGHT_BLACK ON_BRIGHT_RED     ON_BRIGHT_GREEN ON_BRIGHT_YELLOW
+# ON_BRIGHT_BLUE  ON_BRIGHT_MAGENTA ON_BRIGHT_CYAN  ON_BRIGHT_WHITE
+
+use constant {
+    B_GREEN => ($^O eq 'MSWin32' ? BOLD.GREEN : BRIGHT_GREEN),
+};
+
+# Linux BRIGHT_GREEN  => windows BOLD.GREEN
+#perl -e "use Term::ANSIColor qw(:constants); $B_GREEN = $^O eq 'Linux' ? BRIGHT_GREEN : BOLD GREEN; print $B_GREEN, 32323, RESET"
+my %terrain = (
+#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5
+# letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
+	#t => [  'walkable wood', [qw(O o 0 o O O)], [ B_GREEN , GREEN ], '',        0.3 ],
+	t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	
+# letter used in map, descr    one render!,  one color!, bg color,  speed penality: > 4 unwalkable
+	T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       5 ],
+
+);
+    
+# render is class data
+# my %render = (
+
+	# X		=> sub{ color('bold red'),$_[0],color('reset') },
+	# chr(2)  => sub{ color('bold red'),$_[0],color('reset') },
+	# # t		=> sub{ color('bold green'),chr(6),color('reset') },
+	# # T		=> sub{ color('green'),chr(5),color('reset') },
+	# # #m		=> sub{ color('magenta'),$_[0],color('reset') },
+	# # #M		=> sub{ color('bold magenta'),$_[0],color('reset') },
+	# # w		=> sub{ color('bold cyan'),'~',color('reset') },
+	# # W		=> sub{ color('cyan'),'~',color('reset') },
+	# # n		=> sub{ color('yellow'),'n',color('reset') },
+	# # N		=> sub{ color('bold yellow'),'N',color('reset') },
+	# # a		=> sub{ qq(\e[37ma\e[0m) },
+	# # A		=> sub{ qq(\e[1;37mA\e[0m) },
+	# # basic color (on windows) are 16:
+	# # from 30 to 37 preceede or not by 1; to be bright
+	# d		=> sub{ qq(\e[30m$_[0]\e[0m) },
+	# D		=> sub{ qq(\e[1;30m$_[0]\e[0m) },
+	# f		=> sub{ qq(\e[31m$_[0]\e[0m) },
+	# F		=> sub{ qq(\e[1;31m$_[0]\e[0m) },
+	# g		=> sub{ qq(\e[32m$_[0]\e[0m) },
+	# G		=> sub{ qq(\e[1;32m$_[0]\e[0m) },
+	# h		=> sub{ qq(\e[33m$_[0]\e[0m) },
+	# H		=> sub{ qq(\e[1;33m$_[0]\e[0m) },
+	# j		=> sub{ qq(\e[34m$_[0]\e[0m) },
+	# J		=> sub{ qq(\e[1;34m$_[0]\e[0m) },
+	# k		=> sub{ qq(\e[35m$_[0]\e[0m) },
+	# K		=> sub{ qq(\e[1;35m$_[0]\e[0m) },
+	# l		=> sub{ qq(\e[36m$_[0]\e[0m) },
+	# L		=> sub{ qq(\e[1;36m$_[0]\e[0m) },
+	# m		=> sub{ qq(\e[37m$_[0]\e[0m) },
+	# M		=> sub{ qq(\e[1;37m$_[0]\e[0m) },
+	# #'~'		=> sub{ color('blue'),$_[0],color('reset') },
+	
+	
+# );
 
 sub new{
 	my $class = shift;
@@ -32,7 +110,15 @@ sub run{
 		print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
 		$ui->{map} = $map->{data};
 		
+		# enlarge the map to be scrollable
+		# set the hero's coordinates
+		# set real_map_first and real_map_last x,y
 		$ui->set_map_and_hero();
+		
+		$ui->{map}[ $ui->{real_map_first}{y} ][ $ui->{real_map_first}{x} ]='z';
+		$ui->{map}[ $ui->{real_map_last}{y} ][ $ui->{real_map_last}{x} ]='z';
+		print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
+				" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
 		# now BIG map, hero_pos and hero_side are initialized
 		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)		
 		
@@ -49,7 +135,7 @@ sub run{
 				
 				$ui->draw_map();
 				
-	if ($noscroll_debug){
+		if ($noscroll_debug){
 		 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '+';
 		 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '+';
 		 #print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n";
@@ -60,13 +146,11 @@ sub run{
 		 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
 	}
 			
-			
-				$ui->draw_menu( ["hero HP: 42",
+			$ui->draw_menu( ["hero HP: 42",
 									"hero at: $ui->{hero_y}-$ui->{hero_x}",
 									"key $key was pressed:"] );	
 
 			}
-			
 			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;		
 		
 		}
@@ -111,16 +195,27 @@ sub draw_map{
 	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
 		
 		#no warnings qw(uninitialized);
-				print 	' ',$ui->{ dec_ver },
+				#print 	
+				render (' ',$ui->{ dec_ver },
 				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
-				$ui->{ dec_ver },"\n";
+				$ui->{ dec_ver },"\n"
+				)
+				;
 		
 		
 	}	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 }
-
+sub render{
+	#my $ui = shift;
+	 print map{
+		#s/X/BOLD RED 'X', RESET/
+		 # ok BOLD RED $_, RESET
+		 #$render{$_} ? $render{$_}->($_)  : $_ 
+		 "$_"
+	}@_;
+}
 sub move{
 	my $ui = shift;
 	my $key = shift;
@@ -225,17 +320,15 @@ sub draw_menu{
 	print ' ',$ui->{ dec_ver }.$_."\n" for @$messages;
 }
 
-
-
 sub set_map_and_hero{
 	my $ui = shift;
 
 	my $original_map_w = $#{$ui->{map}->[0]} + 1;
 	my $original_map_h = $#{$ui->{map}} + 1;
-	print "DEBUG origial map was $original_map_w x $original_map_h\n" if $debug;
+	print "DEBUG: origial map was $original_map_w x $original_map_h\n" if $debug;
 	# get hero position and side BEFORE enlarging
-	$ui->get_hero_pos();
-			
+	$ui->set_hero_pos();
+	
 	# add at top
 	my @map = map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ; 
 	# at the center
@@ -250,13 +343,70 @@ sub set_map_and_hero{
 	push @map,map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ;
 	
 	@{$ui->{map}} = @map;
+	
+	# set hero coordinates
 	$ui->{hero_x} += $ui->{ map_area_w } ; #+ 1; 
 	$ui->{hero_y} += $ui->{ map_area_h } + 1; 
-
+	
+	# set top left corner coordinates (of the real map data)
+	$ui->{real_map_first}{x} = $ui->{ map_area_w } ;
+	$ui->{real_map_first}{y} = $ui->{ map_area_h } + 1;
+	
+	# set bottom right corner coordinates
+	$ui->{real_map_last}{y} = $#{$ui->{map}} - $ui->{ map_area_h } ; 
+	$ui->{real_map_last}{x} = $#{$ui->{map}->[0]} - $ui->{ map_area_w } ;
+	
+	# beautify map 
+	$ui->beautify_map();
+		
+	
 	$ui->set_no_scrolling_area();
 	
 }
+sub beautify_map{
+# letter used in map, descr  possible renders,  possible fg colors,   speed penality
+#	t => [  'walkable wood', [qw(O o . o O O)], [qw(\e[32m \e[1;32m \e[32m)], 0.3 ],
+# letter used in map, descr    one render!,  one color!,   speed penality: > 4 unwalkable
+#	T => [  'unwalkable wood', 'O',          '\e[32m',     5 ],
 
+	my $ui = shift;
+	foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y} ){
+		foreach my $col( $ui->{real_map_first}{x} .. $ui->{real_map_last}{x} ){
+			#$ui->{map}[$row][$col] = 'S';
+			if(exists $terrain{ $ui->{map}[$row][$col] } ){
+				my $color = ref $terrain{ $ui->{map}[$row][$col] }[2] eq 'ARRAY' 	?
+					$terrain{ $ui->{map}[$row][$col] }[2]->
+						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[2]}+1))]  :
+							$terrain{ $ui->{map}[$row][$col] }[2]  					;
+							
+				my $bg_color = ref $terrain{ $ui->{map}[$row][$col] }[3] eq 'ARRAY' 	?
+					$terrain{ $ui->{map}[$row][$col] }[3]->
+						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[3]}+1))]  :
+							$terrain{ $ui->{map}[$row][$col] }[3]  					;
+				
+				$terrain{ $ui->{map}[$row][$col] }[3];
+				
+				my $render = ref $terrain{ $ui->{map}[$row][$col] }[1] eq 'ARRAY' 	?
+					$terrain{ $ui->{map}[$row][$col] }[1]->
+						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[1]}+1))]  :
+							$terrain{ $ui->{map}[$row][$col] }[1]  					;			
+				# ok $ui->{map}[$row][$col] = "\e[32mO\e[0m";
+				# ok $ui->{map}[$row][$col] = colored(['bold','green'],'O').color('reset');
+				# ok $ui->{map}[$row][$col] = color('bold green').'O'.color('reset');
+				# ok $ui->{map}[$row][$col] = BOLD GREEN.'O'.RESET; 
+				# ok original $ui->{map}[$row][$col] = $color.$render.RESET;
+				#ok %colors variant $ui->{map}[$row][$col] = ($colors{$color} || $color ).$render.RESET;
+		#$ui->{map}[$row][$col] = $bg_color.$color.$render.RESET;
+				# OK $ui->{map}[$row][$col] = ON_RED.BLUE.$render.RESET;
+				$ui->{map}[$row][$col] = $bg_color.$color.$render.RESET;
+			}
+			#$ui->{map}[$row][$col] = 's';
+			
+		}
+	
+	}
+
+}
 sub set_no_scrolling_area{
 	my $ui = shift;
 	
@@ -297,11 +447,13 @@ sub set_no_scrolling_area{
 	local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '+';
 	local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '+';
 	
-	print 	"DEBUG: map extended with no_scroll vertexes:\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
+	print 	"DEBUG: map extended with no_scroll vertexes (+ signs):\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
+	
+	
 	
 }
 
-sub get_hero_pos{
+sub set_hero_pos{
 	my $ui = shift;
 	# hero position MUST be on a side and NEVER on a corner
 	print "DEBUG: original map size; rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n" if $debug;
@@ -323,10 +475,14 @@ sub get_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ map_area_w } //= 20; #80;
-	$conf{ map_area_h } //=  10; #20;
+	$conf{ map_area_w } //= 50; #80;
+	$conf{ map_area_h } //=  20; #20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
+	# set internally to get coord of the first element of the map
+	$conf{ real_map_first} = { x => undef, y => undef };
+	# set internally to get coord of the last element of the map
+	$conf{ real_map_last} = { x => undef, y => undef };
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
 	$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
@@ -342,6 +498,8 @@ sub validate_conf{
 	$conf{ no_scroll } = 0;
 	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
 	
+	#$conf{ render } = { X => BOLD RED 'X', RESET};
+	
 		
 	return %conf;
 }
@@ -350,10 +508,42 @@ sub validate_conf{
 
 1; # End of Game::Term::UI
 __DATA__
+# on Windows10 :constants256 works
+# on Windows 7 no. But:
+# a) from cmd.exe launch ansicon.exe will enable colors (but UNDERLINE and UNDERSCORE will not work)
+#                        https://github.com/adoxa/ansicon/releases
+# anyway underline does not work and no 256 are displayed but 16
+
+# b) MobaXterm will not work
+# c) cmder_mini (OK WITH ULISSE!) has not full color support
+# d) cmder (OK WITH ULISSE!) has not full color support
+# e) powercmd (no ulisse) no colors no readkey!
+# f) conemu (no ulisse) no exetended colors
+# g) ???? mintty has full support.. https://mintty.github.io/
+#         https://code.google.com/archive/p/mintty/downloads
+# h) terminus (no ulisse support)
+
+https://superuser.com/questions/413073/windows-console-with-ansi-colors-handling
+
 perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new(); print $ui->{map_area_w}.$/;dd $ui; dd $ui->{map};$ui->run"
 perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new();$ui->run"
 
 perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new();$ui->run"
+
+perl -e "print qq(\e[31mCOLORED\e[0m)"
+
+perl -E "print qq(\e[$_),'m',qq( $_ ),qq(\e[0m) for 4..7,31..36,41..47"
+
+
+perl -we "use strict; use warnings; use Term::ANSIColor qw(:constants); my %colors = (B_GREEN => $^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN); my $bg = ON_GREEN; print $bg.$colors{B_GREEN}, 32323, RESET"
+
+perl -we "use strict; use warnings; use Term::ANSIColor 4.00 qw(RESET :constants :constants256); my %colors = (B_GREEN => $^O eq 'MSWin32' ? ANSI123: BRIGHT_GREEN); my $bg = ON_RED; print UNDERLINE.$bg.$colors{B_GREEN}, 32323, RESET"
+
+perl -we "use strict; use warnings; use Term::ANSIColor 4.00 qw(RESET :constants :constants256); my %colors = (B_GREEN => $^O eq 'MSWin32' ? ANSI27: BRIGHT_GREEN); my $bg = ''; print UNDERLINE.$bg.$colors{B_GREEN}, 32323, RESET"
+
+https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences/33206814
+
+colortools\ColorTool.exe  -c
 
 =head1 NAME
 
