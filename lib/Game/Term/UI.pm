@@ -50,7 +50,7 @@ my %terrain = (
 	t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
 	
 # letter used in map, descr    one render!,  one color!, bg color,  speed penality: > 4 unwalkable
-	T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  	 UNDERLINE,       5 ],
+	T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       5 ],
 
 );
     
@@ -508,6 +508,23 @@ sub validate_conf{
 
 1; # End of Game::Term::UI
 __DATA__
+# on Windows10 :constants256 works
+# on Windows 7 no. But:
+# a) from cmd.exe launch ansicon.exe will enable colors (but UNDERLINE and UNDERSCORE will not work)
+#                        https://github.com/adoxa/ansicon/releases
+# anyway underline does not work and no 256 are displayed but 16
+
+# b) MobaXterm will not work
+# c) cmder_mini (OK WITH ULISSE!) has not full color support
+# d) cmder (OK WITH ULISSE!) has not full color support
+# e) powercmd (no ulisse) no colors no readkey!
+# f) conemu (no ulisse) no exetended colors
+# g) ???? mintty has full support.. https://mintty.github.io/
+#         https://code.google.com/archive/p/mintty/downloads
+# h) terminus (no ulisse support)
+
+https://superuser.com/questions/413073/windows-console-with-ansi-colors-handling
+
 perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new(); print $ui->{map_area_w}.$/;dd $ui; dd $ui->{map};$ui->run"
 perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new();$ui->run"
 
