@@ -16,12 +16,22 @@ my $debug = 0;
 my $noscroll_debug = 0;
 
 
+# my %colors = (
+
+	# B_GREEN => ($^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN),
+
+# );
+
+use constant {
+    B_GREEN => ($^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN),
+};
+
 # Linux BRIGHT_GREEN  => windows BOLD.GREEN
 #perl -e "use Term::ANSIColor qw(:constants); $B_GREEN = $^O eq 'Linux' ? BRIGHT_GREEN : BOLD GREEN; print $B_GREEN, 32323, RESET"
 my %terrain = (
 # letter used in map, descr  possible renders,  possible fg colors,   speed penality
 	#t => [  'walkable wood', [qw(O o . o O O)], [qw(\e[32m \e[1;32m \e[32m)], 0.3 ],
-	t => [  'walkable wood', [qw(O o 0 o O O)], [ BOLD.GREEN , GREEN ], 0.3 ],
+	t => [  'walkable wood', [qw(O o 0 o O O)], [ B_GREEN , GREEN ], 0.3 ],
 # letter used in map, descr    one render!,  one color!,   speed penality: > 4 unwalkable
 	T => [  'unwalkable wood', 'Q',          GREEN,     5 ],
 
@@ -326,9 +336,9 @@ sub set_map_and_hero{
 	$ui->{real_map_first}{y} = $ui->{ map_area_h } + 1;
 	
 	# set bottom right corner coordinates
-	$ui->{real_map_last}{x} = $ui->{real_map_first}{x} + $ui->{ map_area_w } - 1; 
-	$ui->{real_map_last}{y} = $ui->{real_map_first}{y} + $ui->{ map_area_h } ;
-
+	$ui->{real_map_last}{y} = $#{$ui->{map}} - $ui->{ map_area_h } ; 
+	$ui->{real_map_last}{x} = $#{$ui->{map}->[0]} - $ui->{ map_area_w } ;
+	
 	# beautify map 
 	$ui->beautify_map();
 		
@@ -359,8 +369,11 @@ sub beautify_map{
 				# ok $ui->{map}[$row][$col] = colored(['bold','green'],'O').color('reset');
 				# ok $ui->{map}[$row][$col] = color('bold green').'O'.color('reset');
 				# ok $ui->{map}[$row][$col] = BOLD GREEN.'O'.RESET; 
-				$ui->{map}[$row][$col] = $color.$render.RESET;				
+				# ok original $ui->{map}[$row][$col] = $color.$render.RESET;
+				#ok %colors variant $ui->{map}[$row][$col] = ($colors{$color} || $color ).$render.RESET;
+				$ui->{map}[$row][$col] = $color.$render.RESET;
 			}
+			#$ui->{map}[$row][$col] = 's';
 			
 		}
 	

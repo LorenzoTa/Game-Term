@@ -85,7 +85,7 @@ tt  ttttttttttttttttttttttttttttt            ttt    ttttttttt   tttttttttttttttt
      ttttt                              ttttttttttttt                     tttt t
      ttttt                              tttttttttttttttttttt       ttt     ttttt
       tttt     ttttttt                        tttttttttttttttt     ttttt      tt
-X             tttttttt             ttttt      ttttttttttttttttt    ttttttt      
+              tttttttt             ttttt      ttttttttttttttttt    ttttttt      
    t          tttttttt             tttttttt              tttttt     tttttt     t
         t     tttt                 ttttttttt               ttttt     ttttttttttt
     t         ttt         tttttt     Otttttt                ttttt      ttttttttt
@@ -101,7 +101,7 @@ X             tttttttt             ttttt      ttttttttttttttttt    ttttttt
        tttttttttttttttttttttttttttt                ttt                 ttt  tttt
  t     tttttttttttttttttttttttttttt      tttttttt                      ttt  tttt
 ttt    012345678901234ttttttttttttt      tttttttt         tttttttttttttttttttttt
-ttt                                                   tttttttttttttttttttttttttt
+ttt                                  X                tttttttttttttttttttttttttt
 EOM
 		foreach my $row( split "\n", $fake){
 			push @$map,[ split '', $row ]
