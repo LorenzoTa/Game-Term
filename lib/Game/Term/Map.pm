@@ -99,8 +99,8 @@ tt  ttttttttttttttttttttttttttttt            ttt    ttttttttt   tttttttttttttttt
        tttt            ttttttttttttttttt       ttttttt                      tttt
        tttt                                    ttttttt                 ttt  tttt
        tttttttttttttttttttttttttttt                ttt                 ttt  tttt
- t     tttttttttttttttttttttttttttt      tttttttt                      ttt  tttt
-ttt    012345678901234ttttttttttttt      tttttttt         tttttttttttttttttttttt
+ t     tttttttttttttttttttttttttttt      TTTTTTTT                      ttt  tttt
+ttt    012345678901234ttttttttttttt      TTTTTTTT         tttttttttttttttttttttt
 ttt                                  X                tttttttttttttttttttttttttt
 EOM
 		foreach my $row( split "\n", $fake){

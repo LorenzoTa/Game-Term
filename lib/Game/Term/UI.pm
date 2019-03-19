@@ -23,17 +23,17 @@ my $noscroll_debug = 0;
 # );
 
 use constant {
-    B_GREEN => ($^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN),
+    B_GREEN => ($^O eq 'MSWin32' ? BOLD.GREEN : BRIGHT_GREEN),
 };
 
 # Linux BRIGHT_GREEN  => windows BOLD.GREEN
 #perl -e "use Term::ANSIColor qw(:constants); $B_GREEN = $^O eq 'Linux' ? BRIGHT_GREEN : BOLD GREEN; print $B_GREEN, 32323, RESET"
 my %terrain = (
-# letter used in map, descr  possible renders,  possible fg colors,   speed penality
-	#t => [  'walkable wood', [qw(O o . o O O)], [qw(\e[32m \e[1;32m \e[32m)], 0.3 ],
-	t => [  'walkable wood', [qw(O o 0 o O O)], [ B_GREEN , GREEN ], 0.3 ],
-# letter used in map, descr    one render!,  one color!,   speed penality: > 4 unwalkable
-	T => [  'unwalkable wood', 'Q',          GREEN,     5 ],
+#		     0               1                  2                    3          4
+# letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
+	t => [  'walkable wood', [qw(O o 0 o O O)], [ B_GREEN , GREEN ], '',        0.3 ],
+# letter used in map, descr    one render!,  one color!, bg color,  speed penality: > 4 unwalkable
+	T => [  'unwalkable wood', 'Q',          [B_GREEN , YELLOW],  	 ON_GREEN,       5 ],
 
 );
     
@@ -361,6 +361,9 @@ sub beautify_map{
 					$terrain{ $ui->{map}[$row][$col] }[2]->
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[2]}+1))]  :
 							$terrain{ $ui->{map}[$row][$col] }[2]  					;
+							
+				my $bg_color = $terrain{ $ui->{map}[$row][$col] }[3];
+				
 				my $render = ref $terrain{ $ui->{map}[$row][$col] }[1] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[1]->
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[1]}+1))]  :
@@ -371,7 +374,9 @@ sub beautify_map{
 				# ok $ui->{map}[$row][$col] = BOLD GREEN.'O'.RESET; 
 				# ok original $ui->{map}[$row][$col] = $color.$render.RESET;
 				#ok %colors variant $ui->{map}[$row][$col] = ($colors{$color} || $color ).$render.RESET;
-				$ui->{map}[$row][$col] = $color.$render.RESET;
+		#$ui->{map}[$row][$col] = $bg_color.$color.$render.RESET;
+				# OK $ui->{map}[$row][$col] = ON_RED.BLUE.$render.RESET;
+				$ui->{map}[$row][$col] = $bg_color.$color.$render.RESET;
 			}
 			#$ui->{map}[$row][$col] = 's';
 			
@@ -489,6 +494,10 @@ perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new();$ui->run"
 perl -e "print qq(\e[31mCOLORED\e[0m)"
 
 perl -E "print qq(\e[$_),'m',qq( $_ ),qq(\e[0m) for 4..7,31..36,41..47"
+
+
+perl -we "use strict; use warnings; use Term::ANSIColor qw(:constants); my %colors = (B_GREEN => $^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN); my $bg = ON_GREEN; print $bg.$colors{B_GREEN}, 32323, RESET"
+
 
 colortools\ColorTool.exe  -c
 
