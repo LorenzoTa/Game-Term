@@ -16,6 +16,19 @@ our $VERSION = '0.01';
 my $debug = 0;
 my $noscroll_debug = 0;
 
+# SOME NOTES ABOUT MAP:
+# The map is initially loaded from the data field of the Game::Term::Map object.
+# It is the AoA containig one character per tile (terrains) and containing the hero's
+# starting position marked by 'X'.
+
+# This original AoA is passed to set_map_and_hero() where it will be enlarged depending
+# on the map_area settings (the display window). Here the offsets used in print will be calculated.
+
+# Then beautify_map() will modify tiles of the map using colors and deciding which character to use
+# when display the map. Tiles of the map will also be transformed into anonymous arrays to hold other
+# types of informations.
+
+
 
 # CLEAR           RESET             BOLD            DARK
 # FAINT           ITALIC            UNDERLINE       UNDERSCORE
@@ -189,26 +202,33 @@ sub draw_map{
 		
 		#no warnings qw(uninitialized);
 				#print 	
-				render (' ',$ui->{ dec_ver },
-				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
+				#render (' ',$ui->{ dec_ver },
+				# @$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
+				# $ui->{ dec_ver },"\n"
+				# );
+				
+				print ' ',$ui->{ dec_ver },
+					( 
+						map{
+							# if [] -> if unmasked -> display else ' '
+							# else $_
+							ref $_ eq 'ARRAY' ? ( $$_[2] ? $$_[0] : ' ' ) : $_
+						} @$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ] 
+					),
 				$ui->{ dec_ver },"\n"
-				)
-				;
-		
-		
 	}	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 }
-sub render{
-	#my $ui = shift;
-	 print map{
-		#s/X/BOLD RED 'X', RESET/
-		 # ok BOLD RED $_, RESET
-		 #$render{$_} ? $render{$_}->($_)  : $_ 
-		 "$_"
-	}@_;
-}
+# sub render{
+	# #my $ui = shift;
+	 # print map{
+		# #s/X/BOLD RED 'X', RESET/
+		 # # ok BOLD RED $_, RESET
+		 # #$render{$_} ? $render{$_}->($_)  : $_ 
+		 # "$_"
+	# }@_;
+# }
 sub move{
 	my $ui = shift;
 	my $key = shift;
@@ -356,6 +376,7 @@ sub set_map_and_hero{
 	$ui->set_no_scrolling_area();
 	
 }
+
 sub beautify_map{
 # letter used in map, descr  possible renders,  possible fg colors,   speed penality
 #	t => [  'walkable wood', [qw(O o . o O O)], [qw(\e[32m \e[1;32m \e[32m)], 0.3 ],
@@ -379,7 +400,7 @@ sub beautify_map{
 				
 				$terrain{ $ui->{map}[$row][$col] }[3];
 				
-				my $render = ref $terrain{ $ui->{map}[$row][$col] }[1] eq 'ARRAY' 	?
+				my $to_display = ref $terrain{ $ui->{map}[$row][$col] }[1] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[1]->
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[1]}+1))]  :
 							$terrain{ $ui->{map}[$row][$col] }[1]  					;			
@@ -387,11 +408,18 @@ sub beautify_map{
 				# ok $ui->{map}[$row][$col] = colored(['bold','green'],'O').color('reset');
 				# ok $ui->{map}[$row][$col] = color('bold green').'O'.color('reset');
 				# ok $ui->{map}[$row][$col] = BOLD GREEN.'O'.RESET; 
-				# ok original $ui->{map}[$row][$col] = $color.$render.RESET;
-				#ok %colors variant $ui->{map}[$row][$col] = ($colors{$color} || $color ).$render.RESET;
-		#$ui->{map}[$row][$col] = $bg_color.$color.$render.RESET;
-				# OK $ui->{map}[$row][$col] = ON_RED.BLUE.$render.RESET;
-				$ui->{map}[$row][$col] = $bg_color.$color.$render.RESET;
+				# ok original $ui->{map}[$row][$col] = $color.$to_display.RESET;
+				#ok %colors variant $ui->{map}[$row][$col] = ($colors{$color} || $color ).$to_display.RESET;
+		#$ui->{map}[$row][$col] = $bg_color.$color.$to_display.RESET;
+				# OK $ui->{map}[$row][$col] = ON_RED.BLUE.$to_display.RESET;
+				
+				
+				# OK DEF: $ui->{map}[$row][$col] = $bg_color.$color.$to_display.RESET;
+				$ui->{map}[$row][$col] = [
+						$bg_color.$color.$to_display.RESET	, # 0 display
+						$ui->{map}[$row][$col]				, # 1 original letter of terrain
+						1									, # 2 unmasked
+				];
 			}
 			#$ui->{map}[$row][$col] = 's';
 			
