@@ -347,7 +347,10 @@ sub set_map_and_hero{
 	print "DEBUG: origial map was $original_map_w x $original_map_h\n" if $debug;
 	# get hero position and side BEFORE enlarging
 	$ui->set_hero_pos();
-	
+	# change external tile to []
+	$ui->{ ext_tile } = [ $ui->{ ext_tile }, $ui->{ ext_tile }, 1];
+	# change hero icon to []
+	$ui->{ hero_icon } = [ $ui->{ hero_icon }, $ui->{ hero_icon }, 1 ];
 	# add at top
 	my @map = map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ; 
 	# at the center
@@ -390,7 +393,7 @@ sub beautify_map{
 #	T => [  'unwalkable wood', 'O',          '\e[32m',     5 ],
 
 	my $ui = shift;
-	foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y}-1 ){
+	foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y} - 1 ){ # WATCH this - 1 !!!!!
 		foreach my $col( $ui->{real_map_first}{x} .. $ui->{real_map_last}{x} ){
 			#$ui->{map}[$row][$col] = 'S';
 			if(exists $terrain{ $ui->{map}[$row][$col] } ){
@@ -514,14 +517,14 @@ sub validate_conf{
 	$conf{ real_map_last} = { x => undef, y => undef };
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
-#$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
-$conf{ ext_tile } //= ['O','O',1];
+$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
+#$conf{ ext_tile } //= ['O','O',1];
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
-#$conf{ hero_icon } = chr(2);#'X'; 30 1 2 
-$conf{ hero_icon } = [ chr(2), chr(2), 1] ;#'X'; 30 1 2 
+$conf{ hero_icon } = chr(2);#'X'; 30 1 2 
+#$conf{ hero_icon } = [ chr(2), chr(2), 1] ;#'X'; 30 1 2 
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
