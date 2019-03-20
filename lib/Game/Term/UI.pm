@@ -16,6 +16,19 @@ our $VERSION = '0.01';
 my $debug = 0;
 my $noscroll_debug = 0;
 
+# SOME NOTES ABOUT MAP:
+# The map is initially loaded from the data field of the Game::Term::Map object.
+# It is the AoA containig one character per tile (terrains) and containing the hero's
+# starting position marked by 'X'.
+
+# This original AoA is passed to set_map_and_hero() where it will be enlarged depending
+# on the map_area settings (the display window). Here the offsets used in print will be calculated.
+
+# Then beautify_map() will modify tiles of the map using colors and deciding which character to use
+# when display the map. Tiles of the map will also be transformed into anonymous arrays to hold other
+# types of informations.
+
+
 
 # CLEAR           RESET             BOLD            DARK
 # FAINT           ITALIC            UNDERLINE       UNDERSCORE
@@ -108,8 +121,8 @@ sub run{
 		# set real_map_first and real_map_last x,y
 		$ui->set_map_and_hero();
 		
-		$ui->{map}[ $ui->{real_map_first}{y} ][ $ui->{real_map_first}{x} ]='z';
-		$ui->{map}[ $ui->{real_map_last}{y} ][ $ui->{real_map_last}{x} ]='z';
+# $ui->{map}[ $ui->{real_map_first}{y} ][ $ui->{real_map_first}{x} ]='z';
+# $ui->{map}[ $ui->{real_map_last}{y} ][ $ui->{real_map_last}{x} ]='z';
 		print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
 				" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
 		# now BIG map, hero_pos and hero_side are initialized
@@ -186,29 +199,42 @@ sub draw_map{
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
 	# print map body with decorations
 	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
-		
-		#no warnings qw(uninitialized);
-				#print 	
-				render (' ',$ui->{ dec_ver },
-				@$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
+	
+				# print ' ',$ui->{ dec_ver },
+					# ( 
+						# map{
+							# # if [] -> if unmasked -> display else ' '
+							# # else $_
+							# ref $_ eq 'ARRAY' ? ( $$_[2] ? $$_[0] : ' ' ) : $_
+						# } @$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ] 
+					# ),
+				# $ui->{ dec_ver },"\n"
+				
+				print ' ',$ui->{ dec_ver },
+					( 
+						map{
+							
+							$$_[2] ? $$_[0] : ' ' 
+							#ref $_ eq 'ARRAY' ? '' : "ROW $row has no array ref: -->@$row<--\n"
+							# if [] -> if unmasked -> display else ' '
+							# else $_
+							#ref $_ eq 'ARRAY' ? ( $$_[2] ? $$_[0] : ' ' ) : $_
+						} @$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ] 
+					),
 				$ui->{ dec_ver },"\n"
-				)
-				;
-		
-		
 	}	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 }
-sub render{
-	#my $ui = shift;
-	 print map{
-		#s/X/BOLD RED 'X', RESET/
-		 # ok BOLD RED $_, RESET
-		 #$render{$_} ? $render{$_}->($_)  : $_ 
-		 "$_"
-	}@_;
-}
+# sub render{
+	# #my $ui = shift;
+	 # print map{
+		# #s/X/BOLD RED 'X', RESET/
+		 # # ok BOLD RED $_, RESET
+		 # #$render{$_} ? $render{$_}->($_)  : $_ 
+		 # "$_"
+	# }@_;
+# }
 sub move{
 	my $ui = shift;
 	my $key = shift;
@@ -221,7 +247,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}--;
 		$ui->{map_off_y}-- if $ui->must_scroll();
         return 1;
@@ -232,7 +258,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}++;
 		$ui->{map_off_y}++ if $ui->must_scroll();		
         return 1;
@@ -243,7 +269,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_x}--;
 		$ui->{map_off_x}-- if $ui->must_scroll();		
         return 1;
@@ -254,7 +280,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_x}++;
 		$ui->{map_off_x}++ if $ui->must_scroll();				
         return 1;
@@ -297,9 +323,9 @@ sub must_scroll{
 }
 
 sub is_walkable{
-	my $tile = shift;
-	if( $tile eq ' ' ){ return 1 }
-	elsif( $tile eq '+' ){ return 1 }
+	my $tile = shift; 
+	if( $tile->[1] eq ' ' ){ return 1 }
+	elsif( $tile->[1] eq '+' ){ return 1 }
 	else{return 0}
 }
 		
@@ -321,7 +347,10 @@ sub set_map_and_hero{
 	print "DEBUG: origial map was $original_map_w x $original_map_h\n" if $debug;
 	# get hero position and side BEFORE enlarging
 	$ui->set_hero_pos();
-	
+	# change external tile to []
+	$ui->{ ext_tile } = [ $ui->{ ext_tile }, $ui->{ ext_tile }, 1];
+	# change hero icon to []
+	$ui->{ hero_icon } = [ $ui->{ hero_icon }, $ui->{ hero_icon }, 1 ];
 	# add at top
 	my @map = map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ; 
 	# at the center
@@ -356,6 +385,7 @@ sub set_map_and_hero{
 	$ui->set_no_scrolling_area();
 	
 }
+
 sub beautify_map{
 # letter used in map, descr  possible renders,  possible fg colors,   speed penality
 #	t => [  'walkable wood', [qw(O o . o O O)], [qw(\e[32m \e[1;32m \e[32m)], 0.3 ],
@@ -363,7 +393,7 @@ sub beautify_map{
 #	T => [  'unwalkable wood', 'O',          '\e[32m',     5 ],
 
 	my $ui = shift;
-	foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y} ){
+	foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y} - 1 ){ # WATCH this - 1 !!!!!
 		foreach my $col( $ui->{real_map_first}{x} .. $ui->{real_map_last}{x} ){
 			#$ui->{map}[$row][$col] = 'S';
 			if(exists $terrain{ $ui->{map}[$row][$col] } ){
@@ -379,7 +409,7 @@ sub beautify_map{
 				
 				$terrain{ $ui->{map}[$row][$col] }[3];
 				
-				my $render = ref $terrain{ $ui->{map}[$row][$col] }[1] eq 'ARRAY' 	?
+				my $to_display = ref $terrain{ $ui->{map}[$row][$col] }[1] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[1]->
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[1]}+1))]  :
 							$terrain{ $ui->{map}[$row][$col] }[1]  					;			
@@ -387,12 +417,21 @@ sub beautify_map{
 				# ok $ui->{map}[$row][$col] = colored(['bold','green'],'O').color('reset');
 				# ok $ui->{map}[$row][$col] = color('bold green').'O'.color('reset');
 				# ok $ui->{map}[$row][$col] = BOLD GREEN.'O'.RESET; 
-				# ok original $ui->{map}[$row][$col] = $color.$render.RESET;
-				#ok %colors variant $ui->{map}[$row][$col] = ($colors{$color} || $color ).$render.RESET;
-		#$ui->{map}[$row][$col] = $bg_color.$color.$render.RESET;
-				# OK $ui->{map}[$row][$col] = ON_RED.BLUE.$render.RESET;
-				$ui->{map}[$row][$col] = $bg_color.$color.$render.RESET;
+				# ok original $ui->{map}[$row][$col] = $color.$to_display.RESET;
+				#ok %colors variant $ui->{map}[$row][$col] = ($colors{$color} || $color ).$to_display.RESET;
+		#$ui->{map}[$row][$col] = $bg_color.$color.$to_display.RESET;
+				# OK $ui->{map}[$row][$col] = ON_RED.BLUE.$to_display.RESET;				
+				# OK DEF: $ui->{map}[$row][$col] = $bg_color.$color.$to_display.RESET;
+				
+				# final tile is anonymous array
+				$ui->{map}[$row][$col] = [
+						$bg_color.$color.$to_display.RESET	, # 0 to display
+						$ui->{map}[$row][$col]				, # 1 original letter of terrain
+						1									, # 2 unmasked
+				];
 			}
+			
+			else {  $ui->{map}[$row][$col]  =  [ $ui->{map}[$row][$col], $ui->{map}[$row][$col], 1]}
 			#$ui->{map}[$row][$col] = 's';
 			
 		}
@@ -478,12 +517,14 @@ sub validate_conf{
 	$conf{ real_map_last} = { x => undef, y => undef };
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
-	$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
+$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
+#$conf{ ext_tile } //= ['O','O',1];
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
-	$conf{ hero_icon } = chr(2);#'X'; 30 1 2 
+$conf{ hero_icon } = chr(2);#'X'; 30 1 2 
+#$conf{ hero_icon } = [ chr(2), chr(2), 1] ;#'X'; 30 1 2 
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
