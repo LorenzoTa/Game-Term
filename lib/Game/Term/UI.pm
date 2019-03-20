@@ -192,7 +192,7 @@ sub draw_map{
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
 	
-	# apply sight area
+	# get area of currently seen tiles (by coords)
 	my %seen = $ui->illuminate();
 	
 	# draw hero
@@ -201,61 +201,34 @@ sub draw_map{
 	# MAP AREA:
 	# print decoration first row
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
-	# print map body with decorations
-	#foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
-	foreach my $row ( $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}   ){ 	
 	
-				# print ' ',$ui->{ dec_ver },
-					# ( 
-						# map{
-							# # if [] -> if unmasked -> display else ' '
-							# # else $_
-							# ref $_ eq 'ARRAY' ? ( $$_[2] ? $$_[0] : ' ' ) : $_
-						# } @$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ] 
-					# ),
-				# $ui->{ dec_ver },"\n"
-				
-				##OK v 2
-				# print ' ',$ui->{ dec_ver },
-					# ( 
-						# map{
-							
-							# $$_[2] ? $$_[0] : ' ' 
-							# #ref $_ eq 'ARRAY' ? '' : "ROW $row has no array ref: -->@$row<--\n"
-							# # if [] -> if unmasked -> display else ' '
-							# # else $_
-							# #ref $_ eq 'ARRAY' ? ( $$_[2] ? $$_[0] : ' ' ) : $_
-						# } @$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ] 
-					# ),
-				# $ui->{ dec_ver },"\n"
-				
+	# print map body with decorations
+	# iterate indexes of rows..
+	foreach my $row ( $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}   ){ 	
+				# print decoration vertical
 				print ' ',$ui->{ dec_ver };
+				# iterate cols by indexes 
 				foreach my $col  ( $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w}  ){
-					#print "$row-$col ";
+					# if is seen (in the radius of illuminate) and still masked
 					if ( $seen{$row.'_'.$col} and $ui->{map}[$row][$col][2] == 0 ){
-					
+						# set unmasked
 						$ui->{map}[$row][$col][2] = 1;
+						# print display
 						print $ui->{map}[$row][$col][0];
 					
 					}
+					# already unmasked: print display 
 					elsif( $ui->{map}[$row][$col][2] == 1 ){ print $ui->{map}[$row][$col][0]; }
+					# print ' ' if still masked
 					else{ print ' '}
 				}
-				
+				# print decoration vertical and newline
 				print $ui->{ dec_ver },"\n";
 	}	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 }
-# sub render{
-	# #my $ui = shift;
-	 # print map{
-		# #s/X/BOLD RED 'X', RESET/
-		 # # ok BOLD RED $_, RESET
-		 # #$render{$_} ? $render{$_}->($_)  : $_ 
-		 # "$_"
-	# }@_;
-# }
+
 sub move{
 	my $ui = shift;
 	my $key = shift;
@@ -344,26 +317,16 @@ sub must_scroll{
 }
 sub illuminate{
 	my $ui = shift;
-	# my $center_r = shift;
-	# my $center_c = shift;
-	# my $radius     = shift;
 	my %ret;
 	
-	#foreach my $row ( $center_r - $radius .. $center_r + $radius ){
 	foreach my $row ( $ui->{hero_y} - $ui->{hero_sight}  .. $ui->{hero_y}  + $ui->{hero_sight} ){
-		#my $delta_x = $radius ** 2 - ($center_r - $row) ** 2;
 		my $delta_x = $ui->{hero_sight} ** 2 - ($ui->{hero_y} - $row) ** 2;
-		if( $delta_x >= 0 ){
-				
+		if( $delta_x >= 0 ){				
 				$delta_x = int sqrt $delta_x;			
-				#my $low = max 0, $center_c - $delta_x;
 				my $low = max 0, $ui->{hero_x} - $delta_x;
-				#my $high = min $#{ $aoa[$row] }, $center_c + $delta_x;
-				#my $high = min $#{ $aoa[$row] }, $ui->{hero_x} + $delta_x;
 				my $high = min $#{ $ui->{map}->[$row] }, $ui->{hero_x} + $delta_x;
-				map { $ret{ $row.'_'.$_ }++ } $low .. $high;
-				
-		  }
+				map { $ret{ $row.'_'.$_ }++ } $low .. $high;				
+		}
 	}
 	   return %ret;
 }
