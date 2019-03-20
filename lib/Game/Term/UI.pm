@@ -4,7 +4,7 @@ use 5.014;
 use strict;
 use warnings;
 use Term::ReadKey;
-
+use List::Util qw( max min );
 use Term::ANSIColor qw(RESET :constants :constants256);
 
 use Game::Term::Map;
@@ -190,51 +190,45 @@ sub set_map_offsets{
 sub draw_map{
 	my $ui = shift;
 	# clear screen
-	system $ui->{ cls_cmd } unless $debug;	
+	system $ui->{ cls_cmd } unless $debug;
+	
+	# get area of currently seen tiles (by coords)
+	my %seen = $ui->illuminate();
+	
 	# draw hero
 	# this must set $hero->{on_terrain}
 	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
 	# MAP AREA:
 	# print decoration first row
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
-	# print map body with decorations
-	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
 	
-				# print ' ',$ui->{ dec_ver },
-					# ( 
-						# map{
-							# # if [] -> if unmasked -> display else ' '
-							# # else $_
-							# ref $_ eq 'ARRAY' ? ( $$_[2] ? $$_[0] : ' ' ) : $_
-						# } @$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ] 
-					# ),
-				# $ui->{ dec_ver },"\n"
-				
-				print ' ',$ui->{ dec_ver },
-					( 
-						map{
-							
-							$$_[2] ? $$_[0] : ' ' 
-							#ref $_ eq 'ARRAY' ? '' : "ROW $row has no array ref: -->@$row<--\n"
-							# if [] -> if unmasked -> display else ' '
-							# else $_
-							#ref $_ eq 'ARRAY' ? ( $$_[2] ? $$_[0] : ' ' ) : $_
-						} @$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ] 
-					),
-				$ui->{ dec_ver },"\n"
+	# print map body with decorations
+	# iterate indexes of rows..
+	foreach my $row ( $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}   ){ 	
+				# print decoration vertical
+				print ' ',$ui->{ dec_ver };
+				# iterate cols by indexes 
+				foreach my $col  ( $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w}  ){
+					# if is seen (in the radius of illuminate) and still masked
+					if ( $seen{$row.'_'.$col} and $ui->{map}[$row][$col][2] == 0 ){
+						# set unmasked
+						$ui->{map}[$row][$col][2] = 1;
+						# print display
+						print $ui->{map}[$row][$col][0];
+					
+					}
+					# already unmasked: print display 
+					elsif( $ui->{map}[$row][$col][2] == 1 ){ print $ui->{map}[$row][$col][0]; }
+					# print ' ' if still masked
+					else{ print ' '}
+				}
+				# print decoration vertical and newline
+				print $ui->{ dec_ver },"\n";
 	}	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
 }
-# sub render{
-	# #my $ui = shift;
-	 # print map{
-		# #s/X/BOLD RED 'X', RESET/
-		 # # ok BOLD RED $_, RESET
-		 # #$render{$_} ? $render{$_}->($_)  : $_ 
-		 # "$_"
-	# }@_;
-# }
+
 sub move{
 	my $ui = shift;
 	my $key = shift;
@@ -321,7 +315,21 @@ sub must_scroll{
 	else { return 0 }
 
 }
-
+sub illuminate{
+	my $ui = shift;
+	my %ret;
+	
+	foreach my $row ( $ui->{hero_y} - $ui->{hero_sight}  .. $ui->{hero_y}  + $ui->{hero_sight} ){
+		my $delta_x = $ui->{hero_sight} ** 2 - ($ui->{hero_y} - $row) ** 2;
+		if( $delta_x >= 0 ){				
+				$delta_x = int sqrt $delta_x;			
+				my $low = max 0, $ui->{hero_x} - $delta_x;
+				my $high = min $#{ $ui->{map}->[$row] }, $ui->{hero_x} + $delta_x;
+				map { $ret{ $row.'_'.$_ }++ } $low .. $high;				
+		}
+	}
+	   return %ret;
+}
 sub is_walkable{
 	my $tile = shift; 
 	if( $tile->[1] eq ' ' ){ return 1 }
@@ -427,7 +435,7 @@ sub beautify_map{
 				$ui->{map}[$row][$col] = [
 						$bg_color.$color.$to_display.RESET	, # 0 to display
 						$ui->{map}[$row][$col]				, # 1 original letter of terrain
-						1									, # 2 unmasked
+						0									, # 2 unmasked
 				];
 			}
 			
@@ -520,11 +528,14 @@ sub validate_conf{
 $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
 #$conf{ ext_tile } //= ['O','O',1];
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
+	
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
 $conf{ hero_icon } = chr(2);#'X'; 30 1 2 
 #$conf{ hero_icon } = [ chr(2), chr(2), 1] ;#'X'; 30 1 2 
+	$conf{ hero_sight } = 5;
+
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
