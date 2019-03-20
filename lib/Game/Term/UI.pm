@@ -121,8 +121,8 @@ sub run{
 		# set real_map_first and real_map_last x,y
 		$ui->set_map_and_hero();
 		
-		$ui->{map}[ $ui->{real_map_first}{y} ][ $ui->{real_map_first}{x} ]='z';
-		$ui->{map}[ $ui->{real_map_last}{y} ][ $ui->{real_map_last}{x} ]='z';
+# $ui->{map}[ $ui->{real_map_first}{y} ][ $ui->{real_map_first}{x} ]='z';
+# $ui->{map}[ $ui->{real_map_last}{y} ][ $ui->{real_map_last}{x} ]='z';
 		print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
 				" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
 		# now BIG map, hero_pos and hero_side are initialized
@@ -199,20 +199,26 @@ sub draw_map{
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
 	# print map body with decorations
 	foreach my $row ( @{$ui->{map}}[  $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}  ] ){ 	
-		
-		#no warnings qw(uninitialized);
-				#print 	
-				#render (' ',$ui->{ dec_ver },
-				# @$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ],
+	
+				# print ' ',$ui->{ dec_ver },
+					# ( 
+						# map{
+							# # if [] -> if unmasked -> display else ' '
+							# # else $_
+							# ref $_ eq 'ARRAY' ? ( $$_[2] ? $$_[0] : ' ' ) : $_
+						# } @$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ] 
+					# ),
 				# $ui->{ dec_ver },"\n"
-				# );
 				
 				print ' ',$ui->{ dec_ver },
 					( 
 						map{
+							
+							$$_[2] ? $$_[0] : ' ' 
+							#ref $_ eq 'ARRAY' ? '' : "ROW $row has no array ref: -->@$row<--\n"
 							# if [] -> if unmasked -> display else ' '
 							# else $_
-							ref $_ eq 'ARRAY' ? ( $$_[2] ? $$_[0] : ' ' ) : $_
+							#ref $_ eq 'ARRAY' ? ( $$_[2] ? $$_[0] : ' ' ) : $_
 						} @$row[ $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w} ] 
 					),
 				$ui->{ dec_ver },"\n"
@@ -241,7 +247,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}--;
 		$ui->{map_off_y}-- if $ui->must_scroll();
         return 1;
@@ -252,7 +258,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}++;
 		$ui->{map_off_y}++ if $ui->must_scroll();		
         return 1;
@@ -263,7 +269,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_x}--;
 		$ui->{map_off_x}-- if $ui->must_scroll();		
         return 1;
@@ -274,7 +280,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = ' ';
+		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_x}++;
 		$ui->{map_off_x}++ if $ui->must_scroll();				
         return 1;
@@ -317,9 +323,9 @@ sub must_scroll{
 }
 
 sub is_walkable{
-	my $tile = shift;
-	if( $tile eq ' ' ){ return 1 }
-	elsif( $tile eq '+' ){ return 1 }
+	my $tile = shift; 
+	if( $tile->[1] eq ' ' ){ return 1 }
+	elsif( $tile->[1] eq '+' ){ return 1 }
 	else{return 0}
 }
 		
@@ -384,7 +390,7 @@ sub beautify_map{
 #	T => [  'unwalkable wood', 'O',          '\e[32m',     5 ],
 
 	my $ui = shift;
-	foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y} ){
+	foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y}-1 ){
 		foreach my $col( $ui->{real_map_first}{x} .. $ui->{real_map_last}{x} ){
 			#$ui->{map}[$row][$col] = 'S';
 			if(exists $terrain{ $ui->{map}[$row][$col] } ){
@@ -411,16 +417,18 @@ sub beautify_map{
 				# ok original $ui->{map}[$row][$col] = $color.$to_display.RESET;
 				#ok %colors variant $ui->{map}[$row][$col] = ($colors{$color} || $color ).$to_display.RESET;
 		#$ui->{map}[$row][$col] = $bg_color.$color.$to_display.RESET;
-				# OK $ui->{map}[$row][$col] = ON_RED.BLUE.$to_display.RESET;
-				
-				
+				# OK $ui->{map}[$row][$col] = ON_RED.BLUE.$to_display.RESET;				
 				# OK DEF: $ui->{map}[$row][$col] = $bg_color.$color.$to_display.RESET;
+				
+				# final tile is anonymous array
 				$ui->{map}[$row][$col] = [
-						$bg_color.$color.$to_display.RESET	, # 0 display
+						$bg_color.$color.$to_display.RESET	, # 0 to display
 						$ui->{map}[$row][$col]				, # 1 original letter of terrain
 						1									, # 2 unmasked
 				];
 			}
+			
+			else {  $ui->{map}[$row][$col]  =  [ $ui->{map}[$row][$col], $ui->{map}[$row][$col], 1]}
 			#$ui->{map}[$row][$col] = 's';
 			
 		}
@@ -506,12 +514,14 @@ sub validate_conf{
 	$conf{ real_map_last} = { x => undef, y => undef };
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
-	$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
+#$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
+$conf{ ext_tile } //= ['O','O',1];
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
-	$conf{ hero_icon } = chr(2);#'X'; 30 1 2 
+#$conf{ hero_icon } = chr(2);#'X'; 30 1 2 
+$conf{ hero_icon } = [ chr(2), chr(2), 1] ;#'X'; 30 1 2 
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
