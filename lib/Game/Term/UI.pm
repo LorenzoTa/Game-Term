@@ -700,7 +700,8 @@ These 8 constants will be the right thing on both Windows and Linux:
 
 =HEAD3 MORE COLOR PROBLEMS ON OLDER WINDOWS
 
-With Windows10 finally C<cmd.exe> can use 256 colors ( perhaps you need to enable this feature) but older versions  still cannot. Also alternative consoles available for Windows seems to be unable to render. The only useful thing I found during my investigation is L<https://github.com/adoxa/ansicon|ansicon> that launched into a 16 color C<cmd.exe> window will enable a more correct interpretation of ANSI sequences:  for example C<BRIGHT_RED> will work as expected.
+With Windows10 finally C<cmd.exe> can use 256 colors ( perhaps you need to enable this feature) but older versions  still cannot. Also alternative consoles available for Windows seems to be unable to render. The only useful thing I found during my investigation is L<https://github.com/adoxa/ansicon|ansicon> that launched into a 16 color C<cmd.exe> window will enable a more correct interpretation of ANSI sequences:  for example C<BRIGHT_RED> will work as expected. Visit L<https://github.com/adoxa/ansicon/releases> to get the latest C<ansicon.exe> release. 
+Thanks to Jason Hood for his work.
 
 More interestingly after using C<ansicon.exe> all L<Term::ANSIColor> newer constants from C<ANSI0> to C<ANSI255> will produce the more appropriate color choosen in the 16 color available.
 
