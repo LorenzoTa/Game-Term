@@ -534,7 +534,7 @@ $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 
 #$conf{ ext_tile } //= ['O','O',1];
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	
-	$conf{ masked_map }     //= 0;
+	$conf{ masked_map }     //= 1;
 	
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
