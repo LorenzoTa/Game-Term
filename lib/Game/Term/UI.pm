@@ -438,7 +438,7 @@ sub beautify_map{
 				$ui->{map}[$row][$col] = [
 						$bg_color.$color.$to_display.RESET	, # 0 to display
 						$ui->{map}[$row][$col]				, # 1 original letter of terrain
-						0									, # 2 unmasked
+						( $ui->{masked_map} ? 0 : 1)		, # 2 unmasked
 				];
 			}
 			
@@ -533,6 +533,8 @@ sub validate_conf{
 $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
 #$conf{ ext_tile } //= ['O','O',1];
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
+	
+	$conf{ masked_map }     //= 0;
 	
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
