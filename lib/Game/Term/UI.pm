@@ -28,7 +28,7 @@ my $noscroll_debug = 0;
 # when display the map. Tiles of the map will also be transformed into anonymous arrays to hold other
 # types of informations.
 
-
+# Each tile will end to be:  [ 0:to_display,  1:original_terrain_letter,  2:unmasked ]
 
 # CLEAR           RESET             BOLD            DARK
 # FAINT           ITALIC            UNDERLINE       UNDERSCORE
@@ -143,8 +143,8 @@ sub run{
 				$ui->draw_map();
 				
 		if ($noscroll_debug){
-		 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '+';
-		 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '+';
+		 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+','+',1];
+		 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+','+',1];
 		 #print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n";
 		 print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
 				"NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
@@ -416,7 +416,7 @@ sub beautify_map{
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[3]}+1))]  :
 							$terrain{ $ui->{map}[$row][$col] }[3]  					;
 				
-				$terrain{ $ui->{map}[$row][$col] }[3];
+#$terrain{ $ui->{map}[$row][$col] }[3];
 				
 				my $to_display = ref $terrain{ $ui->{map}[$row][$col] }[1] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[1]->
@@ -485,10 +485,12 @@ sub set_no_scrolling_area{
 	print "DEBUG: no_scroll area from $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
 			"to $ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n" if $debug;
 	
-	local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = '+';
-	local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = '+';
+	local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+', '', 1];
+	local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+', '', 1];
 	
-	print 	"DEBUG: map extended with no_scroll vertexes (+ signs):\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
+	#print 	"DEBUG: map extended with no_scroll vertexes (+ signs):\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
+	print 	"DEBUG: map extended (now each tile is [to_display,terrain letter, masked] ) with no_scroll vertexes (+ signs):\n",
+			map{ join'',(map{ $_->[0] }@$_),$/ } @{$ui->{map}} if $debug > 1;
 	
 	
 	
