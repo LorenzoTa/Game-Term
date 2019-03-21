@@ -18,7 +18,7 @@ WriteMakefile(
         'Test::More' => '0',
     },
     PREREQ_PM => {
-        'Term::ANSIColor'              => '4.06',
+        'Term::ANSIColor'              => '4.06', # needed to have ANSInn constants
         #'Foo::Bar::Module' => '5.0401',
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
