@@ -226,6 +226,15 @@ sub draw_map{
 						print $ui->{map}[$row][$col][0];
 					
 					}
+					# already unmasked but empty space (fog of war)
+					elsif( 	$ui->{map}[$row][$col][2] == 1 		and 
+							$ui->{map}[$row][$col][0] eq ' ' 	and 
+							$ui->{fog_of_war}					and
+							!$seen{$row.'_'.$col}
+						)
+					{ 
+						print $ui->{fog_char} ; 
+					}
 					# already unmasked: print display 
 					elsif( $ui->{map}[$row][$col][2] == 1 ){ print $ui->{map}[$row][$col][0]; }
 					# print ' ' if still masked
@@ -310,17 +319,6 @@ sub must_scroll{
 		$ui->{scrolling} = 1;
 		return 1;
 	}
-	# elsif(	 
-		# $ui->{hero_y} > $ui->{no_scroll_area}{min_y} or
-		# $ui->{hero_y} < $ui->{no_scroll_area}{max_y} or
-		# $ui->{hero_x} > $ui->{no_scroll_area}{min_x} or
-		# $ui->{hero_x} < $ui->{no_scroll_area}{max_x} and $ui->{scrolling} == 1
-	
-	# ){
-		# print "DEBUG: IN of scrolling area\n" if $debug;
-		# $ui->{scrolling} = 0;
-		# return 0;
-	# }
 	else { return 0 }
 
 }
@@ -404,41 +402,30 @@ sub set_map_and_hero{
 }
 
 sub beautify_map{
-# letter used in map, descr  possible renders,  possible fg colors,   speed penality
-#	t => [  'walkable wood', [qw(O o . o O O)], [qw(\e[32m \e[1;32m \e[32m)], 0.3 ],
-# letter used in map, descr    one render!,  one color!,   speed penality: > 4 unwalkable
-#	T => [  'unwalkable wood', 'O',          '\e[32m',     5 ],
+	# letter used in map, descr  possible renders,  possible fg colors,   speed penality
 
 	my $ui = shift;
 	foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y} - 1 ){ # WATCH this - 1 !!!!!
 		foreach my $col( $ui->{real_map_first}{x} .. $ui->{real_map_last}{x} ){
-			#$ui->{map}[$row][$col] = 'S';
+			
+			# if the letter is defined in %terrain
 			if(exists $terrain{ $ui->{map}[$row][$col] } ){
+				# FOREGROUND COLOR 
 				my $color = ref $terrain{ $ui->{map}[$row][$col] }[2] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[2]->
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[2]}+1))]  :
 							$terrain{ $ui->{map}[$row][$col] }[2]  					;
-							
+				# BACKGROUND COLOR			
 				my $bg_color = ref $terrain{ $ui->{map}[$row][$col] }[3] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[3]->
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[3]}+1))]  :
 							$terrain{ $ui->{map}[$row][$col] }[3]  					;
 				
-#$terrain{ $ui->{map}[$row][$col] }[3];
-				
+				# CHARCTER TO DISPLAY
 				my $to_display = ref $terrain{ $ui->{map}[$row][$col] }[1] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[1]->
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[1]}+1))]  :
 							$terrain{ $ui->{map}[$row][$col] }[1]  					;			
-				# ok $ui->{map}[$row][$col] = "\e[32mO\e[0m";
-				# ok $ui->{map}[$row][$col] = colored(['bold','green'],'O').color('reset');
-				# ok $ui->{map}[$row][$col] = color('bold green').'O'.color('reset');
-				# ok $ui->{map}[$row][$col] = BOLD GREEN.'O'.RESET; 
-				# ok original $ui->{map}[$row][$col] = $color.$to_display.RESET;
-				#ok %colors variant $ui->{map}[$row][$col] = ($colors{$color} || $color ).$to_display.RESET;
-		#$ui->{map}[$row][$col] = $bg_color.$color.$to_display.RESET;
-				# OK $ui->{map}[$row][$col] = ON_RED.BLUE.$to_display.RESET;				
-				# OK DEF: $ui->{map}[$row][$col] = $bg_color.$color.$to_display.RESET;
 				
 				# final tile is anonymous array
 				$ui->{map}[$row][$col] = [
@@ -447,14 +434,10 @@ sub beautify_map{
 						( $ui->{masked_map} ? 0 : 1)		, # 2 unmasked
 				];
 			}
-			
-			else {  $ui->{map}[$row][$col]  =  [ $ui->{map}[$row][$col], $ui->{map}[$row][$col], 1]}
-			#$ui->{map}[$row][$col] = 's';
-			
+			# letter not defined in %terrain final tile is anonymous array too
+			else {  $ui->{map}[$row][$col]  =  [ $ui->{map}[$row][$col], $ui->{map}[$row][$col], 0]}
 		}
-	
 	}
-
 }
 sub set_no_scrolling_area{
 	my $ui = shift;
@@ -541,6 +524,8 @@ $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	
 	$conf{ masked_map }     //= 1;
+	$conf{ fog_of_war }		//=0;
+	$conf{ fog_char }		//= '.'; #chr(176); 177 178
 	
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
@@ -548,7 +533,7 @@ $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 
 $conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
 	$conf{ hero_color } //= B_RED;
 #$conf{ hero_icon } = [ chr(2), chr(2), 1] ;#'X'; 30 1 2 
-	$conf{ hero_sight } = 5;
+	$conf{ hero_sight } = 10;
 
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
@@ -587,8 +572,10 @@ https://superuser.com/questions/413073/windows-console-with-ansi-colors-handling
 # perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new(); print $ui->{map_area_w}.$/;dd $ui; dd $ui->{map};$ui->run"
 # perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new();$ui->run"
 
-perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new();$ui->run"
 
+		perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new();$ui->run"
+
+		
 perl -e "print qq(\e[31mCOLORED\e[0m)"
 
 perl -E "print qq(\e[$_),'m',qq( $_ ),qq(\e[0m) for 4..7,31..36,41..47"
