@@ -552,6 +552,23 @@ $conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
 
 1; # End of Game::Term::UI
 __DATA__
+  ▲ ▲
+  █_█
+ ▄█_█▄
+ 
+  ▲ 
+  █_▲
+ ▄█_█▄
+ 
+  ▲ 
+  █▄
+       |>
+      / \
+      |o|
+  .-.-.-.-.
+  |_|#|_|_|
+  
+
 # on Windows10 :constants256 works
 # on Windows 7 no. But:
 # a) from cmd.exe launch ansicon.exe will enable colors (but UNDERLINE and UNDERSCORE will not work)
