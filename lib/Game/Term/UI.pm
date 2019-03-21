@@ -45,8 +45,14 @@ my $noscroll_debug = 0;
 # ON_BRIGHT_BLUE  ON_BRIGHT_MAGENTA ON_BRIGHT_CYAN  ON_BRIGHT_WHITE
 
 use constant {
-    B_GREEN => ($^O eq 'MSWin32' ? BOLD.GREEN : BRIGHT_GREEN),
-	B_RED => ($^O eq 'MSWin32' ? BOLD.RED : BRIGHT_RED),
+	B_BLACK => ($^O eq 'MSWin32' ? BOLD.BLACK : BRIGHT_BLACK),
+    B_RED => ($^O eq 'MSWin32' ? BOLD.RED : BRIGHT_RED),
+	B_GREEN => ($^O eq 'MSWin32' ? BOLD.GREEN : BRIGHT_GREEN),
+	B_YELLOW => ($^O eq 'MSWin32' ? BOLD.YELLOW : BRIGHT_YELLOW),
+	B_BLUE => ($^O eq 'MSWin32' ? BOLD.BLUE : BRIGHT_BLUE),
+	B_MAGENTA => ($^O eq 'MSWin32' ? BOLD.MAGENTA : BRIGHT_MAGENTA),
+	B_CYAN => ($^O eq 'MSWin32' ? BOLD.CYAN : BRIGHT_CYAN),
+	B_WHITE => ($^O eq 'MSWin32' ? BOLD.WHITE : BRIGHT_WHITE),
 };
 
 # Linux BRIGHT_GREEN  => windows BOLD.GREEN
@@ -220,6 +226,15 @@ sub draw_map{
 						print $ui->{map}[$row][$col][0];
 					
 					}
+					# already unmasked but empty space (fog of war)
+					elsif( 	$ui->{map}[$row][$col][2] == 1 		and 
+							$ui->{map}[$row][$col][0] eq ' ' 	and 
+							$ui->{fog_of_war}					and
+							!$seen{$row.'_'.$col}
+						)
+					{ 
+						print $ui->{fog_char} ; 
+					}
 					# already unmasked: print display 
 					elsif( $ui->{map}[$row][$col][2] == 1 ){ print $ui->{map}[$row][$col][0]; }
 					# print ' ' if still masked
@@ -304,17 +319,6 @@ sub must_scroll{
 		$ui->{scrolling} = 1;
 		return 1;
 	}
-	# elsif(	 
-		# $ui->{hero_y} > $ui->{no_scroll_area}{min_y} or
-		# $ui->{hero_y} < $ui->{no_scroll_area}{max_y} or
-		# $ui->{hero_x} > $ui->{no_scroll_area}{min_x} or
-		# $ui->{hero_x} < $ui->{no_scroll_area}{max_x} and $ui->{scrolling} == 1
-	
-	# ){
-		# print "DEBUG: IN of scrolling area\n" if $debug;
-		# $ui->{scrolling} = 0;
-		# return 0;
-	# }
 	else { return 0 }
 
 }
@@ -398,41 +402,30 @@ sub set_map_and_hero{
 }
 
 sub beautify_map{
-# letter used in map, descr  possible renders,  possible fg colors,   speed penality
-#	t => [  'walkable wood', [qw(O o . o O O)], [qw(\e[32m \e[1;32m \e[32m)], 0.3 ],
-# letter used in map, descr    one render!,  one color!,   speed penality: > 4 unwalkable
-#	T => [  'unwalkable wood', 'O',          '\e[32m',     5 ],
+	# letter used in map, descr  possible renders,  possible fg colors,   speed penality
 
 	my $ui = shift;
 	foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y} - 1 ){ # WATCH this - 1 !!!!!
 		foreach my $col( $ui->{real_map_first}{x} .. $ui->{real_map_last}{x} ){
-			#$ui->{map}[$row][$col] = 'S';
+			
+			# if the letter is defined in %terrain
 			if(exists $terrain{ $ui->{map}[$row][$col] } ){
+				# FOREGROUND COLOR 
 				my $color = ref $terrain{ $ui->{map}[$row][$col] }[2] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[2]->
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[2]}+1))]  :
 							$terrain{ $ui->{map}[$row][$col] }[2]  					;
-							
+				# BACKGROUND COLOR			
 				my $bg_color = ref $terrain{ $ui->{map}[$row][$col] }[3] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[3]->
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[3]}+1))]  :
 							$terrain{ $ui->{map}[$row][$col] }[3]  					;
 				
-#$terrain{ $ui->{map}[$row][$col] }[3];
-				
+				# CHARCTER TO DISPLAY
 				my $to_display = ref $terrain{ $ui->{map}[$row][$col] }[1] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[1]->
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[1]}+1))]  :
 							$terrain{ $ui->{map}[$row][$col] }[1]  					;			
-				# ok $ui->{map}[$row][$col] = "\e[32mO\e[0m";
-				# ok $ui->{map}[$row][$col] = colored(['bold','green'],'O').color('reset');
-				# ok $ui->{map}[$row][$col] = color('bold green').'O'.color('reset');
-				# ok $ui->{map}[$row][$col] = BOLD GREEN.'O'.RESET; 
-				# ok original $ui->{map}[$row][$col] = $color.$to_display.RESET;
-				#ok %colors variant $ui->{map}[$row][$col] = ($colors{$color} || $color ).$to_display.RESET;
-		#$ui->{map}[$row][$col] = $bg_color.$color.$to_display.RESET;
-				# OK $ui->{map}[$row][$col] = ON_RED.BLUE.$to_display.RESET;				
-				# OK DEF: $ui->{map}[$row][$col] = $bg_color.$color.$to_display.RESET;
 				
 				# final tile is anonymous array
 				$ui->{map}[$row][$col] = [
@@ -441,14 +434,10 @@ sub beautify_map{
 						( $ui->{masked_map} ? 0 : 1)		, # 2 unmasked
 				];
 			}
-			
-			else {  $ui->{map}[$row][$col]  =  [ $ui->{map}[$row][$col], $ui->{map}[$row][$col], 1]}
-			#$ui->{map}[$row][$col] = 's';
-			
+			# letter not defined in %terrain final tile is anonymous array too
+			else {  $ui->{map}[$row][$col]  =  [ $ui->{map}[$row][$col], $ui->{map}[$row][$col], 0]}
 		}
-	
 	}
-
 }
 sub set_no_scrolling_area{
 	my $ui = shift;
@@ -535,6 +524,8 @@ $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	
 	$conf{ masked_map }     //= 1;
+	$conf{ fog_of_war }		//=0;
+	$conf{ fog_char }		//= '.'; #chr(176); 177 178
 	
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
@@ -542,7 +533,7 @@ $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 
 $conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
 	$conf{ hero_color } //= B_RED;
 #$conf{ hero_icon } = [ chr(2), chr(2), 1] ;#'X'; 30 1 2 
-	$conf{ hero_sight } = 5;
+	$conf{ hero_sight } = 10;
 
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
@@ -561,6 +552,23 @@ $conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
 
 1; # End of Game::Term::UI
 __DATA__
+  ▲ ▲
+  █_█
+ ▄█_█▄
+ 
+  ▲ 
+  █_▲
+ ▄█_█▄
+ 
+  ▲ 
+  █▄
+       |>
+      / \
+      |o|
+  .-.-.-.-.
+  |_|#|_|_|
+  
+
 # on Windows10 :constants256 works
 # on Windows 7 no. But:
 # a) from cmd.exe launch ansicon.exe will enable colors (but UNDERLINE and UNDERSCORE will not work)
@@ -581,8 +589,10 @@ https://superuser.com/questions/413073/windows-console-with-ansi-colors-handling
 # perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new(); print $ui->{map_area_w}.$/;dd $ui; dd $ui->{map};$ui->run"
 # perl -I .\lib -MGame::Term::UI -MData::Dump -e "$ui=Game::Term::UI->new();$ui->run"
 
-perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new();$ui->run"
 
+		perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new();$ui->run"
+
+		
 perl -e "print qq(\e[31mCOLORED\e[0m)"
 
 perl -E "print qq(\e[$_),'m',qq( $_ ),qq(\e[0m) for 4..7,31..36,41..47"
@@ -642,6 +652,70 @@ automatically be notified of progress on your bug as I make changes.
 
 
 
+
+=head1 ABOUT COLORS 
+
+The module uses L<Term::ANSIColor> to manage colors. Specifically L<Term::ANSIColor> version 4.06 can export some constant to represent ANSI colors from 0 to 255. Unfortunately not all consoles are able to display them correctly. 
+
+Many consoles and notably C<cmd.exe> are bound to 16 colors. The present module tries to make possible to use the more appropriate color palette depending on the system you are running the code.
+
+To make things more complex some C<ANSI> sequence is interpreted differently or misinterpreted or even ignored on some console. 
+
+The current module uses the full constant interface provided by  L<Term::ANSIColor> version 4.06 with some minimal addition in the aim of offer a standard way to display the same color in every console. 
+
+So if you are on a full 256 colors console you can use the whole spectrum of constants exported by L<Term::ANSIColor> and probably everything will run as expected.    
+
+
+
+=head3 ADDITIONS TO THE STANDARD SET OF COLOR CONSTANTS
+
+ANSI sequences ( used as exported by L<Term::ANSIColor> constants interface) can specify a given color but also a modification as C<BOLD> or C<UNDERLINE> or even action like C<RESET>. The standard way to specify a brighter color (in the set of 16 basic ones) is C<BRIGHT_RED> that will result into a brighter C<RED>. While this is expected to work correctly on Linux will fail on Windows (prior to Windows10: more on this after).
+
+Windows historically misuses C<BOLD> to render a brighter color. So you need to use different syntax to have the same bright red rendered:
+
+		use Term::ANSIColor 4.00 qw(RESET :constants); 
+		
+		print BRIGHT_RED, 3333, RESET;  # bright red on Linux
+		print BOLD RED, 3333, RESET;    # bright red on Windows
+
+
+I workarounded this nasty situation defining inside the my module 8 constant more:
+
+		B_BLACK  B_RED      B_GREEN   B_YELLOW  
+		B_BLUE   B_MAGENTA  B_CYAN    B_WHITE
+		
+These 8 constants will be the right thing on both Windows and Linux:
+
+		print B_RED, 3333, RESET;    # bright red on Windows and Linux
+
+
+		
+=head3 RECAP OF 16 COLORS TO USE TO WRITE MORE PORTABLE GAMES
+		
+		# provided by Term::ANSIColor
+		BLACK           RED             GREEN           YELLOW
+		BLUE            MAGENTA         CYAN            WHITE 
+		
+		# provided by Game::Term
+		B_BLACK  		B_RED      		B_GREEN   		B_YELLOW  
+		B_BLUE   		B_MAGENTA  		B_CYAN    		B_WHITE
+
+
+
+=HEAD3 MORE COLOR PROBLEMS ON OLDER WINDOWS
+
+With Windows10 finally C<cmd.exe> can use 256 colors ( perhaps you need to enable this feature) but older versions  still cannot. Also alternative consoles available for Windows seems to be unable to render. The only useful thing I found during my investigation is L<https://github.com/adoxa/ansicon|ansicon> that launched into a 16 color C<cmd.exe> window will enable a more correct interpretation of ANSI sequences:  for example C<BRIGHT_RED> will work as expected. Visit L<https://github.com/adoxa/ansicon/releases> to get the latest C<ansicon.exe> release. 
+Thanks to Jason Hood for his work.
+
+More interestingly after using C<ansicon.exe> all L<Term::ANSIColor> newer constants from C<ANSI0> to C<ANSI255> will produce the more appropriate color choosen in the 16 color available.
+
+=head3 color_names.pl
+
+This distribution ships with the program C<color_names.pl> that prints the entire 256 colors palette from C<ANSI0> to C<ANSI255> with names of colors.
+
+ 
+		
+		
 =head1 SUPPORT
 
 Main support site for the current module is L<https://www.perlmonks.org|perlmonks.org>
