@@ -46,6 +46,7 @@ my $noscroll_debug = 0;
 
 use constant {
     B_GREEN => ($^O eq 'MSWin32' ? BOLD.GREEN : BRIGHT_GREEN),
+	B_RED => ($^O eq 'MSWin32' ? BOLD.RED : BRIGHT_RED),
 };
 
 # Linux BRIGHT_GREEN  => windows BOLD.GREEN
@@ -358,7 +359,7 @@ sub set_map_and_hero{
 	# change external tile to []
 	$ui->{ ext_tile } = [ $ui->{ ext_tile }, $ui->{ ext_tile }, 1];
 	# change hero icon to []
-	$ui->{ hero_icon } = [ $ui->{ hero_icon }, $ui->{ hero_icon }, 1 ];
+	$ui->{ hero_icon } = [ $ui->{ hero_color }.$ui->{ hero_icon }.RESET, $ui->{ hero_icon }, 1 ];
 	# add at top
 	my @map = map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ; 
 	# at the center
@@ -532,7 +533,8 @@ $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
-$conf{ hero_icon } = chr(2);#'X'; 30 1 2 
+$conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
+	$conf{ hero_color } //= B_RED;
 #$conf{ hero_icon } = [ chr(2), chr(2), 1] ;#'X'; 30 1 2 
 	$conf{ hero_sight } = 5;
 
