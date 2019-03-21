@@ -57,6 +57,8 @@ my %terrain = (
 	t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
 	
 # letter used in map, descr    one render!,  one color!, bg color,  speed penality: > 4 unwalkable
+	#                                                                                      UNDERLINE works only with 256 colors
+	#T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  UNDERLINE,       5 ],
 	T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       5 ],
 
 );
@@ -582,6 +584,10 @@ perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new();$ui->run"
 perl -e "print qq(\e[31mCOLORED\e[0m)"
 
 perl -E "print qq(\e[$_),'m',qq( $_ ),qq(\e[0m) for 4..7,31..36,41..47"
+
+
+## COLORS NAMES
+https://jonasjacek.github.io/colors/
 
 
 perl -we "use strict; use warnings; use Term::ANSIColor qw(:constants); my %colors = (B_GREEN => $^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN); my $bg = ON_GREEN; print $bg.$colors{B_GREEN}, 32323, RESET"
