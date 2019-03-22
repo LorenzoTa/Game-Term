@@ -371,9 +371,13 @@ sub draw_menu{
 	my $messages = shift;
 	# MENU AREA:
 	# print decoration first row
-	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
+	#print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
+	if ($ui->{dec_color}){
+		print $ui->{dec_color}.(' o'.($ui->{ dec_hor } x  $ui->{ map_area_w }  )).'o'.RESET."\n";
+	}
+	else { print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";}
 	# menu fake data
-	print ' ',$ui->{ dec_ver }.$_."\n" for @$messages;
+	print ' ',$ui->{dec_color}.$ui->{ dec_ver }.RESET.$_."\n" for @$messages;
 }
 
 sub set_map_and_hero{
