@@ -363,7 +363,11 @@ sub set_map_and_hero{
 	# get hero position and side BEFORE enlarging
 	$ui->set_hero_pos();
 	# change external tile to []
-	$ui->{ ext_tile } = [ $ui->{dec_color}.$ui->{ ext_tile }, $ui->{ ext_tile }, 1];
+	$ui->{ ext_tile } = [ 
+							($ui->{dec_color} ?
+							$ui->{dec_color}.$ui->{ ext_tile }.RESET :
+							$ui->{ ext_tile }), 
+							$ui->{ ext_tile }, 1];
 	# change hero icon to []
 	$ui->{ hero_icon } = [ $ui->{ hero_color }.$ui->{ hero_icon }.RESET, $ui->{ hero_icon }, 1 ];
 	# add at top
