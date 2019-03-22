@@ -552,6 +552,9 @@ $conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
 
 1; # End of Game::Term::UI
 __DATA__
+
+useful article linked by Corion: http://journal.stuffwithstuff.com/2014/07/15/a-turn-based-game-loop/
+
   ▲ ▲
   █_█
  ▄█_█▄
