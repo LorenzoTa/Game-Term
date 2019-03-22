@@ -555,6 +555,8 @@ __DATA__
 
 useful article linked by Corion: http://journal.stuffwithstuff.com/2014/07/15/a-turn-based-game-loop/
 
+color tool https://devblogs.microsoft.com/commandline/introducing-the-windows-console-colortool/
+
   ▲ ▲
   █_█
  ▄█_█▄
