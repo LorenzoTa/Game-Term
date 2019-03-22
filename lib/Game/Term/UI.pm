@@ -150,6 +150,8 @@ sub run{
 			
 			sleep(	
 					$ui->{hero_slowness} + 
+					# the slowness #4 of the terrain original letter #1 where
+					# the hero currently is on th emap
 					$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]
 			);
 			print "DEBUG: slowness for terrain ".
@@ -294,7 +296,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
+		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}++;
 		$ui->{map_off_y}++ if $ui->must_scroll();		
         return 1;
@@ -305,7 +307,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
+		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_x}--;
 		$ui->{map_off_x}-- if $ui->must_scroll();		
         return 1;
@@ -316,7 +318,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
+		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_x}++;
 		$ui->{map_off_x}++ if $ui->must_scroll();				
         return 1;
@@ -570,7 +572,7 @@ $conf{ dec_color } //= YELLOW;#''; # apply to dec_hor dec_ver ext_tile
 	$conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
 	$conf{ hero_color } //= B_RED;
 	$conf{ hero_sight } = 10;
-	$conf{ hero_slowness } //= 1; # used to microsleep
+	$conf{ hero_slowness } //= 0; # used to microsleep
 	
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
