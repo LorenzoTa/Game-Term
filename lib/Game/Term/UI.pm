@@ -68,7 +68,7 @@ my %terrain = (
 	#T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  UNDERLINE,       5 ],
 	T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       5 ],
 	' ' => [  'plain', ' ', '', '',        0 ],
-	'X' => [  'plain', ' ', '', '',        0 ],
+	#'X' => [  'plain', ' ', '', '',        0 ],
 );
     
 # render is class data
