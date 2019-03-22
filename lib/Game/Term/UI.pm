@@ -363,7 +363,7 @@ sub set_map_and_hero{
 	# get hero position and side BEFORE enlarging
 	$ui->set_hero_pos();
 	# change external tile to []
-	$ui->{ ext_tile } = [ $ui->{ ext_tile }, $ui->{ ext_tile }, 1];
+	$ui->{ ext_tile } = [ $ui->{dec_color}.$ui->{ ext_tile }, $ui->{ ext_tile }, 1];
 	# change hero icon to []
 	$ui->{ hero_icon } = [ $ui->{ hero_color }.$ui->{ hero_icon }.RESET, $ui->{ hero_icon }, 1 ];
 	# add at top
@@ -520,6 +520,7 @@ sub validate_conf{
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
 $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
+$conf{ dec_color } //= YELLOW;#''; # apply to dec_hor dec_ver ext_tile
 #$conf{ ext_tile } //= ['O','O',1];
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	
