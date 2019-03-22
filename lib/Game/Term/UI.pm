@@ -210,6 +210,14 @@ sub draw_map{
 	# MAP AREA:
 	# print decoration first row
 	print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
+	# print  	defined $ui->{dec_color} 																	? 
+			# $ui->{dec_color}.(' o'.($ui->{ dec_hor } x ( $ui->{ map_area_w } ))).'o'."\n".RESET :
+			# ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
+	
+	# if ($ui->{dec_color}){
+		# print $ui->{dec_color}.(' o'.($ui->{ dec_hor } x  $ui->{ map_area_w }  )).'o'.RESET."\n";
+	# }
+	# else { print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";} 
 	
 	# print map body with decorations
 	# iterate indexes of rows..
@@ -245,12 +253,16 @@ sub draw_map{
 				}
 				# print decoration vertical and newline
 				#print $ui->{ dec_ver },"\n";
-				print ' ',($ui->{dec_color} 						?
+				print +($ui->{dec_color} 						?
 							$ui->{dec_color}.$ui->{ dec_ver }.RESET :
 							$ui->{ dec_ver }),"\n" ;
 	}	
 	# print decoration last row
-	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
+	#print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
+	print  	$ui->{dec_color} 																	? 
+			$ui->{dec_color}.(' o'.($ui->{ dec_hor } x ( $ui->{ map_area_w } ))).'o'."\n".RESET 	:
+			' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
+	
 }
 
 sub move{
@@ -530,7 +542,7 @@ sub validate_conf{
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
 $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
-$conf{ dec_color } //= YELLOW;#''; # apply to dec_hor dec_ver ext_tile
+$conf{ dec_color } //= undef;#YELLOW;#''; # apply to dec_hor dec_ver ext_tile
 #$conf{ ext_tile } //= ['O','O',1];
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	
