@@ -245,7 +245,7 @@ sub draw_map{
 				}
 				# print decoration vertical and newline
 				#print $ui->{ dec_ver },"\n";
-				print ' ',	($ui->{dec_color} 						?
+				print ' ',($ui->{dec_color} 						?
 							$ui->{dec_color}.$ui->{ dec_ver }.RESET :
 							$ui->{ dec_ver }),"\n" ;
 	}	
