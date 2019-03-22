@@ -6,6 +6,7 @@ use warnings;
 use Term::ReadKey;
 use List::Util qw( max min );
 use Term::ANSIColor qw(RESET :constants :constants256);
+use Time::HiRes qw ( sleep );
 
 use Game::Term::Map;
 
@@ -13,7 +14,7 @@ ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 
-my $debug = 0;
+my $debug = 1;
 my $noscroll_debug = 0;
 
 # SOME NOTES ABOUT MAP:
@@ -57,7 +58,7 @@ use constant {
 
 # Linux BRIGHT_GREEN  => windows BOLD.GREEN
 my %terrain = (
-#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5
+#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
 	#t => [  'walkable wood', [qw(O o 0 o O O)], [ B_GREEN , GREEN ], '',        0.3 ],
 	t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
@@ -66,7 +67,8 @@ my %terrain = (
 	#                                                                                      UNDERLINE works only with 256 colors
 	#T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  UNDERLINE,       5 ],
 	T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       5 ],
-
+	' ' => [  'plain', ' ', '', '',        0 ],
+	'X' => [  'plain', ' ', '', '',        0 ],
 );
     
 # render is class data
@@ -146,6 +148,13 @@ sub run{
 		while(1){
 			my $key = ReadKey(0);
 			
+			sleep(	
+					$ui->{hero_slowness} + 
+					$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]
+			);
+			print "DEBUG: slowness for terrain ".
+				$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
+				"\n" if $debug;
 			if( $ui->move( $key ) ){
 				
 				$ui->draw_map();
@@ -206,19 +215,13 @@ sub draw_map{
 	
 	# draw hero
 	# this must set $hero->{on_terrain}
-	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
+	local $ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
 	# MAP AREA:
 	# print decoration first row
-	#print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
-	# print  	$ui->{dec_color} 																	? 
-			# $ui->{dec_color}.(' o'.($ui->{ dec_hor } x ( $ui->{ map_area_w } ))).'o'."\n".RESET :
-			# ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
-	
 	if ($ui->{dec_color}){
 		print $ui->{dec_color}.(' o'.($ui->{ dec_hor } x  $ui->{ map_area_w }  )).'o'.RESET."\n";
 	}
 	else { print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";} 
-	
 	# print map body with decorations
 	# iterate indexes of rows..
 	foreach my $row ( $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}   ){ 	
@@ -234,8 +237,7 @@ sub draw_map{
 						# set unmasked
 						$ui->{map}[$row][$col][2] = 1;
 						# print display
-						print $ui->{map}[$row][$col][0];
-					
+						print $ui->{map}[$row][$col][0];					
 					}
 					# already unmasked but empty space (fog of war)
 					elsif( 	$ui->{map}[$row][$col][2] == 1 		and 
@@ -281,7 +283,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
+	#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}--;
 		$ui->{map_off_y}-- if $ui->must_scroll();
         return 1;
@@ -361,8 +363,10 @@ sub illuminate{
 }
 sub is_walkable{
 	my $tile = shift; 
-	if( $tile->[1] eq ' ' ){ return 1 }
-	elsif( $tile->[1] eq '+' ){ return 1 }
+	# if( $tile->[1] eq ' ' ){ return 1 }
+	# elsif( $tile->[1] eq '+' ){ return 1 }
+	#print "DEBUG: tile -->",(join '|',@$tile),"<--\n";
+	if ( $terrain{ $tile->[1]}->[4] < 5 ){ return 1}
 	else{return 0}
 }
 		
@@ -525,6 +529,8 @@ sub set_hero_pos{
 		foreach my $col ( 0..$#{$ui->{map}->[$row]} ){
 			if ( ${$ui->{map}}[$row][$col] eq 'X' ){
 				print "DEBUG: (original map) found hero at row $row col $col\n" if $debug;
+				# clean this tile
+				${$ui->{map}}[$row][$col] = ' ';
 				$ui->{hero_y} = $row;
 				$ui->{hero_x} = $col;
 				if    ( $row == 0 )						{ $ui->{hero_side} = 'N' }
@@ -561,11 +567,11 @@ $conf{ dec_color } //= YELLOW;#''; # apply to dec_hor dec_ver ext_tile
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
-$conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
+	$conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
 	$conf{ hero_color } //= B_RED;
-#$conf{ hero_icon } = [ chr(2), chr(2), 1] ;#'X'; 30 1 2 
 	$conf{ hero_sight } = 10;
-
+	$conf{ hero_slowness } //= 1; # used to microsleep
+	
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
