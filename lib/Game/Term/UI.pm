@@ -215,7 +215,10 @@ sub draw_map{
 	# iterate indexes of rows..
 	foreach my $row ( $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}   ){ 	
 				# print decoration vertical
-				print ' ',$ui->{ dec_ver };
+				print ' ',	($ui->{dec_color} 						?
+							$ui->{dec_color}.$ui->{ dec_ver }.RESET :
+							$ui->{ dec_ver } );
+				
 				# iterate cols by indexes 
 				foreach my $col  ( $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w}  ){
 					# if is seen (in the radius of illuminate) and still masked
@@ -241,7 +244,10 @@ sub draw_map{
 					else{ print ' '}
 				}
 				# print decoration vertical and newline
-				print $ui->{ dec_ver },"\n";
+				#print $ui->{ dec_ver },"\n";
+				print ' ',	($ui->{dec_color} 						?
+							$ui->{dec_color}.$ui->{ dec_ver }.RESET :
+							$ui->{ dec_ver }),"\n" ;
 	}	
 	# print decoration last row
 	print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
