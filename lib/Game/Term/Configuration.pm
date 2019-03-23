@@ -5,7 +5,16 @@ use strict;
 use warnings;
 
 use Term::ANSIColor qw(RESET :constants :constants256);
-
+use constant {
+	B_BLACK => ($^O eq 'MSWin32' ? BOLD.BLACK : BRIGHT_BLACK),
+    B_RED => ($^O eq 'MSWin32' ? BOLD.RED : BRIGHT_RED),
+	B_GREEN => ($^O eq 'MSWin32' ? BOLD.GREEN : BRIGHT_GREEN),
+	B_YELLOW => ($^O eq 'MSWin32' ? BOLD.YELLOW : BRIGHT_YELLOW),
+	B_BLUE => ($^O eq 'MSWin32' ? BOLD.BLUE : BRIGHT_BLUE),
+	B_MAGENTA => ($^O eq 'MSWin32' ? BOLD.MAGENTA : BRIGHT_MAGENTA),
+	B_CYAN => ($^O eq 'MSWin32' ? BOLD.CYAN : BRIGHT_CYAN),
+	B_WHITE => ($^O eq 'MSWin32' ? BOLD.WHITE : BRIGHT_WHITE),
+};
 
 sub new{
 	my $class = shift;
@@ -13,8 +22,13 @@ sub new{
 	
 	
 	return bless {
-				%conf
+				configuration => \%conf,
+				#terrains => 
 	}, $class;
+}
+sub get_conf{
+	my $conf = shift;
+	return %{$conf->{configuration}};
 }
 
 sub validate_conf{
@@ -42,6 +56,7 @@ sub validate_conf{
 
 	$conf{ no_scroll } = 0;
 
+	return %conf;
 }
 
 1; # End of Game::Term::Configuration

@@ -8,6 +8,7 @@ use List::Util qw( max min );
 use Term::ANSIColor qw(RESET :constants :constants256);
 use Time::HiRes qw ( sleep );
 
+use Game::Term::Configuration;
 use Game::Term::Map;
 
 ReadMode 'cbreak';
@@ -160,7 +161,13 @@ my %terrain = (
 
 sub new{
 	my $class = shift;
-	my %conf = validate_conf( @_ );
+	my %params = @_;
+	
+	my $conf_object = Game::Term::Configuration->new( configuration => $params{configuration});
+	
+	my %conf = $conf_object->get_conf();
+	
+	#my %conf = validate_conf( @_ );
 	
 	
 	return bless {
