@@ -46,121 +46,9 @@ my $noscroll_debug = 0;
 # ON_BRIGHT_BLACK ON_BRIGHT_RED     ON_BRIGHT_GREEN ON_BRIGHT_YELLOW
 # ON_BRIGHT_BLUE  ON_BRIGHT_MAGENTA ON_BRIGHT_CYAN  ON_BRIGHT_WHITE
 
-# use constant {
-	# B_BLACK => ($^O eq 'MSWin32' ? BOLD.BLACK : BRIGHT_BLACK),
-    # B_RED => ($^O eq 'MSWin32' ? BOLD.RED : BRIGHT_RED),
-	# B_GREEN => ($^O eq 'MSWin32' ? BOLD.GREEN : BRIGHT_GREEN),
-	# B_YELLOW => ($^O eq 'MSWin32' ? BOLD.YELLOW : BRIGHT_YELLOW),
-	# B_BLUE => ($^O eq 'MSWin32' ? BOLD.BLUE : BRIGHT_BLUE),
-	# B_MAGENTA => ($^O eq 'MSWin32' ? BOLD.MAGENTA : BRIGHT_MAGENTA),
-	# B_CYAN => ($^O eq 'MSWin32' ? BOLD.CYAN : BRIGHT_CYAN),
-	# B_WHITE => ($^O eq 'MSWin32' ? BOLD.WHITE : BRIGHT_WHITE),
-# };
-
-# Linux BRIGHT_GREEN  => windows BOLD.GREEN
-# my %terrain = (
-# #		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
-# # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
-	# ' ' => [  'plain', ' ', '', '',        0 ],
-	# # A 
-	# # a 
-	# # B 
-	# # b 
-	# # C 
-	# # c 
-	# # D 
-	# # d 
-	# # E 
-	# # e 
-	# # F 
-	# # f 
-	# # G 
-	# # g 
-	# # H 
-	# # h 
-	# # I 
-	# # i 
-	# # J 
-	# # j ͡
-	# # K 
-	# # k 
-	# # L 
-	# # l 
-	# M => [  'unwalkable mountain', chr(156), [ ANSI15],  '',  5 ],         # OK ʌ with chcp 65001
-	# m => [  'mountain', chr(189), [ ANSI130, ANSI136, ANSI246],  '',  3 ],
-	# # N
-	# # n
-	# # O 
-	# # o 
-	# # P 
-	# # p
-	# # Q 
-	# # q 
-	# # R 
-	# # r 
-	# # S 
-	# # s 
-	# T => [  'unwalkable wood', chr(207),          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       999 ], 
-	# t => [  'walkable wood', [chr(172),chr(168)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
-	# #t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
-	# # U 
-	# # u
-	# # V 
-	# # v 
-	# #W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
-	# #w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
-	# W => [  'deep water', chr(171), [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
-	# w => [  'shallow water', chr(171), [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
-	
-	# # X RESERVED for hero in the original map
-	# # x 
-	# # Y 
-	# # y 
-	# # Z 
-	# # z
-		
-# );
 
 my %terrain;
 
-   
-# render is class data
-# my %render = (
-
-	# X		=> sub{ color('bold red'),$_[0],color('reset') },
-	# chr(2)  => sub{ color('bold red'),$_[0],color('reset') },
-	# # t		=> sub{ color('bold green'),chr(6),color('reset') },
-	# # T		=> sub{ color('green'),chr(5),color('reset') },
-	# # #m		=> sub{ color('magenta'),$_[0],color('reset') },
-	# # #M		=> sub{ color('bold magenta'),$_[0],color('reset') },
-	# # w		=> sub{ color('bold cyan'),'~',color('reset') },
-	# # W		=> sub{ color('cyan'),'~',color('reset') },
-	# # n		=> sub{ color('yellow'),'n',color('reset') },
-	# # N		=> sub{ color('bold yellow'),'N',color('reset') },
-	# # a		=> sub{ qq(\e[37ma\e[0m) },
-	# # A		=> sub{ qq(\e[1;37mA\e[0m) },
-	# # basic color (on windows) are 16:
-	# # from 30 to 37 preceede or not by 1; to be bright
-	# d		=> sub{ qq(\e[30m$_[0]\e[0m) },
-	# D		=> sub{ qq(\e[1;30m$_[0]\e[0m) },
-	# f		=> sub{ qq(\e[31m$_[0]\e[0m) },
-	# F		=> sub{ qq(\e[1;31m$_[0]\e[0m) },
-	# g		=> sub{ qq(\e[32m$_[0]\e[0m) },
-	# G		=> sub{ qq(\e[1;32m$_[0]\e[0m) },
-	# h		=> sub{ qq(\e[33m$_[0]\e[0m) },
-	# H		=> sub{ qq(\e[1;33m$_[0]\e[0m) },
-	# j		=> sub{ qq(\e[34m$_[0]\e[0m) },
-	# J		=> sub{ qq(\e[1;34m$_[0]\e[0m) },
-	# k		=> sub{ qq(\e[35m$_[0]\e[0m) },
-	# K		=> sub{ qq(\e[1;35m$_[0]\e[0m) },
-	# l		=> sub{ qq(\e[36m$_[0]\e[0m) },
-	# L		=> sub{ qq(\e[1;36m$_[0]\e[0m) },
-	# m		=> sub{ qq(\e[37m$_[0]\e[0m) },
-	# M		=> sub{ qq(\e[1;37m$_[0]\e[0m) },
-	# #'~'		=> sub{ color('blue'),$_[0],color('reset') },
-	
-	
-# );
 
 sub new{
 	my $class = shift;
@@ -605,41 +493,26 @@ sub set_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-# $conf{ map_area_w } //= 50; #80;
-# $conf{ map_area_h } //=  20; #20;
-# $conf{ menu_area_w } //= $conf{ map_area_w };
-# $conf{ menu_area_h } //= 20;
 	# set internally to get coord of the first element of the map
 	$conf{ real_map_first} = { x => undef, y => undef };
 	# set internally to get coord of the last element of the map
 	$conf{ real_map_last} = { x => undef, y => undef };
-# $conf{ dec_hor }     //= '-';
-# $conf{ dec_ver }     //= '|';
-# $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
-# $conf{ dec_color } //= YELLOW;#''; # apply to dec_hor dec_ver ext_tile
-#$conf{ ext_tile } //= ['O','O',1];
-$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
+
+	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	
-# $conf{ masked_map }     //= 1;
-# $conf{ fog_of_war }		//=0;
-# $conf{ fog_char }		//= '.'; #chr(176); 177 178
 	
 	# get and set internally
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
 	
-# $conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
-# $conf{ hero_color } //= B_RED;
-# $conf{ hero_sight } = 10;
-# $conf{ hero_slowness } //= 0; # used to microsleep
 	
 	# get and set internally
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
 	$conf{ scrolling } = 0;
-# $conf{ no_scroll } = 0;
+
 	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
 	
 		
