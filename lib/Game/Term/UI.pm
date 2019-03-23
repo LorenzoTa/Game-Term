@@ -14,7 +14,7 @@ ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 
-my $debug = 1;
+my $debug = 0;
 my $noscroll_debug = 0;
 
 # SOME NOTES ABOUT MAP:
@@ -60,15 +60,61 @@ use constant {
 my %terrain = (
 #		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
-	#t => [  'walkable wood', [qw(O o 0 o O O)], [ B_GREEN , GREEN ], '',        0.3 ],
-	t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
-	
-# letter used in map, descr    one render!,  one color!, bg color,  speed penality: > 4 unwalkable
-	#                                                                                      UNDERLINE works only with 256 colors
-	#T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  UNDERLINE,       5 ],
-	T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       5 ],
 	' ' => [  'plain', ' ', '', '',        0 ],
-	#'X' => [  'plain', ' ', '', '',        0 ],
+	# A 
+	# a 
+	# B 
+	# b 
+	# C 
+	# c 
+	# D 
+	# d 
+	# E 
+	# e 
+	# F 
+	# f 
+	# G 
+	# g 
+	# H 
+	# h 
+	# I 
+	# i 
+	# J 
+	# j ͡
+	# K 
+	# k 
+	# L 
+	# l 
+	M => [  'unwalkable mountain', 'M', [ ANSI15],  '',  5 ],         # OK ʌ with chcp 65001
+	m => [  'mountain', 'M', [ ANSI130, ANSI136, ANSI246],  '',  3 ],
+	# N
+	# n
+	# O 
+	# o 
+	# P 
+	# p
+	# Q 
+	# q 
+	# R 
+	# r 
+	# S 
+	# s 
+	T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       999 ], 
+	t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	# U 
+	# u
+	# V 
+	# v 
+	W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
+	w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
+	
+	# X RESERVED for hero in the original map
+	# x 
+	# Y 
+	# y 
+	# Z 
+	# z
+		
 );
     
 # render is class data
@@ -644,6 +690,22 @@ perl -E "print qq(\e[$_),'m',qq( $_ ),qq(\e[0m) for 4..7,31..36,41..47"
 
 ## COLORS NAMES
 https://jonasjacek.github.io/colors/
+
+## COLORS cmd.exe INFOS
+http://www.bribes.org/perl/wANSIConsole.html
+
+## ASCII MAPPER
+https://notimetoplay.itch.io/ascii-mapper
+
+## FONT FORGE
+https://www.elegantthemes.com/blog/tips-tricks/create-your-own-font
+https://www.gridsagegames.com/blog/2014/09/fonts-in-roguelikes/
+http://www.medievia.com/fonts.html
+telnet mapscii.me
+http://dwarffortresswiki.org/Tileset_repository  cheepicus_15x15   	Belal 
+-->> http://dffd.bay12games.com/file.php?id=1922
+https://int10h.org/oldschool-pc-fonts/fontlist/
+---> http://www.pentacom.jp/pentacom/bitfontmaker2/
 
 
 perl -we "use strict; use warnings; use Term::ANSIColor qw(:constants); my %colors = (B_GREEN => $^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN); my $bg = ON_GREEN; print $bg.$colors{B_GREEN}, 32323, RESET"

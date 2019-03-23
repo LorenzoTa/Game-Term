@@ -20,7 +20,7 @@ sub new{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ fake_map } //= 'one' ;
+	$conf{ fake_map } //= 'two' ;
 	$conf{ fake_x } //= 40; #80;
 	$conf{ fake_y } //= 20; #20;
 	
@@ -98,9 +98,9 @@ tt  ttttttttttttttttttttttttttttt            ttt    ttttttttt   tttttttttttttttt
       ttttt        tttttttttttttttttttttt      tttttt      tttt             tttt
        tttt            ttttttttttttttttt       ttttttt                      tttt
        tttt                                    ttttttt                 ttt  tttt
-       tttttttttttttttttttttttttttt                ttt                 ttt  tttt
- t     tttttttttttttttttttttttttttt      TTTTTTTT                      ttt  tttt
-ttt    012345678901234ttttttttttttt      TTTTTTTT         tttttttttttttttttttttt
+       tttttttttttttttttttttttttmmm                ttt                 ttt  tttt
+ t     ttttttttttttttttttttttMMMMMM      TTTTTTTT                      ttt  tttt
+ttt    012345678901234ttttttttttmmm      TTTTTTTT         tttttttttttttttttttttt
 ttt                                  X                tttttttttttttttttttttttttt
 EOM
 		foreach my $row( split "\n", $fake){
@@ -125,7 +125,34 @@ EOM
 			push @$map,[ split '', $row ]
 		}
 	}
-	else{die}
+	elsif ($type =~ /^two/i){ 
+		my $fake=<<EOM;  
+wwwWWWWWWwwwwww          
+  wWWWWWWwwww            
+  wWWWWwww               
+   wwwww    tt     tt    
+   wwww     tttt  tt tt  
+              tt TTT tt  
+  mm M       t  TTTTTt   
+   mmM       tttTTTTTtt  
+    mMMM        TTTTT    
+  m m MM       tTTTTt    
+  m mMM        t  ttt    
+  m  MMMMM     ttttt     
+  mm mmmM          ttt   
+       m            t    
+      mm            t    
+      m             t    
+      mm                 
+       m                 
+        m   X            
+EOM
+	foreach my $row( split "\n", $fake){
+			push @$map,[ split '', $row ]
+		}
+	}        
+                         
+    else{die}
 	return $map;
 
 }
