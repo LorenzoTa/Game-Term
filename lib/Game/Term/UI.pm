@@ -596,41 +596,41 @@ sub set_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-$conf{ map_area_w } //= 50; #80;
-$conf{ map_area_h } //=  20; #20;
-$conf{ menu_area_w } //= $conf{ map_area_w };
-$conf{ menu_area_h } //= 20;
+# $conf{ map_area_w } //= 50; #80;
+# $conf{ map_area_h } //=  20; #20;
+# $conf{ menu_area_w } //= $conf{ map_area_w };
+# $conf{ menu_area_h } //= 20;
 	# set internally to get coord of the first element of the map
 	$conf{ real_map_first} = { x => undef, y => undef };
 	# set internally to get coord of the last element of the map
 	$conf{ real_map_last} = { x => undef, y => undef };
-$conf{ dec_hor }     //= '-';
-$conf{ dec_ver }     //= '|';
-$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
-$conf{ dec_color } //= YELLOW;#''; # apply to dec_hor dec_ver ext_tile
+# $conf{ dec_hor }     //= '-';
+# $conf{ dec_ver }     //= '|';
+# $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
+# $conf{ dec_color } //= YELLOW;#''; # apply to dec_hor dec_ver ext_tile
 #$conf{ ext_tile } //= ['O','O',1];
 $conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	
-$conf{ masked_map }     //= 1;
-$conf{ fog_of_war }		//=0;
-$conf{ fog_char }		//= '.'; #chr(176); 177 178
+# $conf{ masked_map }     //= 1;
+# $conf{ fog_of_war }		//=0;
+# $conf{ fog_char }		//= '.'; #chr(176); 177 178
 	
 	# get and set internally
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
 	
-$conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
-$conf{ hero_color } //= B_RED;
-$conf{ hero_sight } = 10;
-$conf{ hero_slowness } //= 0; # used to microsleep
+# $conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
+# $conf{ hero_color } //= B_RED;
+# $conf{ hero_sight } = 10;
+# $conf{ hero_slowness } //= 0; # used to microsleep
 	
 	# get and set internally
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
 	$conf{ scrolling } = 0;
-$conf{ no_scroll } = 0;
+# $conf{ no_scroll } = 0;
 	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
 	
 		
