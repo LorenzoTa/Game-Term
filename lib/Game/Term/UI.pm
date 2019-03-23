@@ -46,81 +46,84 @@ my $noscroll_debug = 0;
 # ON_BRIGHT_BLACK ON_BRIGHT_RED     ON_BRIGHT_GREEN ON_BRIGHT_YELLOW
 # ON_BRIGHT_BLUE  ON_BRIGHT_MAGENTA ON_BRIGHT_CYAN  ON_BRIGHT_WHITE
 
-use constant {
-	B_BLACK => ($^O eq 'MSWin32' ? BOLD.BLACK : BRIGHT_BLACK),
-    B_RED => ($^O eq 'MSWin32' ? BOLD.RED : BRIGHT_RED),
-	B_GREEN => ($^O eq 'MSWin32' ? BOLD.GREEN : BRIGHT_GREEN),
-	B_YELLOW => ($^O eq 'MSWin32' ? BOLD.YELLOW : BRIGHT_YELLOW),
-	B_BLUE => ($^O eq 'MSWin32' ? BOLD.BLUE : BRIGHT_BLUE),
-	B_MAGENTA => ($^O eq 'MSWin32' ? BOLD.MAGENTA : BRIGHT_MAGENTA),
-	B_CYAN => ($^O eq 'MSWin32' ? BOLD.CYAN : BRIGHT_CYAN),
-	B_WHITE => ($^O eq 'MSWin32' ? BOLD.WHITE : BRIGHT_WHITE),
-};
+# use constant {
+	# B_BLACK => ($^O eq 'MSWin32' ? BOLD.BLACK : BRIGHT_BLACK),
+    # B_RED => ($^O eq 'MSWin32' ? BOLD.RED : BRIGHT_RED),
+	# B_GREEN => ($^O eq 'MSWin32' ? BOLD.GREEN : BRIGHT_GREEN),
+	# B_YELLOW => ($^O eq 'MSWin32' ? BOLD.YELLOW : BRIGHT_YELLOW),
+	# B_BLUE => ($^O eq 'MSWin32' ? BOLD.BLUE : BRIGHT_BLUE),
+	# B_MAGENTA => ($^O eq 'MSWin32' ? BOLD.MAGENTA : BRIGHT_MAGENTA),
+	# B_CYAN => ($^O eq 'MSWin32' ? BOLD.CYAN : BRIGHT_CYAN),
+	# B_WHITE => ($^O eq 'MSWin32' ? BOLD.WHITE : BRIGHT_WHITE),
+# };
 
 # Linux BRIGHT_GREEN  => windows BOLD.GREEN
-my %terrain = (
-#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
-# letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
-	' ' => [  'plain', ' ', '', '',        0 ],
-	# A 
-	# a 
-	# B 
-	# b 
-	# C 
-	# c 
-	# D 
-	# d 
-	# E 
-	# e 
-	# F 
-	# f 
-	# G 
-	# g 
-	# H 
-	# h 
-	# I 
-	# i 
-	# J 
-	# j ͡
-	# K 
-	# k 
-	# L 
-	# l 
-	M => [  'unwalkable mountain', chr(156), [ ANSI15],  '',  5 ],         # OK ʌ with chcp 65001
-	m => [  'mountain', chr(189), [ ANSI130, ANSI136, ANSI246],  '',  3 ],
-	# N
-	# n
-	# O 
-	# o 
-	# P 
-	# p
-	# Q 
-	# q 
-	# R 
-	# r 
-	# S 
-	# s 
-	T => [  'unwalkable wood', chr(207),          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       999 ], 
-	t => [  'walkable wood', [chr(172),chr(168)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
-	#t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
-	# U 
-	# u
-	# V 
-	# v 
-	#W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
-	#w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
-	W => [  'deep water', chr(171), [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
-	w => [  'shallow water', chr(171), [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
+# my %terrain = (
+# #		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
+# # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
+	# ' ' => [  'plain', ' ', '', '',        0 ],
+	# # A 
+	# # a 
+	# # B 
+	# # b 
+	# # C 
+	# # c 
+	# # D 
+	# # d 
+	# # E 
+	# # e 
+	# # F 
+	# # f 
+	# # G 
+	# # g 
+	# # H 
+	# # h 
+	# # I 
+	# # i 
+	# # J 
+	# # j ͡
+	# # K 
+	# # k 
+	# # L 
+	# # l 
+	# M => [  'unwalkable mountain', chr(156), [ ANSI15],  '',  5 ],         # OK ʌ with chcp 65001
+	# m => [  'mountain', chr(189), [ ANSI130, ANSI136, ANSI246],  '',  3 ],
+	# # N
+	# # n
+	# # O 
+	# # o 
+	# # P 
+	# # p
+	# # Q 
+	# # q 
+	# # R 
+	# # r 
+	# # S 
+	# # s 
+	# T => [  'unwalkable wood', chr(207),          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       999 ], 
+	# t => [  'walkable wood', [chr(172),chr(168)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	# #t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	# # U 
+	# # u
+	# # V 
+	# # v 
+	# #W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
+	# #w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
+	# W => [  'deep water', chr(171), [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
+	# w => [  'shallow water', chr(171), [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
 	
-	# X RESERVED for hero in the original map
-	# x 
-	# Y 
-	# y 
-	# Z 
-	# z
+	# # X RESERVED for hero in the original map
+	# # x 
+	# # Y 
+	# # y 
+	# # Z 
+	# # z
 		
-);
-    
+# );
+
+my %terrain;
+
+   
 # render is class data
 # my %render = (
 
@@ -166,9 +169,8 @@ sub new{
 	my $conf_object = Game::Term::Configuration->new( configuration => $params{configuration});
 	
 	my %conf = $conf_object->get_conf();
-	
 	#my %conf = validate_conf( @_ );
-	
+	%terrain = $conf_object->get_terrains();
 	
 	return bless {
 				%conf

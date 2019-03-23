@@ -20,17 +20,83 @@ sub new{
 	my $class = shift;
 	my %conf = validate_conf( @_ );
 	
+	my %terrains = terrains_16_colors();
 	
 	return bless {
 				configuration => \%conf,
-				#terrains => 
+				terrains =>  \%terrains,
 	}, $class;
 }
 sub get_conf{
 	my $conf = shift;
 	return %{$conf->{configuration}};
 }
-
+sub get_terrains{
+	my $conf = shift;
+	return %{$conf->{terrains}};
+}
+sub terrains_16_colors{
+	#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
+# letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
+	' ' => [  'plain', ' ', '', '',        0 ],
+	# A 
+	# a 
+	# B 
+	# b 
+	# C 
+	# c 
+	# D 
+	# d 
+	# E 
+	# e 
+	# F 
+	# f 
+	# G 
+	# g 
+	# H 
+	# h 
+	# I 
+	# i 
+	# J 
+	# j ͡
+	# K 
+	# k 
+	# L 
+	# l 
+	M => [  'unwalkable mountain', chr(156), [ ANSI15],  '',  5 ],         # OK ʌ with chcp 65001
+	m => [  'mountain', chr(189), [ ANSI130, ANSI136, ANSI246],  '',  3 ],
+	# N
+	# n
+	# O 
+	# o 
+	# P 
+	# p
+	# Q 
+	# q 
+	# R 
+	# r 
+	# S 
+	# s 
+	T => [  'unwalkable wood', chr(207),          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       999 ], 
+	t => [  'walkable wood', [chr(172),chr(168)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	#t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	# U 
+	# u
+	# V 
+	# v 
+	#W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
+	#w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
+	W => [  'deep water', chr(171), [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
+	w => [  'shallow water', chr(171), [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
+	
+	# X RESERVED for hero in the original map
+	# x 
+	# Y 
+	# y 
+	# Z 
+	# z
+		
+}
 sub validate_conf{
 	my %conf = @_;
 	$conf{ map_area_w } //= 50; #80;
