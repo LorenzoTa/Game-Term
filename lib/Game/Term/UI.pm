@@ -6,6 +6,7 @@ use warnings;
 use Term::ReadKey;
 use List::Util qw( max min );
 use Term::ANSIColor qw(RESET :constants :constants256);
+use Time::HiRes qw ( sleep );
 
 use Game::Term::Map;
 
@@ -57,16 +58,66 @@ use constant {
 
 # Linux BRIGHT_GREEN  => windows BOLD.GREEN
 my %terrain = (
-#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5
+#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
-	#t => [  'walkable wood', [qw(O o 0 o O O)], [ B_GREEN , GREEN ], '',        0.3 ],
-	t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	' ' => [  'plain', ' ', '', '',        0 ],
+	# A 
+	# a 
+	# B 
+	# b 
+	# C 
+	# c 
+	# D 
+	# d 
+	# E 
+	# e 
+	# F 
+	# f 
+	# G 
+	# g 
+	# H 
+	# h 
+	# I 
+	# i 
+	# J 
+	# j ͡
+	# K 
+	# k 
+	# L 
+	# l 
+	M => [  'unwalkable mountain', chr(156), [ ANSI15],  '',  5 ],         # OK ʌ with chcp 65001
+	m => [  'mountain', chr(189), [ ANSI130, ANSI136, ANSI246],  '',  3 ],
+	# N
+	# n
+	# O 
+	# o 
+	# P 
+	# p
+	# Q 
+	# q 
+	# R 
+	# r 
+	# S 
+	# s 
+	T => [  'unwalkable wood', chr(207),          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       999 ], 
+	t => [  'walkable wood', [chr(172),chr(168)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	#t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	# U 
+	# u
+	# V 
+	# v 
+	#W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
+	#w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
+	W => [  'deep water', chr(171), [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
+	w => [  'shallow water', chr(171), [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
 	
-# letter used in map, descr    one render!,  one color!, bg color,  speed penality: > 4 unwalkable
-	#                                                                                      UNDERLINE works only with 256 colors
-	#T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  UNDERLINE,       5 ],
-	T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       5 ],
-
+	# X RESERVED for hero in the original map
+	# x 
+	# Y 
+	# y 
+	# Z 
+	# z
+		
 );
     
 # render is class data
@@ -146,6 +197,15 @@ sub run{
 		while(1){
 			my $key = ReadKey(0);
 			
+			sleep(	
+					$ui->{hero_slowness} + 
+					# the slowness #4 of the terrain original letter #1 where
+					# the hero currently is on th emap
+					$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]
+			);
+			print "DEBUG: slowness for terrain ".
+				$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
+				"\n" if $debug;
 			if( $ui->move( $key ) ){
 				
 				$ui->draw_map();
@@ -206,19 +266,13 @@ sub draw_map{
 	
 	# draw hero
 	# this must set $hero->{on_terrain}
-	$ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
+	local $ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
 	# MAP AREA:
 	# print decoration first row
-	#print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
-	# print  	$ui->{dec_color} 																	? 
-			# $ui->{dec_color}.(' o'.($ui->{ dec_hor } x ( $ui->{ map_area_w } ))).'o'."\n".RESET :
-			# ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
-	
 	if ($ui->{dec_color}){
 		print $ui->{dec_color}.(' o'.($ui->{ dec_hor } x  $ui->{ map_area_w }  )).'o'.RESET."\n";
 	}
 	else { print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";} 
-	
 	# print map body with decorations
 	# iterate indexes of rows..
 	foreach my $row ( $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}   ){ 	
@@ -234,8 +288,7 @@ sub draw_map{
 						# set unmasked
 						$ui->{map}[$row][$col][2] = 1;
 						# print display
-						print $ui->{map}[$row][$col][0];
-					
+						print $ui->{map}[$row][$col][0];					
 					}
 					# already unmasked but empty space (fog of war)
 					elsif( 	$ui->{map}[$row][$col][2] == 1 		and 
@@ -281,7 +334,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
+	#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}--;
 		$ui->{map_off_y}-- if $ui->must_scroll();
         return 1;
@@ -292,7 +345,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
+		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}++;
 		$ui->{map_off_y}++ if $ui->must_scroll();		
         return 1;
@@ -303,7 +356,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
+		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_x}--;
 		$ui->{map_off_x}-- if $ui->must_scroll();		
         return 1;
@@ -314,7 +367,7 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
+		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_x}++;
 		$ui->{map_off_x}++ if $ui->must_scroll();				
         return 1;
@@ -361,8 +414,10 @@ sub illuminate{
 }
 sub is_walkable{
 	my $tile = shift; 
-	if( $tile->[1] eq ' ' ){ return 1 }
-	elsif( $tile->[1] eq '+' ){ return 1 }
+	# if( $tile->[1] eq ' ' ){ return 1 }
+	# elsif( $tile->[1] eq '+' ){ return 1 }
+	#print "DEBUG: tile -->",(join '|',@$tile),"<--\n";
+	if ( $terrain{ $tile->[1]}->[4] < 5 ){ return 1}
 	else{return 0}
 }
 		
@@ -525,6 +580,8 @@ sub set_hero_pos{
 		foreach my $col ( 0..$#{$ui->{map}->[$row]} ){
 			if ( ${$ui->{map}}[$row][$col] eq 'X' ){
 				print "DEBUG: (original map) found hero at row $row col $col\n" if $debug;
+				# clean this tile
+				${$ui->{map}}[$row][$col] = ' ';
 				$ui->{hero_y} = $row;
 				$ui->{hero_x} = $col;
 				if    ( $row == 0 )						{ $ui->{hero_side} = 'N' }
@@ -539,41 +596,42 @@ sub set_hero_pos{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ map_area_w } //= 50; #80;
-	$conf{ map_area_h } //=  20; #20;
-	$conf{ menu_area_w } //= $conf{ map_area_w };
-	$conf{ menu_area_h } //= 20;
+$conf{ map_area_w } //= 50; #80;
+$conf{ map_area_h } //=  20; #20;
+$conf{ menu_area_w } //= $conf{ map_area_w };
+$conf{ menu_area_h } //= 20;
 	# set internally to get coord of the first element of the map
 	$conf{ real_map_first} = { x => undef, y => undef };
 	# set internally to get coord of the last element of the map
 	$conf{ real_map_last} = { x => undef, y => undef };
-	$conf{ dec_hor }     //= '-';
-	$conf{ dec_ver }     //= '|';
+$conf{ dec_hor }     //= '-';
+$conf{ dec_ver }     //= '|';
 $conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
 $conf{ dec_color } //= YELLOW;#''; # apply to dec_hor dec_ver ext_tile
 #$conf{ ext_tile } //= ['O','O',1];
-	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
+$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	
-	$conf{ masked_map }     //= 1;
-	$conf{ fog_of_war }		//=0;
-	$conf{ fog_char }		//= '.'; #chr(176); 177 178
+$conf{ masked_map }     //= 1;
+$conf{ fog_of_war }		//=0;
+$conf{ fog_char }		//= '.'; #chr(176); 177 178
 	
+	# get and set internally
 	$conf{ hero_x } = undef;
 	$conf{ hero_y } = undef;
 	$conf{ hero_side } = '';
+	
 $conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
-	$conf{ hero_color } //= B_RED;
-#$conf{ hero_icon } = [ chr(2), chr(2), 1] ;#'X'; 30 1 2 
-	$conf{ hero_sight } = 10;
-
+$conf{ hero_color } //= B_RED;
+$conf{ hero_sight } = 10;
+$conf{ hero_slowness } //= 0; # used to microsleep
+	
+	# get and set internally
 	$conf{ map } //=[];
 	$conf{ map_off_x } = 0;
 	$conf{ map_off_y } = 0;
 	$conf{ scrolling } = 0;
-	$conf{ no_scroll } = 0;
+$conf{ no_scroll } = 0;
 	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
-	
-	#$conf{ render } = { X => BOLD RED 'X', RESET};
 	
 		
 	return %conf;
@@ -637,6 +695,28 @@ perl -E "print qq(\e[$_),'m',qq( $_ ),qq(\e[0m) for 4..7,31..36,41..47"
 ## COLORS NAMES
 https://jonasjacek.github.io/colors/
 
+## COLORS cmd.exe INFOS
+http://www.bribes.org/perl/wANSIConsole.html
+
+## ASCII MAPPER
+https://notimetoplay.itch.io/ascii-mapper
+
+## FONT FORGE
+https://www.elegantthemes.com/blog/tips-tricks/create-your-own-font
+https://www.gridsagegames.com/blog/2014/09/fonts-in-roguelikes/
+http://www.medievia.com/fonts.html
+telnet mapscii.me
+http://dwarffortresswiki.org/Tileset_repository  cheepicus_15x15   	Belal 
+-->> http://dffd.bay12games.com/file.php?id=1922
+https://int10h.org/oldschool-pc-fonts/fontlist/
+---> http://www.pentacom.jp/pentacom/bitfontmaker2/  funziona LucidaConsoleaa.ttf
+--> but: https://superuser.com/questions/920440/how-to-add-additional-fonts-to-the-windows-console-windows
+
+how to install a font for cmd.exe https://www.techrepublic.com/blog/windows-and-office/quick-tip-add-fonts-to-the-command-prompt/
+
+raster fonts ?? https://github.com/idispatch/raster-fonts	
+
+https://www.thefreewindows.com/3467/edit-your-fonts-with-fony/ fony.exe mmh.. no ttf
 
 perl -we "use strict; use warnings; use Term::ANSIColor qw(:constants); my %colors = (B_GREEN => $^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN); my $bg = ON_GREEN; print $bg.$colors{B_GREEN}, 32323, RESET"
 perl -e "use Term::ANSIColor qw(:constants); $B_GREEN = $^O eq 'Linux' ? BRIGHT_GREEN : BOLD GREEN; print $B_GREEN, 32323, RESET"
