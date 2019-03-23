@@ -85,8 +85,8 @@ my %terrain = (
 	# k 
 	# L 
 	# l 
-	M => [  'unwalkable mountain', 'M', [ ANSI15],  '',  5 ],         # OK ʌ with chcp 65001
-	m => [  'mountain', 'M', [ ANSI130, ANSI136, ANSI246],  '',  3 ],
+	M => [  'unwalkable mountain', chr(156), [ ANSI15],  '',  5 ],         # OK ʌ with chcp 65001
+	m => [  'mountain', chr(189), [ ANSI130, ANSI136, ANSI246],  '',  3 ],
 	# N
 	# n
 	# O 
@@ -99,14 +99,17 @@ my %terrain = (
 	# r 
 	# S 
 	# s 
-	T => [  'unwalkable wood', 'O',          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       999 ], 
-	t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	T => [  'unwalkable wood', chr(207),          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       999 ], 
+	t => [  'walkable wood', [chr(172),chr(168)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	#t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
 	# U 
 	# u
 	# V 
 	# v 
-	W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
-	w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
+	#W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
+	#w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
+	W => [  'deep water', chr(171), [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
+	w => [  'shallow water', chr(171), [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
 	
 	# X RESERVED for hero in the original map
 	# x 
@@ -705,8 +708,14 @@ telnet mapscii.me
 http://dwarffortresswiki.org/Tileset_repository  cheepicus_15x15   	Belal 
 -->> http://dffd.bay12games.com/file.php?id=1922
 https://int10h.org/oldschool-pc-fonts/fontlist/
----> http://www.pentacom.jp/pentacom/bitfontmaker2/
+---> http://www.pentacom.jp/pentacom/bitfontmaker2/  funziona LucidaConsoleaa.ttf
+--> but: https://superuser.com/questions/920440/how-to-add-additional-fonts-to-the-windows-console-windows
 
+how to install a font for cmd.exe https://www.techrepublic.com/blog/windows-and-office/quick-tip-add-fonts-to-the-command-prompt/
+
+raster fonts ?? https://github.com/idispatch/raster-fonts	
+
+https://www.thefreewindows.com/3467/edit-your-fonts-with-fony/ fony.exe mmh.. no ttf
 
 perl -we "use strict; use warnings; use Term::ANSIColor qw(:constants); my %colors = (B_GREEN => $^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN); my $bg = ON_GREEN; print $bg.$colors{B_GREEN}, 32323, RESET"
 perl -e "use Term::ANSIColor qw(:constants); $B_GREEN = $^O eq 'Linux' ? BRIGHT_GREEN : BOLD GREEN; print $B_GREEN, 32323, RESET"
