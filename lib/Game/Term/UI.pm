@@ -54,9 +54,29 @@ sub new{
 	my $class = shift;
 	my %params = @_;
 	
+	# CONFIGURATION:
 	my $conf_object = Game::Term::Configuration->new( configuration => $params{configuration});
-	
 	my %conf = $conf_object->get_conf();
+	# OTHER FILEDS USED INTERNALLY (once set by validate_conf)
+	# # set internally to get coord of the first element of the map
+	# $conf{ real_map_first} = { x => undef, y => undef };
+	# # set internally to get coord of the last element of the map
+	# $conf{ real_map_last} = { x => undef, y => undef };
+	# $conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
+	# # get and set internally
+	# $conf{ hero_x } = undef;
+	# $conf{ hero_y } = undef;
+	# $conf{ hero_side } = '';
+	# # get and set internally
+	# $conf{ map } //=[];
+	# $conf{ map_off_x } = 0;
+	# $conf{ map_off_y } = 0;
+	# $conf{ scrolling } = 0;
+	# $conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
+	
+	
+	
+	
 	#my %conf = validate_conf( @_ );
 	%terrain = $conf_object->get_terrains();
 	
@@ -491,33 +511,33 @@ sub set_hero_pos{
 	}	
 }
 
-sub validate_conf{
-	my %conf = @_;
-	# set internally to get coord of the first element of the map
-	$conf{ real_map_first} = { x => undef, y => undef };
-	# set internally to get coord of the last element of the map
-	$conf{ real_map_last} = { x => undef, y => undef };
+# sub validate_conf{
+	# my %conf = @_;
+	# # set internally to get coord of the first element of the map
+	# $conf{ real_map_first} = { x => undef, y => undef };
+	# # set internally to get coord of the last element of the map
+	# $conf{ real_map_last} = { x => undef, y => undef };
 
-	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
+	# $conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	
 	
-	# get and set internally
-	$conf{ hero_x } = undef;
-	$conf{ hero_y } = undef;
-	$conf{ hero_side } = '';
+	# # get and set internally
+	# $conf{ hero_x } = undef;
+	# $conf{ hero_y } = undef;
+	# $conf{ hero_side } = '';
 	
 	
-	# get and set internally
-	$conf{ map } //=[];
-	$conf{ map_off_x } = 0;
-	$conf{ map_off_y } = 0;
-	$conf{ scrolling } = 0;
+	# # get and set internally
+	# $conf{ map } //=[];
+	# $conf{ map_off_x } = 0;
+	# $conf{ map_off_y } = 0;
+	# $conf{ scrolling } = 0;
 
-	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
+	# $conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
 	
 		
-	return %conf;
-}
+	# return %conf;
+# }
 
 
 
