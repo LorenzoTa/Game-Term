@@ -15,7 +15,7 @@ ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 
-my $debug = 0;
+my $debug = 2;
 my $noscroll_debug = 0;
 
 # SOME NOTES ABOUT MAP:
@@ -240,24 +240,35 @@ sub draw_map{
 sub move{
 	my $ui = shift;
 	my $key = shift;
-	#check if leaving the no_scroll area
+	# check we are in the real map
+	# $ui->{real_map_first}{x} 
+	# $ui->{real_map_first}{y} 
+	# $ui->{real_map_last}{y} 
+	# $ui->{real_map_last}{x} 
 	
-    # move with WASD
-    if ( $key eq 'w' and  is_walkable(
-							# map coord as hero X - 1, hero Y
-							$ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
-							)
+	# move with WASD
+	if ( 	$key eq 'w' 	
+			# we are inside the real map
+			and $ui->{hero_y} > $ui->{real_map_first}{y} 
+			and  is_walkable(
+				# map coord as hero X - 1, hero Y
+				$ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
+				)
+					
 		){
         #									THIS must be set to $hero->{on_terrain}
-	#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
+		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}--;
 		$ui->{map_off_y}-- if $ui->must_scroll();
         return 1;
     }
-	elsif ( $key eq 's' and  is_walkable(
-							# map coord as hero X + 1, hero Y
-							$ui->{map}->[ $ui->{hero_y} + 1 ][	$ui->{hero_x} ]
-							)
+	elsif ( $key eq 's'
+			# we are inside the real map
+			and $ui->{hero_y} < $ui->{real_map_last}{y} - 1
+			and  is_walkable(
+						# map coord as hero X + 1, hero Y
+						$ui->{map}->[ $ui->{hero_y} + 1 ][	$ui->{hero_x} ]
+						)
 		){
         #									THIS must be set to $hero->{on_terrain}
 		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
@@ -265,7 +276,10 @@ sub move{
 		$ui->{map_off_y}++ if $ui->must_scroll();		
         return 1;
     }
-	elsif ( $key eq 'a' and  is_walkable(
+	elsif ( $key eq 'a' 
+			# we are inside the real map
+			and $ui->{hero_x} > $ui->{real_map_first}{x}
+			and  is_walkable(
 							# map coord as hero X, hero Y - 1
 							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} - 1 ]
 							)
@@ -276,7 +290,10 @@ sub move{
 		$ui->{map_off_x}-- if $ui->must_scroll();		
         return 1;
     }
-	elsif ( $key eq 'd' and  is_walkable(
+	elsif ( $key eq 'd' 
+			# we are inside the real map
+			and $ui->{hero_x} < $ui->{real_map_last}{x}
+			and  is_walkable(
 							# map coord as hero X, hero Y + 1
 							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} + 1 ]
 							)
@@ -288,7 +305,7 @@ sub move{
         return 1;
     }
 	else{
-		print "unused [$key] was pressed\n" if $debug;
+		print "DEBUG: no movement possible ([$key] was pressed)\n" if $debug;
 		return 0;
 	}
 	
@@ -332,6 +349,7 @@ sub is_walkable{
 	# if( $tile->[1] eq ' ' ){ return 1 }
 	# elsif( $tile->[1] eq '+' ){ return 1 }
 	#print "DEBUG: tile -->",(join '|',@$tile),"<--\n";
+	
 	if ( $terrain{ $tile->[1]}->[4] < 5 ){ return 1}
 	else{return 0}
 }
