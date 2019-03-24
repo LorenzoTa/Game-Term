@@ -120,7 +120,9 @@ sub run{
 				$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
 				"\n" if $debug;
 			if( print $ui->move( $key ) ){
-				
+				local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
+				local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
+				local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'walkable wood';
 				$ui->draw_map();
 				
 		if ($noscroll_debug){
