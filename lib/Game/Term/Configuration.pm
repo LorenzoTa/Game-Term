@@ -63,8 +63,8 @@ sub terrains_16_colors{
 	# k 
 	# L 
 	# l 
-	M => [  'unwalkable mountain', chr(156), [ ANSI15],  '',  5 ],         # OK ʌ with chcp 65001
-	m => [  'mountain', chr(189), [ ANSI130, ANSI136, ANSI246],  '',  3 ],
+	M => [  'unwalkable mountain', 'M', [ WHITE, B_WHITE ],  '',  5 ],         # OK ʌ with chcp 65001
+	m => [  'mountain', 'M', [ YELLOW, GREEN ],  '',  3 ],
 	# N
 	# n
 	# O 
@@ -77,8 +77,8 @@ sub terrains_16_colors{
 	# r 
 	# S 
 	# s 
-	T => [  'unwalkable wood', chr(207),          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       999 ], 
-	t => [  'walkable wood', [chr(172),chr(168)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	T => [  'unwalkable wood', 'P',   [ B_YELLOW, B_GREEN ],  '',       999 ], 
+	t => [  'walkable wood', ['P', 'Y'], [ YELLOW, GREEN], '',        0.3 ],
 	#t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
 	# U 
 	# u
@@ -86,8 +86,8 @@ sub terrains_16_colors{
 	# v 
 	#W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
 	#w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
-	W => [  'deep water', chr(171), [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
-	w => [  'shallow water', chr(171), [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
+	W => [  'deep water', '~',  [ B_BLUE, B_BLACK, B_BLUE ] , ON_BLUE, 999 ],
+	w => [  'shallow water',[qw(~ - ~ ~)], [ B_WHITE, B_BLUE ], '', 2 ],
 	
 	# X RESERVED for hero in the original map
 	# x 
@@ -112,12 +112,12 @@ sub validate_conf{
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 
 	$conf{ masked_map }     //= 1;
-	$conf{ fog_of_war }		//=0;
+	$conf{ fog_of_war }		//=1;
 	$conf{ fog_char }		//= '.'; #chr(176); 177 178
 
 	$conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
 	$conf{ hero_color } //= B_RED;
-	$conf{ hero_sight } = 10;
+	$conf{ hero_sight } = 5;
 	$conf{ hero_slowness } //= 0; # used to microsleep
 
 	$conf{ no_scroll } = 0;

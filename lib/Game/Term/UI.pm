@@ -15,8 +15,8 @@ ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 
-my $debug = 2;
-my $noscroll_debug = 0;
+our $debug = 0;
+our $noscroll_debug = 0;
 
 # SOME NOTES ABOUT MAP:
 # The map is initially loaded from the data field of the Game::Term::Map object.
@@ -83,7 +83,6 @@ sub new{
 	}, $class;
 }
 
-#dirty
 sub run{
 		my $ui = shift;
 		
@@ -96,8 +95,6 @@ sub run{
 		# set real_map_first and real_map_last x,y
 		$ui->set_map_and_hero();
 		
-# $ui->{map}[ $ui->{real_map_first}{y} ][ $ui->{real_map_first}{x} ]='z';
-# $ui->{map}[ $ui->{real_map_last}{y} ][ $ui->{real_map_last}{x} ]='z';
 		print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
 				" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
 		# now BIG map, hero_pos and hero_side are initialized
@@ -207,12 +204,12 @@ sub draw_map{
 					}
 					# already unmasked but empty space (fog of war)
 					elsif( 	$ui->{map}[$row][$col][2] == 1 		and 
-							$ui->{map}[$row][$col][0] eq ' ' 	and 
+							$ui->{map}[$row][$col][1] eq ' ' 	and # WITH [0]FAILS!!!!!
 							$ui->{fog_of_war}					and
 							!$seen{$row.'_'.$col}
 						)
 					{ 
-						print $ui->{fog_char} ; 
+						print $ui->{fog_char} ;
 					}
 					# already unmasked: print display 
 					elsif( $ui->{map}[$row][$col][2] == 1 ){ print $ui->{map}[$row][$col][0]; }
@@ -240,11 +237,6 @@ sub draw_map{
 sub move{
 	my $ui = shift;
 	my $key = shift;
-	# check we are in the real map
-	# $ui->{real_map_first}{x} 
-	# $ui->{real_map_first}{y} 
-	# $ui->{real_map_last}{y} 
-	# $ui->{real_map_last}{x} 
 	
 	# move with WASD
 	if ( 	$key eq 'w' 	
