@@ -54,7 +54,7 @@ sub terrains_16_colors{
 	# G 
 	# g 
 	# H 
-	# h 
+	h => [ 'hill', 'm', [ YELLOW, GREEN ],  '',  0.3 ],
 	# I 
 	# i 
 	# J 

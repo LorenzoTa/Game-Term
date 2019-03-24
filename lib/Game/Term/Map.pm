@@ -93,14 +93,14 @@ tt  ttttttttttttttttttttttttttttt            ttt    ttttttttt   tttttttttttttttt
               tttt        ttttttt       tttt     ttttt       tttt           tttt
    t  ttt     tttttt      ttttttt      tttt      ttttt        ttt       tttttttt
       ttt     tttttttt                ttttt      ttttt      ttttt      ttttttttt
-      tttt      ttttttttt            tttttt     tttt       tttttt      ttttttttt
-      ttttt      ttttttttttttttttttttttttt     ttttt       tttttt      ttttttttt
-      ttttt        tttttttttttttttttttttt      tttttt      tttt             tttt
-       tttt            ttttttttttttttttt       ttttttt                      tttt
+      tttt      ttttttttt            tthhtt     tttt       tttttt      ttttttttt
+      ttttt      ttttttttttttttttttttthhhh     ttttt       tttttt      ttttttttt
+      ttttt        tttttttttttttttthhhhhh      tttttt      tttt             tttt
+       tttt            tttttttttthhhhhhh       ttttttt                      tttt
        tttt                                    ttttttt                 ttt  tttt
-       tttttttttttttttttttttttttmmm                ttt                 ttt  tttt
- t     ttttttttttttttttttttttMMMMMM      TTTTTTTT                      ttt  tttt
-ttt    012345678901234ttttttttttmmm      TTTTTTTT         tttttttttttttttttttttt
+       tttttttttttttwwwwwwwwwtttmmm                ttt                 ttt  tttt
+ t     ttttttttttttwwwwWWWWWWMMMMMM      TTTTTTTT                      ttt  tttt
+ttt    012345678901234wwwwwwwwwwmmm      TTTTTTTT         tttttttttttttttttttttt
 ttt                                  X                tttttttttttttttttttttttttt
 EOM
 		foreach my $row( split "\n", $fake){

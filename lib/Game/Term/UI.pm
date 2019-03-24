@@ -15,13 +15,13 @@ ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 
-our $debug = 0;
+our $debug = 1;
 our $noscroll_debug = 0;
 
 # SOME NOTES ABOUT MAP:
 # The map is initially loaded from the data field of the Game::Term::Map object.
-# It is the AoA containig one character per tile (terrains) and containing the hero's
-# starting position marked by 'X'.
+# It is the AoA containing one character per tile (terrains) and containing the hero's
+# starting position marked by 'X' ( sticked on one side ).
 
 # This original AoA is passed to set_map_and_hero() where it will be enlarged depending
 # on the map_area settings (the display window). Here the offsets used in print will be calculated.
@@ -57,7 +57,7 @@ sub new{
 	# CONFIGURATION:
 	my $conf_object = Game::Term::Configuration->new( configuration => $params{configuration});
 	my %conf = $conf_object->get_conf();
-	# OTHER FILEDS USED INTERNALLY (once set by validate_conf)
+	# OTHER FIELDS USED INTERNALLY (once set by validate_conf)
 	# # set internally to get coord of the first element of the map
 	# $conf{ real_map_first} = { x => undef, y => undef };
 	# # set internally to get coord of the last element of the map
@@ -67,6 +67,7 @@ sub new{
 	# $conf{ hero_x } = undef;
 	# $conf{ hero_y } = undef;
 	# $conf{ hero_side } = '';
+	# $conf{ hero_terrain } = ''; #new!
 	# # get and set internally
 	# $conf{ map } //=[];
 	# $conf{ map_off_x } = 0;
@@ -118,7 +119,7 @@ sub run{
 			print "DEBUG: slowness for terrain ".
 				$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
 				"\n" if $debug;
-			if( $ui->move( $key ) ){
+			if( print $ui->move( $key ) ){
 				
 				$ui->draw_map();
 				
@@ -133,8 +134,9 @@ sub run{
 		 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
 	}
 			
-			$ui->draw_menu( ["hero HP: 42",
-									"hero at: $ui->{hero_y}-$ui->{hero_x}",
+			$ui->draw_menu( ["hero HP: 42".
+									"hero at: $ui->{hero_y}-$ui->{hero_x} ".
+									"( $ui->{hero_terrain} ) sight: $ui->{hero_sight}",
 									"key $key was pressed:"] );	
 
 			}
@@ -172,7 +174,7 @@ sub draw_map{
 	my $ui = shift;
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
-	
+	#print CLEAR unless $debug;
 	# get area of currently seen tiles (by coords)
 	my %seen = $ui->illuminate();
 	
@@ -239,20 +241,21 @@ sub move{
 	my $key = shift;
 	
 	# move with WASD
-	if ( 	$key eq 'w' 	
-			# we are inside the real map
-			and $ui->{hero_y} > $ui->{real_map_first}{y} 
-			and  is_walkable(
-				# map coord as hero X - 1, hero Y
-				$ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
-				)
+	if ( $key eq 'w' 	
+		# we are inside the real map
+		and $ui->{hero_y} > $ui->{real_map_first}{y} 
+		and  is_walkable(
+			# map coord as hero X - 1, hero Y
+			$ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
+			)
 					
 		){
         #									THIS must be set to $hero->{on_terrain}
-		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}--;
 		$ui->{map_off_y}-- if $ui->must_scroll();
-        return 1;
+        #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
+		return 1;
     }
 	elsif ( $key eq 's'
 			# we are inside the real map
@@ -263,10 +266,11 @@ sub move{
 						)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}++;
 		$ui->{map_off_y}++ if $ui->must_scroll();		
-        return 1;
+        #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
+		return 1;
     }
 	elsif ( $key eq 'a' 
 			# we are inside the real map
@@ -277,10 +281,11 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_x}--;
 		$ui->{map_off_x}-- if $ui->must_scroll();		
-        return 1;
+        #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
+		return 1;
     }
 	elsif ( $key eq 'd' 
 			# we are inside the real map
@@ -291,10 +296,11 @@ sub move{
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_x}++;
 		$ui->{map_off_x}++ if $ui->must_scroll();				
-        return 1;
+        #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
+		return 1;
     }
 	else{
 		print "DEBUG: no movement possible ([$key] was pressed)\n" if $debug;
