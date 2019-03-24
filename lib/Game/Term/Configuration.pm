@@ -39,10 +39,10 @@ sub terrains_16_colors{
 	#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
 	' ' => [  'plain', ' ', '', '',        0 ],
-	# A 
-	# a 
-	# B 
-	# b 
+	A => [ 'bridge', '-', YELLOW,  '',  0 ],
+	a => [ 'bridge', '|', YELLOW,  '',  0 ],
+	B => [ 'bridge', '/', YELLOW,  '',  0 ], # you need two of this
+    b => [ 'bridge', '\\', YELLOW,  '',  0 ],#   ''
 	# C 
 	# c 
 	# D 
@@ -54,7 +54,7 @@ sub terrains_16_colors{
 	# G 
 	# g 
 	# H 
-	h => [ 'hill', 'm', [ YELLOW, GREEN ],  '',  0.3 ],
+	h => [ 'hill', 'm', [ YELLOW, GREEN ],  '',  0.8 ],
 	# I 
 	# i 
 	# J 
@@ -63,8 +63,8 @@ sub terrains_16_colors{
 	# k 
 	# L 
 	# l 
-	M => [  'unwalkable mountain', 'M', [ WHITE, B_WHITE ],  '',  5 ],         # OK ʌ with chcp 65001
-	m => [  'mountain', 'M', [ YELLOW, GREEN ],  '',  3 ],
+	M => [ 'unwalkable mountain', 'M', [ WHITE, B_WHITE ],  '',  999 ],         # OK ʌ with chcp 65001
+	m => [ 'mountain', 'M', [ YELLOW, GREEN ],  '',  3 ],
 	# N
 	# n
 	# O 
@@ -75,10 +75,10 @@ sub terrains_16_colors{
 	# q 
 	# R 
 	# r 
-	S => [  'unwalkable swamp', [qw( ~ - ~ - ~)], GREEN, ON_YELLOW,  999 ],
-	s => [  'swamp', '-', YELLOW,  '',       1 ],
-	T => [  'unwalkable wood', 'P',   [ B_YELLOW, B_GREEN ],  '',       999 ], 
-	t => [  'wood', ['P', 'Y'], [ YELLOW, GREEN], '',        0.3 ],
+	S => [ 'unwalkable swamp', [qw( ~ - ~ - ~)], GREEN, ON_YELLOW,  999 ],
+	s => [ 'swamp', '-', YELLOW,  '',       1 ],
+	T => [ 'unwalkable wood', 'O',   [ B_YELLOW, B_GREEN ],  '',       999 ], 
+	t => [ 'wood', ['O', 'o'], [ YELLOW, GREEN], '',        0.5 ],
 	#t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
 	# U 
 	# u
@@ -86,8 +86,8 @@ sub terrains_16_colors{
 	# v 
 	#W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
 	#w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
-	W => [  'deep water', '~',  [ B_BLUE, B_BLACK, B_BLUE ] , ON_BLUE, 999 ],
-	w => [  'shallow water',[qw(~ - ~ ~)], [ B_WHITE, B_BLUE ], '', 2 ],
+	W => [ 'deep water', '~',  [ B_BLUE, B_BLACK, B_BLUE ] , ON_BLUE, 999 ],
+	w => [ 'shallow water',[qw(~ - ~ ~)], [ B_WHITE, B_BLUE ], '', 2 ],
 	
 	# X RESERVED for hero in the original map
 	# x 
