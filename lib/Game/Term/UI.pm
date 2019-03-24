@@ -72,12 +72,10 @@ sub new{
 	# $conf{ map_off_x } = 0;
 	# $conf{ map_off_y } = 0;
 	# $conf{ scrolling } = 0;
-	# $conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
-	
-	
-	
-	
+	# $conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };	
 	#my %conf = validate_conf( @_ );
+	
+	
 	%terrain = $conf_object->get_terrains();
 	
 	return bless {
@@ -362,10 +360,14 @@ sub set_map_and_hero{
 	$ui->set_hero_pos();
 	# change external tile to []
 	$ui->{ ext_tile } = [ 
-							($ui->{dec_color} ?
-							$ui->{dec_color}.$ui->{ ext_tile }.RESET :
-							$ui->{ ext_tile }), 
-							$ui->{ ext_tile }, 1];
+							(
+								$ui->{dec_color} 							?
+								$ui->{dec_color}.$ui->{ ext_tile }.RESET 	:
+								$ui->{ ext_tile }
+							), 
+							$ui->{ ext_tile },
+							1	# unmasked
+						];
 	# change hero icon to []
 	$ui->{ hero_icon } = [ $ui->{ hero_color }.$ui->{ hero_icon }.RESET, $ui->{ hero_icon }, 1 ];
 	# add at top
