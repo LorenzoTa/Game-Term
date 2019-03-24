@@ -75,10 +75,10 @@ sub terrains_16_colors{
 	# q 
 	# R 
 	# r 
-	# S 
-	# s 
+	S => [  'unwalkable swamp', [qw( ~ - ~ - ~)], GREEN, ON_YELLOW,  999 ],
+	s => [  'swamp', '-', YELLOW,  '',       1 ],
 	T => [  'unwalkable wood', 'P',   [ B_YELLOW, B_GREEN ],  '',       999 ], 
-	t => [  'walkable wood', ['P', 'Y'], [ YELLOW, GREEN], '',        0.3 ],
+	t => [  'wood', ['P', 'Y'], [ YELLOW, GREEN], '',        0.3 ],
 	#t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
 	# U 
 	# u
@@ -107,7 +107,7 @@ sub validate_conf{
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
 	$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
-	$conf{ dec_color } //= YELLOW;#''; # apply to dec_hor dec_ver ext_tile
+	$conf{ dec_color } //= RED;#''; # apply to dec_hor dec_ver ext_tile
 	#$conf{ ext_tile } //= ['O','O',1];
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 

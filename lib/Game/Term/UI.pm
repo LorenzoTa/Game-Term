@@ -15,7 +15,7 @@ ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 
-our $debug = 1;
+our $debug = 0;
 our $noscroll_debug = 0;
 
 # SOME NOTES ABOUT MAP:
@@ -119,10 +119,10 @@ sub run{
 			print "DEBUG: slowness for terrain ".
 				$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
 				"\n" if $debug;
-			if( print $ui->move( $key ) ){
+			if( $ui->move( $key ) ){
 				local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
 				local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
-				local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'walkable wood';
+				local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'wood';
 				$ui->draw_map();
 				
 		if ($noscroll_debug){
@@ -136,9 +136,11 @@ sub run{
 		 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
 	}
 			
-			$ui->draw_menu( ["hero HP: 42".
-									"hero at: $ui->{hero_y}-$ui->{hero_x} ".
-									"( $ui->{hero_terrain} ) sight: $ui->{hero_sight}",
+			$ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
+								"( $ui->{hero_terrain} ) sight: $ui->{hero_sight} ".
+								"slowness: ".
+								($ui->{hero_slowness} + 
+								$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]),
 									"key $key was pressed:"] );	
 
 			}

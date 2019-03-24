@@ -94,10 +94,10 @@ tt  ttttttttttttttttttttttttttttt            ttt    ttttttttt   tttttttttttttttt
    t  ttt     tttttt      ttttttt      tttt      ttttt        ttt       tttttttt
       ttt     tttttttt                ttttt      ttttt      ttttt      ttttttttt
       tttt      ttttttttt            tthhtt     tttt       tttttt      ttttttttt
-      ttttt      ttttttttttttttttttttthhhh     ttttt       tttttt      ttttttttt
-      ttttt        tttttttttttttttthhhhhh      tttttt      tttt             tttt
-       tttt            tttttttttthhhhhhh       ttttttt                      tttt
-       tttt                                    ttttttt                 ttt  tttt
+      ttttt      ttttttttttttttttttttthhhh     sssss       tttttt      ttttttttt
+      ttttt        tttttttttttttttthhhhhh      ssSSss      tttt             tttt
+       tttt            tttttttttthhhhhhh       ssSSSss                      tttt
+       tttt                                    sssssss                 ttt  tttt
        tttttttttttttwwwwwwwwwtttmmm                ttt                 ttt  tttt
  t     ttttttttttttwwwwWWWWWWMMMMMM      TTTTTTTT                      ttt  tttt
 ttt    012345678901234wwwwwwwwwwmmm      TTTTTTTT         tttttttttttttttttttttt
