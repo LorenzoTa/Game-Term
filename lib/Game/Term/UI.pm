@@ -394,7 +394,7 @@ sub set_map_and_hero{
 
 	my $original_map_w = $#{$ui->{map}->[0]} + 1;
 	my $original_map_h = $#{$ui->{map}} + 1;
-	print "DEBUG: origial map was $original_map_w x $original_map_h\n" if $debug;
+	print "DEBUG: original map was $original_map_w x $original_map_h\n" if $debug;
 	# get hero position and side BEFORE enlarging
 	$ui->set_hero_pos();
 	# change external tile to []
