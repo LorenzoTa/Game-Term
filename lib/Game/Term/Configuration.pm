@@ -5,6 +5,8 @@ use strict;
 use warnings;
 
 use Term::ANSIColor qw(RESET :constants :constants256);
+
+##############NOOOO usare sempre ANSI0-ANSI15 per i 16 colori
 use constant {
 	B_BLACK => ($^O eq 'MSWin32' ? BOLD.BLACK : BRIGHT_BLACK),
     B_RED => ($^O eq 'MSWin32' ? BOLD.RED : BRIGHT_RED),
@@ -77,7 +79,7 @@ sub terrains_16_colors{
 	# r 
 	S => [ 'unwalkable swamp', [qw( ~ - ~ - ~)], GREEN, ON_YELLOW,  999 ],
 	s => [ 'swamp', '-', YELLOW,  '',       1 ],
-	T => [ 'unwalkable wood', 'O',   [ B_YELLOW, B_GREEN ],  '',       999 ], 
+	T => [ 'unwalkable wood', 'O',   [ ANSI11,ANSI10 ],  '',       999 ], 
 	t => [ 'wood', ['O', 'o'], [ YELLOW, GREEN], '',        0.5 ],
 	#t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
 	# U 
