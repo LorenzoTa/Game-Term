@@ -16,7 +16,9 @@ ReadMode 'cbreak';
 our $VERSION = '0.01';
 
 our $debug = 0;
-our $noscroll_debug = 0;
+our $noscroll_debug = 1;
+my %terrain;
+
 
 # SOME NOTES ABOUT MAP:
 # The map is initially loaded from the data field of the Game::Term::Map object.
@@ -47,40 +49,57 @@ our $noscroll_debug = 0;
 # ON_BRIGHT_BLUE  ON_BRIGHT_MAGENTA ON_BRIGHT_CYAN  ON_BRIGHT_WHITE
 
 
-my %terrain;
+
 
 
 sub new{
 	my $class = shift;
 	my %params = @_;
+	$debug = $params{debug};
+	$noscroll_debug = $params{noscroll_debug};
+	# CONFIGURATION and TERRAINS
+	my %conf;
+	#my %terrain;
+	#my $conf_object = Game::Term::Configuration->new( configuration => $params{configuration});
+	#my $conf_object = $params{configuration} ;
 	
-	# CONFIGURATION:
-	my $conf_object = Game::Term::Configuration->new( configuration => $params{configuration});
-	my %conf = $conf_object->get_conf();
+	unless( 
+			exists  $params{configuration} and 
+			ref $params{configuration} eq 'Game::Term::Configuration'
+		)
+	{
+		$params{configuration} = Game::Term::Configuration->new();
+		print "DEBUG: no configuration provided, loading a basic one\n" if $debug;
+	}	
+	my %interface_conf = $params{configuration}->get_interface();
+	%terrain = $params{configuration}->get_terrains();
+	
+	delete $params{configuration};
+	
 	# OTHER FIELDS USED INTERNALLY (once set by validate_conf)
 	# # set internally to get coord of the first element of the map
-	# $conf{ real_map_first} = { x => undef, y => undef };
+	# $ui{ real_map_first} = { x => undef, y => undef };
 	# # set internally to get coord of the last element of the map
-	# $conf{ real_map_last} = { x => undef, y => undef };
-	# $conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
+	# $ui{ real_map_last} = { x => undef, y => undef };
+	# $ui{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	# # get and set internally
-	# $conf{ hero_x } = undef;
-	# $conf{ hero_y } = undef;
-	# $conf{ hero_side } = '';
-	# $conf{ hero_terrain } = ''; #new!
+	# $ui{ hero_x } = undef;
+	# $ui{ hero_y } = undef;
+	# $ui{ hero_side } = '';
+	# $ui{ hero_terrain } = ''; #new!
 	# # get and set internally
-	# $conf{ map } //=[];
-	# $conf{ map_off_x } = 0;
-	# $conf{ map_off_y } = 0;
-	# $conf{ scrolling } = 0;
-	# $conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };	
+	# $ui{ map } //=[];
+	# $ui{ map_off_x } = 0;
+	# $ui{ map_off_y } = 0;
+	# $ui{ scrolling } = 0;
+	# $ui{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };	
 	#my %conf = validate_conf( @_ );
 	
 	
-	%terrain = $conf_object->get_terrains();
+#%terrain = $conf_object->get_terrains();
 	
 	return bless {
-				%conf
+				%interface_conf
 	}, $class;
 }
 

@@ -25,13 +25,13 @@ sub new{
 	my %terrains = terrains_16_colors();
 	
 	return bless {
-				configuration => \%conf,
+				interface => \%conf,
 				terrains =>  \%terrains,
 	}, $class;
 }
-sub get_conf{
+sub get_interface{
 	my $conf = shift;
-	return %{$conf->{configuration}};
+	return %{$conf->{interface}};
 }
 sub get_terrains{
 	my $conf = shift;
