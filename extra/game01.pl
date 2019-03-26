@@ -19,7 +19,7 @@ my $conf = Game::Term::Configuration->new();
 # my $ui = Game::Term::UI->new( configuration => $conf, debug => 1 );
 
 # bare UI with defaults
-my $ui = Game::Term::UI->new( debug => 2 );
+my $ui = Game::Term::UI->new();
 
 # directly modify debugs
 # $Game::Term::UI::debug = 1;

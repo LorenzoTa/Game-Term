@@ -43,7 +43,7 @@ sub new{
 	my %params = @_;
 	my $conf_obj = $params{configuration};
 	
-	$debug = $params{debug};
+	$debug = $params{debug} // 0;
 	$noscroll_debug = $params{noscroll_debug};
 	my $ui = bless {
 				#%interface_conf
