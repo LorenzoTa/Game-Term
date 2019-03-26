@@ -7,20 +7,25 @@ use Term::ReadKey;
 use List::Util qw( max min );
 use Term::ANSIColor qw(RESET :constants :constants256);
 use Time::HiRes qw ( sleep );
+use Carp;
 
+use Game::Term::Configuration;
 use Game::Term::Map;
 
 ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 
-my $debug = 0;
-my $noscroll_debug = 0;
+our $debug = 0;
+our $noscroll_debug = 0;
+# terrain is class data!!
+my %terrain;
+
 
 # SOME NOTES ABOUT MAP:
 # The map is initially loaded from the data field of the Game::Term::Map object.
-# It is the AoA containig one character per tile (terrains) and containing the hero's
-# starting position marked by 'X'.
+# It is the AoA containing one character per tile (terrains) and containing the hero's
+# starting position marked by 'X' ( sticked on one side ).
 
 # This original AoA is passed to set_map_and_hero() where it will be enlarged depending
 # on the map_area settings (the display window). Here the offsets used in print will be calculated.
@@ -31,141 +36,78 @@ my $noscroll_debug = 0;
 
 # Each tile will end to be:  [ 0:to_display,  1:original_terrain_letter,  2:unmasked ]
 
-# CLEAR           RESET             BOLD            DARK
-# FAINT           ITALIC            UNDERLINE       UNDERSCORE
-# BLINK           REVERSE           CONCEALED
- 
-# BLACK           RED               GREEN           YELLOW
-# BLUE            MAGENTA           CYAN            WHITE
-# BRIGHT_BLACK    BRIGHT_RED        BRIGHT_GREEN    BRIGHT_YELLOW
-# BRIGHT_BLUE     BRIGHT_MAGENTA    BRIGHT_CYAN     BRIGHT_WHITE
- 
-# ON_BLACK        ON_RED            ON_GREEN        ON_YELLOW
-# ON_BLUE         ON_MAGENTA        ON_CYAN         ON_WHITE
-# ON_BRIGHT_BLACK ON_BRIGHT_RED     ON_BRIGHT_GREEN ON_BRIGHT_YELLOW
-# ON_BRIGHT_BLUE  ON_BRIGHT_MAGENTA ON_BRIGHT_CYAN  ON_BRIGHT_WHITE
 
-use constant {
-	B_BLACK => ($^O eq 'MSWin32' ? BOLD.BLACK : BRIGHT_BLACK),
-    B_RED => ($^O eq 'MSWin32' ? BOLD.RED : BRIGHT_RED),
-	B_GREEN => ($^O eq 'MSWin32' ? BOLD.GREEN : BRIGHT_GREEN),
-	B_YELLOW => ($^O eq 'MSWin32' ? BOLD.YELLOW : BRIGHT_YELLOW),
-	B_BLUE => ($^O eq 'MSWin32' ? BOLD.BLUE : BRIGHT_BLUE),
-	B_MAGENTA => ($^O eq 'MSWin32' ? BOLD.MAGENTA : BRIGHT_MAGENTA),
-	B_CYAN => ($^O eq 'MSWin32' ? BOLD.CYAN : BRIGHT_CYAN),
-	B_WHITE => ($^O eq 'MSWin32' ? BOLD.WHITE : BRIGHT_WHITE),
-};
-
-# Linux BRIGHT_GREEN  => windows BOLD.GREEN
-my %terrain = (
-#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
-# letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
-	' ' => [  'plain', ' ', '', '',        0 ],
-	# A 
-	# a 
-	# B 
-	# b 
-	# C 
-	# c 
-	# D 
-	# d 
-	# E 
-	# e 
-	# F 
-	# f 
-	# G 
-	# g 
-	# H 
-	# h 
-	# I 
-	# i 
-	# J 
-	# j ͡
-	# K 
-	# k 
-	# L 
-	# l 
-	M => [  'unwalkable mountain', chr(156), [ ANSI15],  '',  5 ],         # OK ʌ with chcp 65001
-	m => [  'mountain', chr(189), [ ANSI130, ANSI136, ANSI246],  '',  3 ],
-	# N
-	# n
-	# O 
-	# o 
-	# P 
-	# p
-	# Q 
-	# q 
-	# R 
-	# r 
-	# S 
-	# s 
-	T => [  'unwalkable wood', chr(207),          [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22],  '',       999 ], 
-	t => [  'walkable wood', [chr(172),chr(168)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
-	#t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
-	# U 
-	# u
-	# V 
-	# v 
-	#W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
-	#w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
-	W => [  'deep water', chr(171), [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
-	w => [  'shallow water', chr(171), [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
-	
-	# X RESERVED for hero in the original map
-	# x 
-	# Y 
-	# y 
-	# Z 
-	# z
-		
-);
-    
-# render is class data
-# my %render = (
-
-	# X		=> sub{ color('bold red'),$_[0],color('reset') },
-	# chr(2)  => sub{ color('bold red'),$_[0],color('reset') },
-	# # t		=> sub{ color('bold green'),chr(6),color('reset') },
-	# # T		=> sub{ color('green'),chr(5),color('reset') },
-	# # #m		=> sub{ color('magenta'),$_[0],color('reset') },
-	# # #M		=> sub{ color('bold magenta'),$_[0],color('reset') },
-	# # w		=> sub{ color('bold cyan'),'~',color('reset') },
-	# # W		=> sub{ color('cyan'),'~',color('reset') },
-	# # n		=> sub{ color('yellow'),'n',color('reset') },
-	# # N		=> sub{ color('bold yellow'),'N',color('reset') },
-	# # a		=> sub{ qq(\e[37ma\e[0m) },
-	# # A		=> sub{ qq(\e[1;37mA\e[0m) },
-	# # basic color (on windows) are 16:
-	# # from 30 to 37 preceede or not by 1; to be bright
-	# d		=> sub{ qq(\e[30m$_[0]\e[0m) },
-	# D		=> sub{ qq(\e[1;30m$_[0]\e[0m) },
-	# f		=> sub{ qq(\e[31m$_[0]\e[0m) },
-	# F		=> sub{ qq(\e[1;31m$_[0]\e[0m) },
-	# g		=> sub{ qq(\e[32m$_[0]\e[0m) },
-	# G		=> sub{ qq(\e[1;32m$_[0]\e[0m) },
-	# h		=> sub{ qq(\e[33m$_[0]\e[0m) },
-	# H		=> sub{ qq(\e[1;33m$_[0]\e[0m) },
-	# j		=> sub{ qq(\e[34m$_[0]\e[0m) },
-	# J		=> sub{ qq(\e[1;34m$_[0]\e[0m) },
-	# k		=> sub{ qq(\e[35m$_[0]\e[0m) },
-	# K		=> sub{ qq(\e[1;35m$_[0]\e[0m) },
-	# l		=> sub{ qq(\e[36m$_[0]\e[0m) },
-	# L		=> sub{ qq(\e[1;36m$_[0]\e[0m) },
-	# m		=> sub{ qq(\e[37m$_[0]\e[0m) },
-	# M		=> sub{ qq(\e[1;37m$_[0]\e[0m) },
-	# #'~'		=> sub{ color('blue'),$_[0],color('reset') },
-	
-	
-# );
 
 sub new{
 	my $class = shift;
-	my %conf = validate_conf( @_ );
+	my %params = @_;
+	my $conf_obj = $params{configuration};
 	
-	
-	return bless {
-				%conf
+	$debug = $params{debug} // 0;
+	$noscroll_debug = $params{noscroll_debug};
+	my $ui = bless {
+				#%interface_conf
 	}, $class;
+	# LOAD CONFIGURATION into $ui and and class data %terrains
+	# if the right object was passed to new 
+	if ( defined $conf_obj and ref $conf_obj eq 'Game::Term::Configuration' ){
+		# terrain is class data!!
+		%terrain = $conf_obj->get_terrains();
+		my %interface_conf = $conf_obj->get_interface();
+		# apply
+		foreach my $key ( keys %interface_conf ){
+			print "DEBUG: configuration $key set..\n";# THIS CHANGE COLOR!! to $interface_conf{ $key }\n";
+			$ui->{ $key } = $interface_conf{ $key };	
+		}
+	}
+	# no configuration object was passed
+	else{ $ui->load_configuration()  }
+	
+#use Data::Dump; dd $ui;	
+	return $ui;	
+}
+
+
+sub load_configuration{
+	my $ui = shift;
+	my $conf_from = shift;
+	my $conf_obj;
+	if ( $conf_from ){
+		$conf_obj = Game::Term::Configuration->new( from => $conf_from );
+	}
+	else{
+		$conf_obj = Game::Term::Configuration->new();
+		print "DEBUG: no specific configuration provided, loading a basic one\n" if $debug;
+	}
+	# terrain is class data!!
+	%terrain = $conf_obj->get_terrains();
+	print "DEBUG: terrain:\n" if $debug > 1;
+	foreach my $ter(sort keys %terrain){
+		
+		print "\t '$ter' =>  [ ",
+			(join ', ',map{ ref $_ eq 'ARRAY' ? "[qw( @$_ )]" : "'$_'" }@{$terrain{$ter}}),
+			" ],\n" if $debug > 1;
+		
+		$terrain{$ter}->[2] =  ref $terrain{$ter}->[2] eq 'ARRAY' ?
+								[ map{ color_names_to_ANSI($_) }@{$terrain{$ter}->[2]} ] : 
+								#color_names_to_ANSI( $terrain{$ter}->[2] );
+								( defined  $terrain{$ter}->[3] ? color_names_to_ANSI( $terrain{$ter}->[3] ):'');
+								
+		$terrain{$ter}->[3] =  ref $terrain{$ter}->[3] eq 'ARRAY' ?
+								[map{ color_names_to_ANSI($_) }@{$terrain{$ter}->[3]} ] : 
+								( defined  $terrain{$ter}->[3] ? color_names_to_ANSI( $terrain{$ter}->[3] ):'');
+	}
+	# translate color names into ANSI constant
+	# ...
+	my %interface_conf = $conf_obj->get_interface();
+	print "DEBUG: interface:\n",map{ "\t$_ => '$interface_conf{$_}'\n" } sort keys %interface_conf if $debug > 1;
+	# translate color names to ANSIx
+	$interface_conf{hero_color} = color_names_to_ANSI($interface_conf{hero_color});
+	$interface_conf{dec_color} = color_names_to_ANSI($interface_conf{dec_color});
+	# apply
+	foreach my $key ( keys %interface_conf ){
+		$ui->{ $key } = $interface_conf{ $key };	
+	}
 }
 
 
@@ -181,8 +123,6 @@ sub run{
 		# set real_map_first and real_map_last x,y
 		$ui->set_map_and_hero();
 		
-# $ui->{map}[ $ui->{real_map_first}{y} ][ $ui->{real_map_first}{x} ]='z';
-# $ui->{map}[ $ui->{real_map_last}{y} ][ $ui->{real_map_last}{x} ]='z';
 		print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
 				" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
 		# now BIG map, hero_pos and hero_side are initialized
@@ -207,7 +147,9 @@ sub run{
 				$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
 				"\n" if $debug;
 			if( $ui->move( $key ) ){
-				
+				local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
+				local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
+				local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'wood';
 				$ui->draw_map();
 				
 		if ($noscroll_debug){
@@ -221,8 +163,11 @@ sub run{
 		 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
 	}
 			
-			$ui->draw_menu( ["hero HP: 42",
-									"hero at: $ui->{hero_y}-$ui->{hero_x}",
+			$ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
+								"( $ui->{hero_terrain} ) sight: $ui->{hero_sight} ".
+								"slowness: ".
+								($ui->{hero_slowness} + 
+								$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]),
 									"key $key was pressed:"] );	
 
 			}
@@ -260,7 +205,7 @@ sub draw_map{
 	my $ui = shift;
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
-	
+	#print CLEAR unless $debug;
 	# get area of currently seen tiles (by coords)
 	my %seen = $ui->illuminate();
 	
@@ -292,12 +237,12 @@ sub draw_map{
 					}
 					# already unmasked but empty space (fog of war)
 					elsif( 	$ui->{map}[$row][$col][2] == 1 		and 
-							$ui->{map}[$row][$col][0] eq ' ' 	and 
+							$ui->{map}[$row][$col][1] eq ' ' 	and # WITH [0]FAILS!!!!!
 							$ui->{fog_of_war}					and
 							!$seen{$row.'_'.$col}
 						)
 					{ 
-						print $ui->{fog_char} ; 
+						print $ui->{fog_char} ;
 					}
 					# already unmasked: print display 
 					elsif( $ui->{map}[$row][$col][2] == 1 ){ print $ui->{map}[$row][$col][0]; }
@@ -325,55 +270,71 @@ sub draw_map{
 sub move{
 	my $ui = shift;
 	my $key = shift;
-	#check if leaving the no_scroll area
 	
-    # move with WASD
-    if ( $key eq 'w' and  is_walkable(
-							# map coord as hero X - 1, hero Y
-							$ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
-							)
+	# move with WASD
+	if ( $key eq 'w' 	
+		# we are inside the real map
+		and $ui->{hero_y} > $ui->{real_map_first}{y} 
+		and  is_walkable(
+			# map coord as hero X - 1, hero Y
+			$ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
+			)
+					
 		){
         #									THIS must be set to $hero->{on_terrain}
-	#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}--;
 		$ui->{map_off_y}-- if $ui->must_scroll();
-        return 1;
+        #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
+		return 1;
     }
-	elsif ( $key eq 's' and  is_walkable(
-							# map coord as hero X + 1, hero Y
-							$ui->{map}->[ $ui->{hero_y} + 1 ][	$ui->{hero_x} ]
-							)
+	elsif ( $key eq 's'
+			# we are inside the real map
+			and $ui->{hero_y} < $ui->{real_map_last}{y} - 1
+			and  is_walkable(
+						# map coord as hero X + 1, hero Y
+						$ui->{map}->[ $ui->{hero_y} + 1 ][	$ui->{hero_x} ]
+						)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_y}++;
 		$ui->{map_off_y}++ if $ui->must_scroll();		
-        return 1;
+        #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
+		return 1;
     }
-	elsif ( $key eq 'a' and  is_walkable(
+	elsif ( $key eq 'a' 
+			# we are inside the real map
+			and $ui->{hero_x} > $ui->{real_map_first}{x}
+			and  is_walkable(
 							# map coord as hero X, hero Y - 1
 							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} - 1 ]
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_x}--;
 		$ui->{map_off_x}-- if $ui->must_scroll();		
-        return 1;
+        #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
+		return 1;
     }
-	elsif ( $key eq 'd' and  is_walkable(
+	elsif ( $key eq 'd' 
+			# we are inside the real map
+			and $ui->{hero_x} < $ui->{real_map_last}{x}
+			and  is_walkable(
 							# map coord as hero X, hero Y + 1
 							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} + 1 ]
 							)
 		){
         #									THIS must be set to $hero->{on_terrain}
-		#$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ] = [' ',' ',1];
 		$ui->{hero_x}++;
 		$ui->{map_off_x}++ if $ui->must_scroll();				
-        return 1;
+        #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
+		return 1;
     }
 	else{
-		print "unused [$key] was pressed\n" if $debug;
+		print "DEBUG: no movement possible ([$key] was pressed)\n" if $debug;
 		return 0;
 	}
 	
@@ -417,6 +378,7 @@ sub is_walkable{
 	# if( $tile->[1] eq ' ' ){ return 1 }
 	# elsif( $tile->[1] eq '+' ){ return 1 }
 	#print "DEBUG: tile -->",(join '|',@$tile),"<--\n";
+	
 	if ( $terrain{ $tile->[1]}->[4] < 5 ){ return 1}
 	else{return 0}
 }
@@ -440,15 +402,19 @@ sub set_map_and_hero{
 
 	my $original_map_w = $#{$ui->{map}->[0]} + 1;
 	my $original_map_h = $#{$ui->{map}} + 1;
-	print "DEBUG: origial map was $original_map_w x $original_map_h\n" if $debug;
+	print "DEBUG: original map was $original_map_w x $original_map_h\n" if $debug;
 	# get hero position and side BEFORE enlarging
 	$ui->set_hero_pos();
 	# change external tile to []
 	$ui->{ ext_tile } = [ 
-							($ui->{dec_color} ?
-							$ui->{dec_color}.$ui->{ ext_tile }.RESET :
-							$ui->{ ext_tile }), 
-							$ui->{ ext_tile }, 1];
+							(
+								$ui->{dec_color} 							?
+								$ui->{dec_color}.$ui->{ ext_tile }.RESET 	:
+								$ui->{ ext_tile }
+							), 
+							$ui->{ ext_tile },
+							1	# unmasked
+						];
 	# change hero icon to []
 	$ui->{ hero_icon } = [ $ui->{ hero_color }.$ui->{ hero_icon }.RESET, $ui->{ hero_icon }, 1 ];
 	# add at top
@@ -594,49 +560,555 @@ sub set_hero_pos{
 	}	
 }
 
-sub validate_conf{
-	my %conf = @_;
-$conf{ map_area_w } //= 50; #80;
-$conf{ map_area_h } //=  20; #20;
-$conf{ menu_area_w } //= $conf{ map_area_w };
-$conf{ menu_area_h } //= 20;
-	# set internally to get coord of the first element of the map
-	$conf{ real_map_first} = { x => undef, y => undef };
-	# set internally to get coord of the last element of the map
-	$conf{ real_map_last} = { x => undef, y => undef };
-$conf{ dec_hor }     //= '-';
-$conf{ dec_ver }     //= '|';
-$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
-$conf{ dec_color } //= YELLOW;#''; # apply to dec_hor dec_ver ext_tile
-#$conf{ ext_tile } //= ['O','O',1];
-$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
+# sub validate_conf{
+	# my %conf = @_;
+	# # set internally to get coord of the first element of the map
+	# $conf{ real_map_first} = { x => undef, y => undef };
+	# # set internally to get coord of the last element of the map
+	# $conf{ real_map_last} = { x => undef, y => undef };
+
+	# $conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 	
-$conf{ masked_map }     //= 1;
-$conf{ fog_of_war }		//=0;
-$conf{ fog_char }		//= '.'; #chr(176); 177 178
 	
-	# get and set internally
-	$conf{ hero_x } = undef;
-	$conf{ hero_y } = undef;
-	$conf{ hero_side } = '';
+	# # get and set internally
+	# $conf{ hero_x } = undef;
+	# $conf{ hero_y } = undef;
+	# $conf{ hero_side } = '';
 	
-$conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
-$conf{ hero_color } //= B_RED;
-$conf{ hero_sight } = 10;
-$conf{ hero_slowness } //= 0; # used to microsleep
 	
-	# get and set internally
-	$conf{ map } //=[];
-	$conf{ map_off_x } = 0;
-	$conf{ map_off_y } = 0;
-	$conf{ scrolling } = 0;
-$conf{ no_scroll } = 0;
-	$conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
+	# # get and set internally
+	# $conf{ map } //=[];
+	# $conf{ map_off_x } = 0;
+	# $conf{ map_off_y } = 0;
+	# $conf{ scrolling } = 0;
+
+	# $conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
 	
 		
-	return %conf;
-}
+	# return %conf;
+# }
 
+
+sub color_names_to_ANSI {
+	my %conv = (
+				Black	=>	ANSI0,
+				Maroon	=>	ANSI1,
+				Green	=>	ANSI2,
+				Olive	=>	ANSI3,
+				Navy	=>	ANSI4,
+				Purple	=>	ANSI5,
+				Teal	=>	ANSI6,
+				Silver	=>	ANSI7,
+				Grey	=>	ANSI8,
+				Red		=>	ANSI9,
+				Lime	=>	ANSI10,
+				Yellow	=>	ANSI11,
+				Blue	=>	ANSI12,
+				Fuchsia	=>	ANSI13,
+				Aqua	=>	ANSI14,
+				White	=>	ANSI15,
+				Grey0	=>	ANSI16,
+				NavyBlue	=>	ANSI17,
+				DarkBlue	=>	ANSI18,
+				Blue3	=>	ANSI19,
+				Blue3	=>	ANSI20,
+				Blue1	=>	ANSI21,
+				DarkGreen	=>	ANSI22,
+				DeepSkyBlue4	=>	ANSI23,
+				DeepSkyBlue4	=>	ANSI24,
+				DeepSkyBlue4	=>	ANSI25,
+				DodgerBlue3	=>	ANSI26,
+				DodgerBlue2	=>	ANSI27,
+				Green4	=>	ANSI28,
+				SpringGreen4	=>	ANSI29,
+				Turquoise4	=>	ANSI30,
+				DeepSkyBlue3	=>	ANSI31,
+				DeepSkyBlue3	=>	ANSI32,
+				DodgerBlue1	=>	ANSI33,
+				Green3	=>	ANSI34,
+				SpringGreen3	=>	ANSI35,
+				DarkCyan	=>	ANSI36,
+				LightSeaGreen	=>	ANSI37,
+				DeepSkyBlue2	=>	ANSI38,
+				DeepSkyBlue1	=>	ANSI39,
+				Green3	=>	ANSI40,
+				SpringGreen3	=>	ANSI41,
+				SpringGreen2	=>	ANSI42,
+				Cyan3	=>	ANSI43,
+				DarkTurquoise	=>	ANSI44,
+				Turquoise2	=>	ANSI45,
+				Green1	=>	ANSI46,
+				SpringGreen2	=>	ANSI47,
+				SpringGreen1	=>	ANSI48,
+				MediumSpringGreen	=>	ANSI49,
+				Cyan2	=>	ANSI50,
+				Cyan1	=>	ANSI51,
+				DarkRed	=>	ANSI52,
+				DeepPink4	=>	ANSI53,
+				Purple4	=>	ANSI54,
+				Purple4	=>	ANSI55,
+				Purple3	=>	ANSI56,
+				BlueViolet	=>	ANSI57,
+				Orange4	=>	ANSI58,
+				Grey37	=>	ANSI59,
+				MediumPurple4	=>	ANSI60,
+				SlateBlue3	=>	ANSI61,
+				SlateBlue3	=>	ANSI62,
+				RoyalBlue1	=>	ANSI63,
+				Chartreuse4	=>	ANSI64,
+				DarkSeaGreen4	=>	ANSI65,
+				PaleTurquoise4	=>	ANSI66,
+				SteelBlue	=>	ANSI67,
+				SteelBlue3	=>	ANSI68,
+				CornflowerBlue	=>	ANSI69,
+				Chartreuse3	=>	ANSI70,
+				DarkSeaGreen4	=>	ANSI71,
+				CadetBlue	=>	ANSI72,
+				CadetBlue	=>	ANSI73,
+				SkyBlue3	=>	ANSI74,
+				SteelBlue1	=>	ANSI75,
+				Chartreuse3	=>	ANSI76,
+				PaleGreen3	=>	ANSI77,
+				SeaGreen3	=>	ANSI78,
+				Aquamarine3	=>	ANSI79,
+				MediumTurquoise	=>	ANSI80,
+				SteelBlue1	=>	ANSI81,
+				Chartreuse2	=>	ANSI82,
+				SeaGreen2	=>	ANSI83,
+				SeaGreen1	=>	ANSI84,
+				SeaGreen1	=>	ANSI85,
+				Aquamarine1	=>	ANSI86,
+				DarkSlateGray2	=>	ANSI87,
+				DarkRed	=>	ANSI88,
+				DeepPink4	=>	ANSI89,
+				DarkMagenta	=>	ANSI90,
+				DarkMagenta	=>	ANSI91,
+				DarkViolet	=>	ANSI92,
+				Purple	=>	ANSI93,
+				Orange4	=>	ANSI94,
+				LightPink4	=>	ANSI95,
+				Plum4	=>	ANSI96,
+				MediumPurple3	=>	ANSI97,
+				MediumPurple3	=>	ANSI98,
+				SlateBlue1	=>	ANSI99,
+				Yellow4	=>	ANSI100,
+				Wheat4	=>	ANSI101,
+				Grey53	=>	ANSI102,
+				LightSlateGrey	=>	ANSI103,
+				MediumPurple	=>	ANSI104,
+				LightSlateBlue	=>	ANSI105,
+				Yellow4	=>	ANSI106,
+				DarkOliveGreen3	=>	ANSI107,
+				DarkSeaGreen	=>	ANSI108,
+				LightSkyBlue3	=>	ANSI109,
+				LightSkyBlue3	=>	ANSI110,
+				SkyBlue2	=>	ANSI111,
+				Chartreuse2	=>	ANSI112,
+				DarkOliveGreen3	=>	ANSI113,
+				PaleGreen3	=>	ANSI114,
+				DarkSeaGreen3	=>	ANSI115,
+				DarkSlateGray3	=>	ANSI116,
+				SkyBlue1	=>	ANSI117,
+				Chartreuse1	=>	ANSI118,
+				LightGreen	=>	ANSI119,
+				LightGreen	=>	ANSI120,
+				PaleGreen1	=>	ANSI121,
+				Aquamarine1	=>	ANSI122,
+				DarkSlateGray1	=>	ANSI123,
+				Red3	=>	ANSI124,
+				DeepPink4	=>	ANSI125,
+				MediumVioletRed	=>	ANSI126,
+				Magenta3	=>	ANSI127,
+				DarkViolet	=>	ANSI128,
+				Purple	=>	ANSI129,
+				DarkOrange3	=>	ANSI130,
+				IndianRed	=>	ANSI131,
+				HotPink3	=>	ANSI132,
+				MediumOrchid3	=>	ANSI133,
+				MediumOrchid	=>	ANSI134,
+				MediumPurple2	=>	ANSI135,
+				DarkGoldenrod	=>	ANSI136,
+				LightSalmon3	=>	ANSI137,
+				RosyBrown	=>	ANSI138,
+				Grey63	=>	ANSI139,
+				MediumPurple2	=>	ANSI140,
+				MediumPurple1	=>	ANSI141,
+				Gold3	=>	ANSI142,
+				DarkKhaki	=>	ANSI143,
+				NavajoWhite3	=>	ANSI144,
+				Grey69	=>	ANSI145,
+				LightSteelBlue3	=>	ANSI146,
+				LightSteelBlue	=>	ANSI147,
+				Yellow3	=>	ANSI148,
+				DarkOliveGreen3	=>	ANSI149,
+				DarkSeaGreen3	=>	ANSI150,
+				DarkSeaGreen2	=>	ANSI151,
+				LightCyan3	=>	ANSI152,
+				LightSkyBlue1	=>	ANSI153,
+				GreenYellow	=>	ANSI154,
+				DarkOliveGreen2	=>	ANSI155,
+				PaleGreen1	=>	ANSI156,
+				DarkSeaGreen2	=>	ANSI157,
+				DarkSeaGreen1	=>	ANSI158,
+				PaleTurquoise1	=>	ANSI159,
+				Red3	=>	ANSI160,
+				DeepPink3	=>	ANSI161,
+				DeepPink3	=>	ANSI162,
+				Magenta3	=>	ANSI163,
+				Magenta3	=>	ANSI164,
+				Magenta2	=>	ANSI165,
+				DarkOrange3	=>	ANSI166,
+				IndianRed	=>	ANSI167,
+				HotPink3	=>	ANSI168,
+				HotPink2	=>	ANSI169,
+				Orchid	=>	ANSI170,
+				MediumOrchid1	=>	ANSI171,
+				Orange3	=>	ANSI172,
+				LightSalmon3	=>	ANSI173,
+				LightPink3	=>	ANSI174,
+				Pink3	=>	ANSI175,
+				Plum3	=>	ANSI176,
+				Violet	=>	ANSI177,
+				Gold3	=>	ANSI178,
+				LightGoldenrod3	=>	ANSI179,
+				Tan	=>	ANSI180,
+				MistyRose3	=>	ANSI181,
+				Thistle3	=>	ANSI182,
+				Plum2	=>	ANSI183,
+				Yellow3	=>	ANSI184,
+				Khaki3	=>	ANSI185,
+				LightGoldenrod2	=>	ANSI186,
+				LightYellow3	=>	ANSI187,
+				Grey84	=>	ANSI188,
+				LightSteelBlue1	=>	ANSI189,
+				Yellow2	=>	ANSI190,
+				DarkOliveGreen1	=>	ANSI191,
+				DarkOliveGreen1	=>	ANSI192,
+				DarkSeaGreen1	=>	ANSI193,
+				Honeydew2	=>	ANSI194,
+				LightCyan1	=>	ANSI195,
+				Red1	=>	ANSI196,
+				DeepPink2	=>	ANSI197,
+				DeepPink1	=>	ANSI198,
+				DeepPink1	=>	ANSI199,
+				Magenta2	=>	ANSI200,
+				Magenta1	=>	ANSI201,
+				OrangeRed1	=>	ANSI202,
+				IndianRed1	=>	ANSI203,
+				IndianRed1	=>	ANSI204,
+				HotPink	=>	ANSI205,
+				HotPink	=>	ANSI206,
+				MediumOrchid1	=>	ANSI207,
+				DarkOrange	=>	ANSI208,
+				Salmon1	=>	ANSI209,
+				LightCoral	=>	ANSI210,
+				PaleVioletRed1	=>	ANSI211,
+				Orchid2	=>	ANSI212,
+				Orchid1	=>	ANSI213,
+				Orange1	=>	ANSI214,
+				SandyBrown	=>	ANSI215,
+				LightSalmon1	=>	ANSI216,
+				LightPink1	=>	ANSI217,
+				Pink1	=>	ANSI218,
+				Plum1	=>	ANSI219,
+				Gold1	=>	ANSI220,
+				LightGoldenrod2	=>	ANSI221,
+				LightGoldenrod2	=>	ANSI222,
+				NavajoWhite1	=>	ANSI223,
+				MistyRose1	=>	ANSI224,
+				Thistle1	=>	ANSI225,
+				Yellow1	=>	ANSI226,
+				LightGoldenrod1	=>	ANSI227,
+				Khaki1	=>	ANSI228,
+				Wheat1	=>	ANSI229,
+				Cornsilk1	=>	ANSI230,
+				Grey100	=>	ANSI231,
+				Grey3	=>	ANSI232,
+				Grey7	=>	ANSI233,
+				Grey11	=>	ANSI234,
+				Grey15	=>	ANSI235,
+				Grey19	=>	ANSI236,
+				Grey23	=>	ANSI237,
+				Grey27	=>	ANSI238,
+				Grey30	=>	ANSI239,
+				Grey35	=>	ANSI240,
+				Grey39	=>	ANSI241,
+				Grey42	=>	ANSI242,
+				Grey46	=>	ANSI243,
+				Grey50	=>	ANSI244,
+				Grey54	=>	ANSI245,
+				Grey58	=>	ANSI246,
+				Grey62	=>	ANSI247,
+				Grey66	=>	ANSI248,
+				Grey70	=>	ANSI249,
+				Grey74	=>	ANSI250,
+				Grey78	=>	ANSI251,
+				Grey82	=>	ANSI252,
+				Grey85	=>	ANSI253,
+				Grey89	=>	ANSI254,
+				Grey93	=>	ANSI255,
+				
+				On_Black => ON_ANSI0,
+				On_Maroon => ON_ANSI1,
+				On_Green => ON_ANSI2,
+				On_Olive => ON_ANSI3,
+				On_Navy => ON_ANSI4,
+				On_Purple => ON_ANSI5,
+				On_Teal => ON_ANSI6,
+				On_Silver => ON_ANSI7,
+				On_Grey => ON_ANSI8,
+				On_Red => ON_ANSI9,
+				On_Lime => ON_ANSI10,
+				On_Yellow => ON_ANSI11,
+				On_Blue => ON_ANSI12,
+				On_Fuchsia => ON_ANSI13,
+				On_Aqua => ON_ANSI14,
+				On_White => ON_ANSI15,
+				On_Grey0 => ON_ANSI16,
+				On_NavyBlue => ON_ANSI17,
+				On_DarkBlue => ON_ANSI18,
+				On_Blue3 => ON_ANSI19,
+				On_Blue3 => ON_ANSI20,
+				On_Blue1 => ON_ANSI21,
+				On_DarkGreen => ON_ANSI22,
+				On_DeepSkyBlue4 => ON_ANSI23,
+				On_DeepSkyBlue4 => ON_ANSI24,
+				On_DeepSkyBlue4 => ON_ANSI25,
+				On_DodgerBlue3 => ON_ANSI26,
+				On_DodgerBlue2 => ON_ANSI27,
+				On_Green4 => ON_ANSI28,
+				On_SpringGreen4 => ON_ANSI29,
+				On_Turquoise4 => ON_ANSI30,
+				On_DeepSkyBlue3 => ON_ANSI31,
+				On_DeepSkyBlue3 => ON_ANSI32,
+				On_DodgerBlue1 => ON_ANSI33,
+				On_Green3 => ON_ANSI34,
+				On_SpringGreen3 => ON_ANSI35,
+				On_DarkCyan => ON_ANSI36,
+				On_LightSeaGreen => ON_ANSI37,
+				On_DeepSkyBlue2 => ON_ANSI38,
+				On_DeepSkyBlue1 => ON_ANSI39,
+				On_Green3 => ON_ANSI40,
+				On_SpringGreen3 => ON_ANSI41,
+				On_SpringGreen2 => ON_ANSI42,
+				On_Cyan3 => ON_ANSI43,
+				On_DarkTurquoise => ON_ANSI44,
+				On_Turquoise2 => ON_ANSI45,
+				On_Green1 => ON_ANSI46,
+				On_SpringGreen2 => ON_ANSI47,
+				On_SpringGreen1 => ON_ANSI48,
+				On_MediumSpringGreen => ON_ANSI49,
+				On_Cyan2 => ON_ANSI50,
+				On_Cyan1 => ON_ANSI51,
+				On_DarkRed => ON_ANSI52,
+				On_DeepPink4 => ON_ANSI53,
+				On_Purple4 => ON_ANSI54,
+				On_Purple4 => ON_ANSI55,
+				On_Purple3 => ON_ANSI56,
+				On_BlueViolet => ON_ANSI57,
+				On_Orange4 => ON_ANSI58,
+				On_Grey37 => ON_ANSI59,
+				On_MediumPurple4 => ON_ANSI60,
+				On_SlateBlue3 => ON_ANSI61,
+				On_SlateBlue3 => ON_ANSI62,
+				On_RoyalBlue1 => ON_ANSI63,
+				On_Chartreuse4 => ON_ANSI64,
+				On_DarkSeaGreen4 => ON_ANSI65,
+				On_PaleTurquoise4 => ON_ANSI66,
+				On_SteelBlue => ON_ANSI67,
+				On_SteelBlue3 => ON_ANSI68,
+				On_CornflowerBlue => ON_ANSI69,
+				On_Chartreuse3 => ON_ANSI70,
+				On_DarkSeaGreen4 => ON_ANSI71,
+				On_CadetBlue => ON_ANSI72,
+				On_CadetBlue => ON_ANSI73,
+				On_SkyBlue3 => ON_ANSI74,
+				On_SteelBlue1 => ON_ANSI75,
+				On_Chartreuse3 => ON_ANSI76,
+				On_PaleGreen3 => ON_ANSI77,
+				On_SeaGreen3 => ON_ANSI78,
+				On_Aquamarine3 => ON_ANSI79,
+				On_MediumTurquoise => ON_ANSI80,
+				On_SteelBlue1 => ON_ANSI81,
+				On_Chartreuse2 => ON_ANSI82,
+				On_SeaGreen2 => ON_ANSI83,
+				On_SeaGreen1 => ON_ANSI84,
+				On_SeaGreen1 => ON_ANSI85,
+				On_Aquamarine1 => ON_ANSI86,
+				On_DarkSlateGray2 => ON_ANSI87,
+				On_DarkRed => ON_ANSI88,
+				On_DeepPink4 => ON_ANSI89,
+				On_DarkMagenta => ON_ANSI90,
+				On_DarkMagenta => ON_ANSI91,
+				On_DarkViolet => ON_ANSI92,
+				On_Purple => ON_ANSI93,
+				On_Orange4 => ON_ANSI94,
+				On_LightPink4 => ON_ANSI95,
+				On_Plum4 => ON_ANSI96,
+				On_MediumPurple3 => ON_ANSI97,
+				On_MediumPurple3 => ON_ANSI98,
+				On_SlateBlue1 => ON_ANSI99,
+				On_Yellow4 => ON_ANSI100,
+				On_Wheat4 => ON_ANSI101,
+				On_Grey53 => ON_ANSI102,
+				On_LightSlateGrey => ON_ANSI103,
+				On_MediumPurple => ON_ANSI104,
+				On_LightSlateBlue => ON_ANSI105,
+				On_Yellow4 => ON_ANSI106,
+				On_DarkOliveGreen3 => ON_ANSI107,
+				On_DarkSeaGreen => ON_ANSI108,
+				On_LightSkyBlue3 => ON_ANSI109,
+				On_LightSkyBlue3 => ON_ANSI110,
+				On_SkyBlue2 => ON_ANSI111,
+				On_Chartreuse2 => ON_ANSI112,
+				On_DarkOliveGreen3 => ON_ANSI113,
+				On_PaleGreen3 => ON_ANSI114,
+				On_DarkSeaGreen3 => ON_ANSI115,
+				On_DarkSlateGray3 => ON_ANSI116,
+				On_SkyBlue1 => ON_ANSI117,
+				On_Chartreuse1 => ON_ANSI118,
+				On_LightGreen => ON_ANSI119,
+				On_LightGreen => ON_ANSI120,
+				On_PaleGreen1 => ON_ANSI121,
+				On_Aquamarine1 => ON_ANSI122,
+				On_DarkSlateGray1 => ON_ANSI123,
+				On_Red3 => ON_ANSI124,
+				On_DeepPink4 => ON_ANSI125,
+				On_MediumVioletRed => ON_ANSI126,
+				On_Magenta3 => ON_ANSI127,
+				On_DarkViolet => ON_ANSI128,
+				On_Purple => ON_ANSI129,
+				On_DarkOrange3 => ON_ANSI130,
+				On_IndianRed => ON_ANSI131,
+				On_HotPink3 => ON_ANSI132,
+				On_MediumOrchid3 => ON_ANSI133,
+				On_MediumOrchid => ON_ANSI134,
+				On_MediumPurple2 => ON_ANSI135,
+				On_DarkGoldenrod => ON_ANSI136,
+				On_LightSalmon3 => ON_ANSI137,
+				On_RosyBrown => ON_ANSI138,
+				On_Grey63 => ON_ANSI139,
+				On_MediumPurple2 => ON_ANSI140,
+				On_MediumPurple1 => ON_ANSI141,
+				On_Gold3 => ON_ANSI142,
+				On_DarkKhaki => ON_ANSI143,
+				On_NavajoWhite3 => ON_ANSI144,
+				On_Grey69 => ON_ANSI145,
+				On_LightSteelBlue3 => ON_ANSI146,
+				On_LightSteelBlue => ON_ANSI147,
+				On_Yellow3 => ON_ANSI148,
+				On_DarkOliveGreen3 => ON_ANSI149,
+				On_DarkSeaGreen3 => ON_ANSI150,
+				On_DarkSeaGreen2 => ON_ANSI151,
+				On_LightCyan3 => ON_ANSI152,
+				On_LightSkyBlue1 => ON_ANSI153,
+				On_GreenYellow => ON_ANSI154,
+				On_DarkOliveGreen2 => ON_ANSI155,
+				On_PaleGreen1 => ON_ANSI156,
+				On_DarkSeaGreen2 => ON_ANSI157,
+				On_DarkSeaGreen1 => ON_ANSI158,
+				On_PaleTurquoise1 => ON_ANSI159,
+				On_Red3 => ON_ANSI160,
+				On_DeepPink3 => ON_ANSI161,
+				On_DeepPink3 => ON_ANSI162,
+				On_Magenta3 => ON_ANSI163,
+				On_Magenta3 => ON_ANSI164,
+				On_Magenta2 => ON_ANSI165,
+				On_DarkOrange3 => ON_ANSI166,
+				On_IndianRed => ON_ANSI167,
+				On_HotPink3 => ON_ANSI168,
+				On_HotPink2 => ON_ANSI169,
+				On_Orchid => ON_ANSI170,
+				On_MediumOrchid1 => ON_ANSI171,
+				On_Orange3 => ON_ANSI172,
+				On_LightSalmon3 => ON_ANSI173,
+				On_LightPink3 => ON_ANSI174,
+				On_Pink3 => ON_ANSI175,
+				On_Plum3 => ON_ANSI176,
+				On_Violet => ON_ANSI177,
+				On_Gold3 => ON_ANSI178,
+				On_LightGoldenrod3 => ON_ANSI179,
+				On_Tan => ON_ANSI180,
+				On_MistyRose3 => ON_ANSI181,
+				On_Thistle3 => ON_ANSI182,
+				On_Plum2 => ON_ANSI183,
+				On_Yellow3 => ON_ANSI184,
+				On_Khaki3 => ON_ANSI185,
+				On_LightGoldenrod2 => ON_ANSI186,
+				On_LightYellow3 => ON_ANSI187,
+				On_Grey84 => ON_ANSI188,
+				On_LightSteelBlue1 => ON_ANSI189,
+				On_Yellow2 => ON_ANSI190,
+				On_DarkOliveGreen1 => ON_ANSI191,
+				On_DarkOliveGreen1 => ON_ANSI192,
+				On_DarkSeaGreen1 => ON_ANSI193,
+				On_Honeydew2 => ON_ANSI194,
+				On_LightCyan1 => ON_ANSI195,
+				On_Red1 => ON_ANSI196,
+				On_DeepPink2 => ON_ANSI197,
+				On_DeepPink1 => ON_ANSI198,
+				On_DeepPink1 => ON_ANSI199,
+				On_Magenta2 => ON_ANSI200,
+				On_Magenta1 => ON_ANSI201,
+				On_OrangeRed1 => ON_ANSI202,
+				On_IndianRed1 => ON_ANSI203,
+				On_IndianRed1 => ON_ANSI204,
+				On_HotPink => ON_ANSI205,
+				On_HotPink => ON_ANSI206,
+				On_MediumOrchid1 => ON_ANSI207,
+				On_DarkOrange => ON_ANSI208,
+				On_Salmon1 => ON_ANSI209,
+				On_LightCoral => ON_ANSI210,
+				On_PaleVioletRed1 => ON_ANSI211,
+				On_Orchid2 => ON_ANSI212,
+				On_Orchid1 => ON_ANSI213,
+				On_Orange1 => ON_ANSI214,
+				On_SandyBrown => ON_ANSI215,
+				On_LightSalmon1 => ON_ANSI216,
+				On_LightPink1 => ON_ANSI217,
+				On_Pink1 => ON_ANSI218,
+				On_Plum1 => ON_ANSI219,
+				On_Gold1 => ON_ANSI220,
+				On_LightGoldenrod2 => ON_ANSI221,
+				On_LightGoldenrod2 => ON_ANSI222,
+				On_NavajoWhite1 => ON_ANSI223,
+				On_MistyRose1 => ON_ANSI224,
+				On_Thistle1 => ON_ANSI225,
+				On_Yellow1 => ON_ANSI226,
+				On_LightGoldenrod1 => ON_ANSI227,
+				On_Khaki1 => ON_ANSI228,
+				On_Wheat1 => ON_ANSI229,
+				On_Cornsilk1 => ON_ANSI230,
+				On_Grey100 => ON_ANSI231,
+				On_Grey3 => ON_ANSI232,
+				On_Grey7 => ON_ANSI233,
+				On_Grey11 => ON_ANSI234,
+				On_Grey15 => ON_ANSI235,
+				On_Grey19 => ON_ANSI236,
+				On_Grey23 => ON_ANSI237,
+				On_Grey27 => ON_ANSI238,
+				On_Grey30 => ON_ANSI239,
+				On_Grey35 => ON_ANSI240,
+				On_Grey39 => ON_ANSI241,
+				On_Grey42 => ON_ANSI242,
+				On_Grey46 => ON_ANSI243,
+				On_Grey50 => ON_ANSI244,
+				On_Grey54 => ON_ANSI245,
+				On_Grey58 => ON_ANSI246,
+				On_Grey62 => ON_ANSI247,
+				On_Grey66 => ON_ANSI248,
+				On_Grey70 => ON_ANSI249,
+				On_Grey74 => ON_ANSI250,
+				On_Grey78 => ON_ANSI251,
+				On_Grey82 => ON_ANSI252,
+				On_Grey85 => ON_ANSI253,
+				On_Grey89 => ON_ANSI254,
+				On_Grey93 => ON_ANSI255,
+	);
+	if(exists $conv{$_[0]}){ return $conv{$_[0]} }
+	elsif( $_[0] eq '' ){return ''}
+	else{carp "'$conv{$_[0]}' is not a valid ANSI color name!"}
+}
 
 
 1; # End of Game::Term::UI
@@ -685,6 +1157,7 @@ https://superuser.com/questions/413073/windows-console-with-ansi-colors-handling
 
 
 		perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new();$ui->run"
+		perl -I .\lib -MGame::Term::UI -e "Game::Term::UI->new()->run"
 
 		
 perl -e "print qq(\e[31mCOLORED\e[0m)"
@@ -808,13 +1281,17 @@ These 8 constants will be the right thing on both Windows and Linux:
 		
 =head3 RECAP OF 16 COLORS TO USE TO WRITE MORE PORTABLE GAMES
 		
-		# provided by Term::ANSIColor
-		BLACK           RED             GREEN           YELLOW
-		BLUE            MAGENTA         CYAN            WHITE 
-		
-		# provided by Game::Term
-		B_BLACK  		B_RED      		B_GREEN   		B_YELLOW  
-		B_BLUE   		B_MAGENTA  		B_CYAN    		B_WHITE
+	# darker colors				# brigther colors
+
+	ANSI0  Black (SYSTEM)		ANSI8  Grey (SYSTEM)
+	ANSI1  Maroon (SYSTEM)		ANSI9  Red (SYSTEM)
+	ANSI2  Green (SYSTEM)		ANSI10  Lime (SYSTEM)
+	ANSI3  Olive (SYSTEM)		ANSI11  Yellow (SYSTEM)
+	ANSI4  Navy (SYSTEM)		ANSI12  Blue (SYSTEM)
+	ANSI5  Purple (SYSTEM)		ANSI13  Fuchsia (SYSTEM)
+	ANSI6  Teal (SYSTEM)		ANSI14  Aqua (SYSTEM)
+	ANSI7  Silver (SYSTEM)		ANSI15  White (SYSTEM)
+
 
 
 

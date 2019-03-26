@@ -20,7 +20,7 @@ sub new{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ fake_map } //= 'two' ;
+	$conf{ fake_map } //= 'one' ;
 	$conf{ fake_x } //= 40; #80;
 	$conf{ fake_y } //= 20; #20;
 	
@@ -85,22 +85,22 @@ tt  ttttttttttttttttttttttttttttt            ttt    ttttttttt   tttttttttttttttt
      ttttt                              ttttttttttttt                     tttt t
      ttttt                              tttttttttttttttttttt       ttt     ttttt
       tttt     ttttttt                        tttttttttttttttt     ttttt      tt
-              tttttttt             ttttt      ttttttttttttttttt    ttttttt      
-   t          tttttttt             tttttttt              tttttt     tttttt     t
-        t     tttt                 ttttttttt               ttttt     ttttttttttt
-    t         ttt         tttttt     Otttttt                ttttt      ttttttttt
-         t    ttt         ttttttt       tttt                 tttt      ttttttttt
-              tttt        ttttttt       tttt     ttttt       tttt           tttt
-   t  ttt     tttttt      ttttttt      tttt      ttttt        ttt       tttttttt
-      ttt     tttttttt                ttttt      ttttt      ttttt      ttttttttt
-      tttt      ttttttttt            tttttt     tttt       tttttt      ttttttttt
-      ttttt      ttttttttttttttttttttttttt     ttttt       tttttt      ttttttttt
-      ttttt        tttttttttttttttttttttt      tttttt      tttt             tttt
-       tttt            ttttttttttttttttt       ttttttt                      tttt
-       tttt                                    ttttttt                 ttt  tttt
-       tttttttttttttttttttttttttmmm                ttt                 ttt  tttt
- t     ttttttttttttttttttttttMMMMMM      TTTTTTTT                      ttt  tttt
-ttt    012345678901234ttttttttttmmm      TTTTTTTT         tttttttttttttttttttttt
+         aa   tttttttt             ttttt      ttttttttttttttttt    ttttttt      
+   t   wwaawwwtttttttt             tttttttt              tttttt     tttttt     t
+       wwaawww tttt                 ttttttttt               ttttt     tttttttttt
+    t    aa WWWtt         tttttt     Otttttt                ttttt      ttttttttt
+         t AAAAA ttt         ttttttt      ttttt                 tttt      tttttt
+           AAAAA t        ttttttt      ttttt     ttttt       tttt           tttt
+   t  ttt   WWWwwwww      ttttttt      tttt      ttttt        ttt       tttttttt
+      ttt   wwwwwwwwtt                ttttt      ttttt      ttttt      ttttttttt
+      tttt      tttwwwttt            tthhtt     tttt       tttttt      ttttttttt
+      ttttt         wwwttttttttttttttthhhh     sssss       tttttt      ttttttttt
+      ttttt       bbwwttttttttttttthhhhhh      ssSSss      tttt             tttt
+       tttt     wwwbbwwwwtttttttthhhhhhh       ssSSSss                      tttt
+       tttt     wwwwbbwwwww                     sssssss                 tt  tttt
+       tttttttttWWWWWbbWwwwwwtttmmm                ttt                 ttt  tttt
+ t     ttttttttttttwwwbbWWWWWMMMMMM      TTTTTTTT                      ttt  tttt
+ttt    01234567890wwwwwbbwwwwwwwmmm      TTTTTTTT         tttttttttttttttttttttt
 ttt                                  X                tttttttttttttttttttttttttt
 EOM
 		foreach my $row( split "\n", $fake){
