@@ -3,7 +3,7 @@ package Game::Term::Configuration;
 use 5.014;
 use strict;
 use warnings;
-use Carp;
+
 
 use Term::ANSIColor qw(RESET :constants :constants256);
 
@@ -40,9 +40,39 @@ use Term::ANSIColor qw(RESET :constants :constants256);
 # ANSI14  Aqua (SYSTEM)
 # ANSI15  White (SYSTEM)
 
+# # system dark
+# Black Maroon Green Olive Navy Purple Teal Silver 
+# # system bright
+# Grey Red Lime Yellow Blue Fuchsia Aqua White
+# # 256 colors 
+# Grey0 NavyBlue DarkBlue Blue3 Blue3 Blue1 DarkGreen DeepSkyBlue4 DeepSkyBlue4 DeepSkyBlue4 DodgerBlue3 DodgerBlue2
+# Green4 SpringGreen4 Turquoise4 DeepSkyBlue3 DeepSkyBlue3 DodgerBlue1 Green3 SpringGreen3 DarkCyan LightSeaGreen
+# DeepSkyBlue2 DeepSkyBlue1 Green3 Spring Green3 SpringGreen2 Cyan3 DarkTurquoise Turquoise2 Green1 SpringGreen2
+# SpringGreen1 MediumSpringGreen Cyan2 Cyan1 DarkRed DeepPink4 Purple4 Purple4 Purple3 BlueViolet Orange4 Grey37
+# MediumPurple4 SlateBlue3 SlateBlue3 RoyalBlue1 Chartreuse4 DarkSeaGreen4 PaleTurquoise4 SteelBlue SteelBlue3
+# CornflowerBlue Chartreuse3 DarkSeaGreen4 CadetBlue CadetBlue SkyBlue3 SteelBlue1 Chartreuse3 PaleGreen3 SeaGreen3
+# Aquamarine3 MediumTurquoise SteelBlue1 Chartreuse2 SeaGreen2 SeaGreen1 SeaGreen1 Aquamarine1 DarkSlateGray2 
+# DarkRed DeepPink4 DarkMagenta DarkMagenta DarkViolet Purple Orange4 LightPink4 Plum4 MediumPurple3 MediumPurple3
+# SlateBlue1 Yellow4 Wheat4 Grey53 LightSlateGrey MediumPurple LightSlateBlue Yellow4 DarkOliveGreen3 DarkSeaGreen
+# LightSkyBlue3 LightSkyBlue3 SkyBlue2 Chartreuse2 DarkOliveGreen3 PaleGreen3 DarkSeaGreen3 DarkSlateGray3 SkyBlue1
+# Chartreuse1 LightGreen LightGreen PaleGreen1 Aquamarine1 DarkSlateGray1 Red3 DeepPink4 MediumVioletRed Magenta3
+# DarkViolet Purple DarkOrange3 IndianRed HotPink3 MediumOrchid3 MediumOrchid MediumPurple2 DarkGoldenrod 
+# LightSalmon3 RosyBrown Grey63 MediumPurple2 MediumPurple1 Gold3 DarkKhaki NavajoWhite3 Grey69 LightSteelBlue3
+# LightSteelBlue Yellow3 DarkOliveGreen3 DarkSeaGreen3 DarkSeaGreen2 LightCyan3 LightSkyBlue1 GreenYellow
+# DarkOliveGreen2 PaleGreen1 DarkSeaGreen2 DarkSeaGreen1 PaleTurquoise1 Red3 DeepPink3 DeepPink3 Magenta3 Magenta3
+# Magenta2 DarkOrange3 IndianRed HotPink3 HotPink2 Orchid MediumOrchid1 Orange3 LightSalmon3 LightPink3 Pink3 Plum3
+# Violet Gold3 LightGoldenrod3 Tan MistyRose3 Thistle3 Plum2 Yellow3 Khaki3 LightGoldenrod2 LightYellow3 Grey84
+# LightSteelBlue1 Yellow2 DarkOliveGreen1 DarkOliveGreen1 DarkSeaGreen1 Honeydew2 LightCyan1 Red1 DeepPink2
+# DeepPink1 DeepPink1 Magenta2 Magenta1 OrangeRed1 IndianRed1 IndianRed1 HotPink HotPink MediumOrchid1 DarkOrange
+# Salmon1 LightCoral PaleVioletRed1 Orchid2 Orchid1 Orange1 SandyBrown LightSalmon1 LightPink1 Pink1 Plum1 Gold1
+# LightGoldenrod2 LightGoldenrod2 NavajoWhite1 MistyRose1 Thistle1 Yellow1 LightGoldenrod1 Kh
+# aki1 Wheat1 Cornsilk1 Grey100 Grey3 Grey7 Grey11 Grey15 Grey19 Grey23 Grey27 Grey30 Grey35 Grey39 Grey42 Grey46
+# Grey50 Grey54 Grey58 Grey62 Grey66 Grey70 Grey74 Grey78 Grey82 Grey85 Grey89 Grey93
+
 sub new{
 	my $class = shift;
 	my %conf = validate_conf( @_ );
+	
 	# if $conf{from} ...
 	# read file..
 	# import.. 
@@ -133,7 +163,7 @@ sub validate_conf{
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
 	$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
-	$conf{ dec_color } //= ANSI1;#''; # apply to dec_hor dec_ver ext_tile
+	$conf{ dec_color } //= 'Maroon' ;#''; # apply to dec_hor dec_ver ext_tile
 	#$conf{ ext_tile } //= ['O','O',1];
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 
@@ -142,276 +172,13 @@ sub validate_conf{
 	$conf{ fog_char }		//= '.'; #chr(176); 177 178
 
 	$conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
-	$conf{ hero_color } //= ANSI9;
+	$conf{ hero_color } //= 'Red';
 	$conf{ hero_sight } = 5;
 	$conf{ hero_slowness } //= 0; # used to microsleep
 
 	$conf{ no_scroll } = 0;
 
 	return %conf;
-}
-
-sub color_names_to_ANSI {
-	my %conv = (
-				Black	=>	ANSI0,
-				Maroon	=>	ANSI1,
-				Green	=>	ANSI2,
-				Olive	=>	ANSI3,
-				Navy	=>	ANSI4,
-				Purple	=>	ANSI5,
-				Teal	=>	ANSI6,
-				Silver	=>	ANSI7,
-				Grey	=>	ANSI8,
-				Red		=>	ANSI9,
-				Lime	=>	ANSI10,
-				Yellow	=>	ANSI11,
-				Blue	=>	ANSI12,
-				Fuchsia	=>	ANSI13,
-				Aqua	=>	ANSI14,
-				White	=>	ANSI15,
-				Grey0	=>	ANSI16,
-				NavyBlue	=>	ANSI17,
-				DarkBlue	=>	ANSI18,
-				Blue3	=>	ANSI19,
-				Blue3	=>	ANSI20,
-				Blue1	=>	ANSI21,
-				DarkGreen	=>	ANSI22,
-				DeepSkyBlue4	=>	ANSI23,
-				DeepSkyBlue4	=>	ANSI24,
-				DeepSkyBlue4	=>	ANSI25,
-				DodgerBlue3	=>	ANSI26,
-				DodgerBlue2	=>	ANSI27,
-				Green4	=>	ANSI28,
-				SpringGreen4	=>	ANSI29,
-				Turquoise4	=>	ANSI30,
-				DeepSkyBlue3	=>	ANSI31,
-				DeepSkyBlue3	=>	ANSI32,
-				DodgerBlue1	=>	ANSI33,
-				Green3	=>	ANSI34,
-				SpringGreen3	=>	ANSI35,
-				DarkCyan	=>	ANSI36,
-				LightSeaGreen	=>	ANSI37,
-				DeepSkyBlue2	=>	ANSI38,
-				DeepSkyBlue1	=>	ANSI39,
-				Green3	=>	ANSI40,
-				SpringGreen3	=>	ANSI41,
-				SpringGreen2	=>	ANSI42,
-				Cyan3	=>	ANSI43,
-				DarkTurquoise	=>	ANSI44,
-				Turquoise2	=>	ANSI45,
-				Green1	=>	ANSI46,
-				SpringGreen2	=>	ANSI47,
-				SpringGreen1	=>	ANSI48,
-				MediumSpringGreen	=>	ANSI49,
-				Cyan2	=>	ANSI50,
-				Cyan1	=>	ANSI51,
-				DarkRed	=>	ANSI52,
-				DeepPink4	=>	ANSI53,
-				Purple4	=>	ANSI54,
-				Purple4	=>	ANSI55,
-				Purple3	=>	ANSI56,
-				BlueViolet	=>	ANSI57,
-				Orange4	=>	ANSI58,
-				Grey37	=>	ANSI59,
-				MediumPurple4	=>	ANSI60,
-				SlateBlue3	=>	ANSI61,
-				SlateBlue3	=>	ANSI62,
-				RoyalBlue1	=>	ANSI63,
-				Chartreuse4	=>	ANSI64,
-				DarkSeaGreen4	=>	ANSI65,
-				PaleTurquoise4	=>	ANSI66,
-				SteelBlue	=>	ANSI67,
-				SteelBlue3	=>	ANSI68,
-				CornflowerBlue	=>	ANSI69,
-				Chartreuse3	=>	ANSI70,
-				DarkSeaGreen4	=>	ANSI71,
-				CadetBlue	=>	ANSI72,
-				CadetBlue	=>	ANSI73,
-				SkyBlue3	=>	ANSI74,
-				SteelBlue1	=>	ANSI75,
-				Chartreuse3	=>	ANSI76,
-				PaleGreen3	=>	ANSI77,
-				SeaGreen3	=>	ANSI78,
-				Aquamarine3	=>	ANSI79,
-				MediumTurquoise	=>	ANSI80,
-				SteelBlue1	=>	ANSI81,
-				Chartreuse2	=>	ANSI82,
-				SeaGreen2	=>	ANSI83,
-				SeaGreen1	=>	ANSI84,
-				SeaGreen1	=>	ANSI85,
-				Aquamarine1	=>	ANSI86,
-				DarkSlateGray2	=>	ANSI87,
-				DarkRed	=>	ANSI88,
-				DeepPink4	=>	ANSI89,
-				DarkMagenta	=>	ANSI90,
-				DarkMagenta	=>	ANSI91,
-				DarkViolet	=>	ANSI92,
-				Purple	=>	ANSI93,
-				Orange4	=>	ANSI94,
-				LightPink4	=>	ANSI95,
-				Plum4	=>	ANSI96,
-				MediumPurple3	=>	ANSI97,
-				MediumPurple3	=>	ANSI98,
-				SlateBlue1	=>	ANSI99,
-				Yellow4	=>	ANSI100,
-				Wheat4	=>	ANSI101,
-				Grey53	=>	ANSI102,
-				LightSlateGrey	=>	ANSI103,
-				MediumPurple	=>	ANSI104,
-				LightSlateBlue	=>	ANSI105,
-				Yellow4	=>	ANSI106,
-				DarkOliveGreen3	=>	ANSI107,
-				DarkSeaGreen	=>	ANSI108,
-				LightSkyBlue3	=>	ANSI109,
-				LightSkyBlue3	=>	ANSI110,
-				SkyBlue2	=>	ANSI111,
-				Chartreuse2	=>	ANSI112,
-				DarkOliveGreen3	=>	ANSI113,
-				PaleGreen3	=>	ANSI114,
-				DarkSeaGreen3	=>	ANSI115,
-				DarkSlateGray3	=>	ANSI116,
-				SkyBlue1	=>	ANSI117,
-				Chartreuse1	=>	ANSI118,
-				LightGreen	=>	ANSI119,
-				LightGreen	=>	ANSI120,
-				PaleGreen1	=>	ANSI121,
-				Aquamarine1	=>	ANSI122,
-				DarkSlateGray1	=>	ANSI123,
-				Red3	=>	ANSI124,
-				DeepPink4	=>	ANSI125,
-				MediumVioletRed	=>	ANSI126,
-				Magenta3	=>	ANSI127,
-				DarkViolet	=>	ANSI128,
-				Purple	=>	ANSI129,
-				DarkOrange3	=>	ANSI130,
-				IndianRed	=>	ANSI131,
-				HotPink3	=>	ANSI132,
-				MediumOrchid3	=>	ANSI133,
-				MediumOrchid	=>	ANSI134,
-				MediumPurple2	=>	ANSI135,
-				DarkGoldenrod	=>	ANSI136,
-				LightSalmon3	=>	ANSI137,
-				RosyBrown	=>	ANSI138,
-				Grey63	=>	ANSI139,
-				MediumPurple2	=>	ANSI140,
-				MediumPurple1	=>	ANSI141,
-				Gold3	=>	ANSI142,
-				DarkKhaki	=>	ANSI143,
-				NavajoWhite3	=>	ANSI144,
-				Grey69	=>	ANSI145,
-				LightSteelBlue3	=>	ANSI146,
-				LightSteelBlue	=>	ANSI147,
-				Yellow3	=>	ANSI148,
-				DarkOliveGreen3	=>	ANSI149,
-				DarkSeaGreen3	=>	ANSI150,
-				DarkSeaGreen2	=>	ANSI151,
-				LightCyan3	=>	ANSI152,
-				LightSkyBlue1	=>	ANSI153,
-				GreenYellow	=>	ANSI154,
-				DarkOliveGreen2	=>	ANSI155,
-				PaleGreen1	=>	ANSI156,
-				DarkSeaGreen2	=>	ANSI157,
-				DarkSeaGreen1	=>	ANSI158,
-				PaleTurquoise1	=>	ANSI159,
-				Red3	=>	ANSI160,
-				DeepPink3	=>	ANSI161,
-				DeepPink3	=>	ANSI162,
-				Magenta3	=>	ANSI163,
-				Magenta3	=>	ANSI164,
-				Magenta2	=>	ANSI165,
-				DarkOrange3	=>	ANSI166,
-				IndianRed	=>	ANSI167,
-				HotPink3	=>	ANSI168,
-				HotPink2	=>	ANSI169,
-				Orchid	=>	ANSI170,
-				MediumOrchid1	=>	ANSI171,
-				Orange3	=>	ANSI172,
-				LightSalmon3	=>	ANSI173,
-				LightPink3	=>	ANSI174,
-				Pink3	=>	ANSI175,
-				Plum3	=>	ANSI176,
-				Violet	=>	ANSI177,
-				Gold3	=>	ANSI178,
-				LightGoldenrod3	=>	ANSI179,
-				Tan	=>	ANSI180,
-				MistyRose3	=>	ANSI181,
-				Thistle3	=>	ANSI182,
-				Plum2	=>	ANSI183,
-				Yellow3	=>	ANSI184,
-				Khaki3	=>	ANSI185,
-				LightGoldenrod2	=>	ANSI186,
-				LightYellow3	=>	ANSI187,
-				Grey84	=>	ANSI188,
-				LightSteelBlue1	=>	ANSI189,
-				Yellow2	=>	ANSI190,
-				DarkOliveGreen1	=>	ANSI191,
-				DarkOliveGreen1	=>	ANSI192,
-				DarkSeaGreen1	=>	ANSI193,
-				Honeydew2	=>	ANSI194,
-				LightCyan1	=>	ANSI195,
-				Red1	=>	ANSI196,
-				DeepPink2	=>	ANSI197,
-				DeepPink1	=>	ANSI198,
-				DeepPink1	=>	ANSI199,
-				Magenta2	=>	ANSI200,
-				Magenta1	=>	ANSI201,
-				OrangeRed1	=>	ANSI202,
-				IndianRed1	=>	ANSI203,
-				IndianRed1	=>	ANSI204,
-				HotPink	=>	ANSI205,
-				HotPink	=>	ANSI206,
-				MediumOrchid1	=>	ANSI207,
-				DarkOrange	=>	ANSI208,
-				Salmon1	=>	ANSI209,
-				LightCoral	=>	ANSI210,
-				PaleVioletRed1	=>	ANSI211,
-				Orchid2	=>	ANSI212,
-				Orchid1	=>	ANSI213,
-				Orange1	=>	ANSI214,
-				SandyBrown	=>	ANSI215,
-				LightSalmon1	=>	ANSI216,
-				LightPink1	=>	ANSI217,
-				Pink1	=>	ANSI218,
-				Plum1	=>	ANSI219,
-				Gold1	=>	ANSI220,
-				LightGoldenrod2	=>	ANSI221,
-				LightGoldenrod2	=>	ANSI222,
-				NavajoWhite1	=>	ANSI223,
-				MistyRose1	=>	ANSI224,
-				Thistle1	=>	ANSI225,
-				Yellow1	=>	ANSI226,
-				LightGoldenrod1	=>	ANSI227,
-				Khaki1	=>	ANSI228,
-				Wheat1	=>	ANSI229,
-				Cornsilk1	=>	ANSI230,
-				Grey100	=>	ANSI231,
-				Grey3	=>	ANSI232,
-				Grey7	=>	ANSI233,
-				Grey11	=>	ANSI234,
-				Grey15	=>	ANSI235,
-				Grey19	=>	ANSI236,
-				Grey23	=>	ANSI237,
-				Grey27	=>	ANSI238,
-				Grey30	=>	ANSI239,
-				Grey35	=>	ANSI240,
-				Grey39	=>	ANSI241,
-				Grey42	=>	ANSI242,
-				Grey46	=>	ANSI243,
-				Grey50	=>	ANSI244,
-				Grey54	=>	ANSI245,
-				Grey58	=>	ANSI246,
-				Grey62	=>	ANSI247,
-				Grey66	=>	ANSI248,
-				Grey70	=>	ANSI249,
-				Grey74	=>	ANSI250,
-				Grey78	=>	ANSI251,
-				Grey82	=>	ANSI252,
-				Grey85	=>	ANSI253,
-				Grey89	=>	ANSI254,
-				Grey93	=>	ANSI255,
-	);
-	if(exists $conv{$_[0]}){ return $conv{$_[0]} }
-	else{croak "'$conv{$_[0]}' is not a valid ANSI color name!"}
 }
 
 
