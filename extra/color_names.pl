@@ -264,6 +264,9 @@ my %ansi256colors = (
 
  );
 
+foreach my $key ( sort {$a<=>$b} keys %ansi256colors ){
+	print 'On_'."$ansi256colors{$key}[2] => ON_ANSI$key,\n"
+}
  exit;
 print "COLOR\tANSI\tNAME\tXterm_Number\tHEX\tRGB\tHSL\n\n";
 foreach my $key ( sort {$a<=>$b} keys %ansi256colors ){
