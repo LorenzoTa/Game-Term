@@ -6,22 +6,45 @@ use warnings;
 
 use Term::ANSIColor qw(RESET :constants :constants256);
 
-##############NOOOO usare sempre ANSI0-ANSI15 per i 16 colori
-use constant {
-	B_BLACK => ($^O eq 'MSWin32' ? BOLD.BLACK : BRIGHT_BLACK),
-    B_RED => ($^O eq 'MSWin32' ? BOLD.RED : BRIGHT_RED),
-	B_GREEN => ($^O eq 'MSWin32' ? BOLD.GREEN : BRIGHT_GREEN),
-	B_YELLOW => ($^O eq 'MSWin32' ? BOLD.YELLOW : BRIGHT_YELLOW),
-	B_BLUE => ($^O eq 'MSWin32' ? BOLD.BLUE : BRIGHT_BLUE),
-	B_MAGENTA => ($^O eq 'MSWin32' ? BOLD.MAGENTA : BRIGHT_MAGENTA),
-	B_CYAN => ($^O eq 'MSWin32' ? BOLD.CYAN : BRIGHT_CYAN),
-	B_WHITE => ($^O eq 'MSWin32' ? BOLD.WHITE : BRIGHT_WHITE),
-};
+# CLEAR           RESET             BOLD            DARK
+# FAINT           ITALIC            UNDERLINE       UNDERSCORE
+# BLINK           REVERSE           CONCEALED
+ 
+# BLACK           RED               GREEN           YELLOW
+# BLUE            MAGENTA           CYAN            WHITE
+# BRIGHT_BLACK    BRIGHT_RED        BRIGHT_GREEN    BRIGHT_YELLOW
+# BRIGHT_BLUE     BRIGHT_MAGENTA    BRIGHT_CYAN     BRIGHT_WHITE
+ 
+# ON_BLACK        ON_RED            ON_GREEN        ON_YELLOW
+# ON_BLUE         ON_MAGENTA        ON_CYAN         ON_WHITE
+# ON_BRIGHT_BLACK ON_BRIGHT_RED     ON_BRIGHT_GREEN ON_BRIGHT_YELLOW
+# ON_BRIGHT_BLUE  ON_BRIGHT_MAGENTA ON_BRIGHT_CYAN  ON_BRIGHT_WHITE
+
+
+# ANSI0  Black (SYSTEM)
+# ANSI1  Maroon (SYSTEM)
+# ANSI2  Green (SYSTEM)
+# ANSI3  Olive (SYSTEM)
+# ANSI4  Navy (SYSTEM)
+# ANSI5  Purple (SYSTEM)
+# ANSI6  Teal (SYSTEM)
+# ANSI7  Silver (SYSTEM)
+# brigther colors
+# ANSI8  Grey (SYSTEM)
+# ANSI9  Red (SYSTEM)
+# ANSI10  Lime (SYSTEM)
+# ANSI11  Yellow (SYSTEM)
+# ANSI12  Blue (SYSTEM)
+# ANSI13  Fuchsia (SYSTEM)
+# ANSI14  Aqua (SYSTEM)
+# ANSI15  White (SYSTEM)
 
 sub new{
 	my $class = shift;
 	my %conf = validate_conf( @_ );
-	
+	# if $conf{from} ...
+	# read file..
+	# import.. 
 	my %terrains = terrains_16_colors();
 	
 	return bless {
@@ -41,10 +64,10 @@ sub terrains_16_colors{
 	#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
 	' ' => [  'plain', ' ', '', '',        0 ],
-	A => [ 'bridge', '-', YELLOW,  '',  0 ],
-	a => [ 'bridge', '|', YELLOW,  '',  0 ],
-	B => [ 'bridge', '/', YELLOW,  '',  0 ], # you need two of this
-    b => [ 'bridge', '\\', YELLOW,  '',  0 ],#   ''
+	A => [ 'bridge', '-', ANSI3,  '',  0 ],
+	a => [ 'bridge', '|', ANSI3,  '',  0 ],
+	B => [ 'bridge', '/', ANSI3,  '',  0 ], # you need two of this
+    b => [ 'bridge', '\\', ANSI3,  '',  0 ],#   ''
 	# C 
 	# c 
 	# D 
@@ -56,7 +79,7 @@ sub terrains_16_colors{
 	# G 
 	# g 
 	# H 
-	h => [ 'hill', 'm', [ YELLOW, GREEN ],  '',  0.8 ],
+	h => [ 'hill', 'm', [ ANSI3, ANSI2 ],  '',  0.8 ],
 	# I 
 	# i 
 	# J 
@@ -65,8 +88,8 @@ sub terrains_16_colors{
 	# k 
 	# L 
 	# l 
-	M => [ 'unwalkable mountain', 'M', [ WHITE, B_WHITE ],  '',  999 ],         # OK ʌ with chcp 65001
-	m => [ 'mountain', 'M', [ YELLOW, GREEN ],  '',  3 ],
+	M => [ 'unwalkable mountain', 'M', [ ANSI15, ANSI8 ],  '',  999 ],         # OK ʌ with chcp 65001
+	m => [ 'mountain', 'M', [ ANSI3, ANSI2 ],  '',  3 ],
 	# N
 	# n
 	# O 
@@ -77,10 +100,10 @@ sub terrains_16_colors{
 	# q 
 	# R 
 	# r 
-	S => [ 'unwalkable swamp', [qw( ~ - ~ - ~)], GREEN, ON_YELLOW,  999 ],
-	s => [ 'swamp', '-', YELLOW,  '',       1 ],
-	T => [ 'unwalkable wood', 'O',   [ ANSI11,ANSI10 ],  '',       999 ], 
-	t => [ 'wood', ['O', 'o'], [ YELLOW, GREEN], '',        0.5 ],
+	S => [ 'unwalkable swamp', [qw( ~ - ~ - ~)], ANSI2, ON_YELLOW,  999 ],
+	s => [ 'swamp', '-', ANSI3,  '',       1 ],
+	T => [ 'unwalkable wood', 'O',   [ ANSI3,ANSI10 ],  '',       999 ], 
+	t => [ 'wood', ['O', 'o'], [ ANSI3, ANSI2], '',        0.5 ],
 	#t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
 	# U 
 	# u
@@ -88,8 +111,8 @@ sub terrains_16_colors{
 	# v 
 	#W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
 	#w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
-	W => [ 'deep water', '~',  [ B_BLUE, B_BLACK, B_BLUE ] , ON_BLUE, 999 ],
-	w => [ 'shallow water',[qw(~ - ~ ~)], [ B_WHITE, B_BLUE ], '', 2 ],
+	W => [ 'deep water', '~',  [ ANSI12, ANSI8, ANSI12 ] , ON_BLUE, 999 ],
+	w => [ 'shallow water',[qw(~ - ~ ~)], [ ANSI15, ANSI12 ], '', 2 ],
 	
 	# X RESERVED for hero in the original map
 	# x 
@@ -109,7 +132,7 @@ sub validate_conf{
 	$conf{ dec_hor }     //= '-';
 	$conf{ dec_ver }     //= '|';
 	$conf{ ext_tile }	//= 'O'; # ok with chr(119) intersting chr(0) == null 176-178 219
-	$conf{ dec_color } //= RED;#''; # apply to dec_hor dec_ver ext_tile
+	$conf{ dec_color } //= ANSI1;#''; # apply to dec_hor dec_ver ext_tile
 	#$conf{ ext_tile } //= ['O','O',1];
 	$conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
 
@@ -118,7 +141,7 @@ sub validate_conf{
 	$conf{ fog_char }		//= '.'; #chr(176); 177 178
 
 	$conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
-	$conf{ hero_color } //= B_RED;
+	$conf{ hero_color } //= ANSI9;
 	$conf{ hero_sight } = 5;
 	$conf{ hero_slowness } //= 0; # used to microsleep
 

@@ -16,7 +16,8 @@ ReadMode 'cbreak';
 our $VERSION = '0.01';
 
 our $debug = 0;
-our $noscroll_debug = 1;
+our $noscroll_debug = 0;
+# terrain is class data!!
 my %terrain;
 
 
@@ -34,74 +35,59 @@ my %terrain;
 
 # Each tile will end to be:  [ 0:to_display,  1:original_terrain_letter,  2:unmasked ]
 
-# CLEAR           RESET             BOLD            DARK
-# FAINT           ITALIC            UNDERLINE       UNDERSCORE
-# BLINK           REVERSE           CONCEALED
- 
-# BLACK           RED               GREEN           YELLOW
-# BLUE            MAGENTA           CYAN            WHITE
-# BRIGHT_BLACK    BRIGHT_RED        BRIGHT_GREEN    BRIGHT_YELLOW
-# BRIGHT_BLUE     BRIGHT_MAGENTA    BRIGHT_CYAN     BRIGHT_WHITE
- 
-# ON_BLACK        ON_RED            ON_GREEN        ON_YELLOW
-# ON_BLUE         ON_MAGENTA        ON_CYAN         ON_WHITE
-# ON_BRIGHT_BLACK ON_BRIGHT_RED     ON_BRIGHT_GREEN ON_BRIGHT_YELLOW
-# ON_BRIGHT_BLUE  ON_BRIGHT_MAGENTA ON_BRIGHT_CYAN  ON_BRIGHT_WHITE
-
-
-
 
 
 sub new{
 	my $class = shift;
 	my %params = @_;
+	my $conf_obj = $params{configuration};
+	
 	$debug = $params{debug};
 	$noscroll_debug = $params{noscroll_debug};
-	# CONFIGURATION and TERRAINS
-	my %conf;
-	#my %terrain;
-	#my $conf_object = Game::Term::Configuration->new( configuration => $params{configuration});
-	#my $conf_object = $params{configuration} ;
-	
-	unless( 
-			exists  $params{configuration} and 
-			ref $params{configuration} eq 'Game::Term::Configuration'
-		)
-	{
-		$params{configuration} = Game::Term::Configuration->new();
-		print "DEBUG: no configuration provided, loading a basic one\n" if $debug;
-	}	
-	my %interface_conf = $params{configuration}->get_interface();
-	%terrain = $params{configuration}->get_terrains();
-	
-	delete $params{configuration};
-	
-	# OTHER FIELDS USED INTERNALLY (once set by validate_conf)
-	# # set internally to get coord of the first element of the map
-	# $ui{ real_map_first} = { x => undef, y => undef };
-	# # set internally to get coord of the last element of the map
-	# $ui{ real_map_last} = { x => undef, y => undef };
-	# $ui{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
-	# # get and set internally
-	# $ui{ hero_x } = undef;
-	# $ui{ hero_y } = undef;
-	# $ui{ hero_side } = '';
-	# $ui{ hero_terrain } = ''; #new!
-	# # get and set internally
-	# $ui{ map } //=[];
-	# $ui{ map_off_x } = 0;
-	# $ui{ map_off_y } = 0;
-	# $ui{ scrolling } = 0;
-	# $ui{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };	
-	#my %conf = validate_conf( @_ );
-	
-	
-#%terrain = $conf_object->get_terrains();
-	
-	return bless {
-				%interface_conf
+	my $ui = bless {
+				#%interface_conf
 	}, $class;
+	# LOAD CONFIGURATION into $ui and and class data %terrains
+	# if the right object was passed to new 
+	if ( defined $conf_obj and ref $conf_obj eq 'Game::Term::Configuration' ){
+		# terrain is class data!!
+		%terrain = $conf_obj->get_terrains();
+		my %interface_conf = $conf_obj->get_interface();
+		# apply
+		foreach my $key ( keys %interface_conf ){
+			print "DEBUG: configuration $key set..\n";# THIS CHANGE COLOR!! to $interface_conf{ $key }\n";
+			$ui->{ $key } = $interface_conf{ $key };	
+		}
+	}
+	# no configuration object was passed
+	else{ $ui->load_configuration()  }
+	
+#use Data::Dump; dd $ui;	
+	return $ui;	
 }
+
+
+sub load_configuration{
+	my $ui = shift;
+	my $conf_from = shift;
+	my $conf_obj;
+	if ( $conf_from ){
+		$conf_obj = Game::Term::Configuration->new( from => $conf_from );
+	}
+	else{
+		$conf_obj = Game::Term::Configuration->new();
+		print "DEBUG: no specific configuration provided, loading a basic one\n" if $debug;
+	}
+	# terrain is class data!!
+	%terrain = $conf_obj->get_terrains();
+	my %interface_conf = $conf_obj->get_interface();
+	# apply
+	foreach my $key ( keys %interface_conf ){
+		print "DEBUG: configuration for $key set..\n";# THIS CHANGE COLOR!! to $interface_conf{ $key }\n";
+		$ui->{ $key } = $interface_conf{ $key };	
+	}
+}
+
 
 sub run{
 		my $ui = shift;
@@ -628,6 +614,7 @@ https://superuser.com/questions/413073/windows-console-with-ansi-colors-handling
 
 
 		perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new();$ui->run"
+		perl -I .\lib -MGame::Term::UI -e "Game::Term::UI->new()->run"
 
 		
 perl -e "print qq(\e[31mCOLORED\e[0m)"
@@ -751,13 +738,17 @@ These 8 constants will be the right thing on both Windows and Linux:
 		
 =head3 RECAP OF 16 COLORS TO USE TO WRITE MORE PORTABLE GAMES
 		
-		# provided by Term::ANSIColor
-		BLACK           RED             GREEN           YELLOW
-		BLUE            MAGENTA         CYAN            WHITE 
-		
-		# provided by Game::Term
-		B_BLACK  		B_RED      		B_GREEN   		B_YELLOW  
-		B_BLUE   		B_MAGENTA  		B_CYAN    		B_WHITE
+	# darker colors				# brigther colors
+
+	ANSI0  Black (SYSTEM)		ANSI8  Grey (SYSTEM)
+	ANSI1  Maroon (SYSTEM)		ANSI9  Red (SYSTEM)
+	ANSI2  Green (SYSTEM)		ANSI10  Lime (SYSTEM)
+	ANSI3  Olive (SYSTEM)		ANSI11  Yellow (SYSTEM)
+	ANSI4  Navy (SYSTEM)		ANSI12  Blue (SYSTEM)
+	ANSI5  Purple (SYSTEM)		ANSI13  Fuchsia (SYSTEM)
+	ANSI6  Teal (SYSTEM)		ANSI14  Aqua (SYSTEM)
+	ANSI7  Silver (SYSTEM)		ANSI15  White (SYSTEM)
+
 
 
 
