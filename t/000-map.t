@@ -30,4 +30,8 @@ ok ( ref $valid2->{data} eq 'ARRAY', "data part of the object is an array (valid
 my @validAoA = ([1,2],[1,2],[1,2]);
 my $valid3 = Game::Term::Map->new( from => \@validAoA );
 ok ( ref $valid3->{data} eq 'ARRAY', "data part of the object is an array (valid array reference)"); 
+ok ( ref $valid3->{data}[0] eq 'ARRAY', "first element of the array is an array"); 
+
+
+
 
