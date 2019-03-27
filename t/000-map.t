@@ -22,15 +22,17 @@ dies_ok { my $map = Game::Term::Map->new( from => \@fakeAoA ); }
 		
 my $valid1 = Game::Term::Map->new( fake_map => 'S' );
 ok ( ref $valid1->{data} eq 'ARRAY', "data part of the object is an array (valid fake_map)"); 
+ok ( ref $valid1->{data}[0] eq 'ARRAY', "AoA (valid fake_map)");
 
 my $validAoA = [[1,2],[1,2],[1,2]];
 my $valid2 = Game::Term::Map->new( from => $validAoA );
 ok ( ref $valid2->{data} eq 'ARRAY', "data part of the object is an array (valid anonymous array)"); 
+ok ( ref $valid2->{data}[0] eq 'ARRAY', "AoA (valid anonymous array)");
 
 my @validAoA = ([1,2],[1,2],[1,2]);
 my $valid3 = Game::Term::Map->new( from => \@validAoA );
 ok ( ref $valid3->{data} eq 'ARRAY', "data part of the object is an array (valid array reference)"); 
-ok ( ref $valid3->{data}[0] eq 'ARRAY', "first element of the array is an array"); 
+ok ( ref $valid3->{data}[0] eq 'ARRAY', "AoA (valid array reference)"); 
 
 
 
