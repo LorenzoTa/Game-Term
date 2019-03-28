@@ -44,7 +44,7 @@ sub new{
 	my $conf_obj = $params{configuration};
 	
 	$debug = $params{debug} // 0;
-	$noscroll_debug = $params{noscroll_debug};
+	$noscroll_debug = $params{noscroll_debug} // 0;
 	my $ui = bless {
 				#%interface_conf
 	}, $class;
@@ -87,17 +87,16 @@ sub load_configuration{
 		print "\t '$ter' =>  [ ",
 			(join ', ',map{ ref $_ eq 'ARRAY' ? "[qw( @$_ )]" : "'$_'" }@{$terrain{$ter}}),
 			" ],\n" if $debug > 1;
-		
+		# foreground colors
 		$terrain{$ter}->[2] =  ref $terrain{$ter}->[2] eq 'ARRAY' ?
 								[ map{ color_names_to_ANSI($_) }@{$terrain{$ter}->[2]} ] : 
-								#color_names_to_ANSI( $terrain{$ter}->[2] );
 								( defined  $terrain{$ter}->[3] ? color_names_to_ANSI( $terrain{$ter}->[3] ):'');
-								
+		# eventual background colors						
 		$terrain{$ter}->[3] =  ref $terrain{$ter}->[3] eq 'ARRAY' ?
 								[map{ color_names_to_ANSI($_) }@{$terrain{$ter}->[3]} ] : 
 								( defined  $terrain{$ter}->[3] ? color_names_to_ANSI( $terrain{$ter}->[3] ):'');
 	}
-	# translate color names into ANSI constant
+	# INERFACE: translate color names into ANSI constant
 	# ...
 	my %interface_conf = $conf_obj->get_interface();
 	print "DEBUG: interface:\n",map{ "\t$_ => '$interface_conf{$_}'\n" } sort keys %interface_conf if $debug > 1;
@@ -150,20 +149,23 @@ sub run{
 				local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
 				local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
 				local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'wood';
+				
+				# CHECK EVENT??????
+		
 				$ui->draw_map();
 				
-		if ($noscroll_debug){
-		 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+','+',1];
-		 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+','+',1];
-		 #print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n";
-		 print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
-				"NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
-				"$ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n";
-		 print "OFF_Y used in print: $ui->{map_off_y} .. $ui->{map_off_y} + $ui->{map_area_h}\n";
-		 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
-	}
+			if ($noscroll_debug){
+				 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+','+',1];
+				 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+','+',1];
+				 
+				 print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
+						"NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
+						"$ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n";
+				 print "OFF_Y used in print: $ui->{map_off_y} .. $ui->{map_off_y} + $ui->{map_area_h}\n";
+				 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
+			}
 			
-			$ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
+				$ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
 								"( $ui->{hero_terrain} ) sight: $ui->{hero_sight} ".
 								"slowness: ".
 								($ui->{hero_slowness} + 
@@ -171,8 +173,7 @@ sub run{
 									"key $key was pressed:"] );	
 
 			}
-			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;		
-		
+			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;				
 		}
 }
 
@@ -250,16 +251,11 @@ sub draw_map{
 					else{ print ' '}
 				}
 				# print decoration vertical and newline
-				#print $ui->{ dec_ver },"\n";
 				print +($ui->{dec_color} 						?
 							$ui->{dec_color}.$ui->{ dec_ver }.RESET :
 							$ui->{ dec_ver }),"\n" ;
 	}	
 	# print decoration last row
-	#print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
-	# print  	$ui->{dec_color} 																	? 
-			# $ui->{dec_color}.(' o'.($ui->{ dec_hor } x ( $ui->{ map_area_w } ))).'o'."\n".RESET 	:
-			# ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";
 	if ($ui->{dec_color}){
 		print $ui->{dec_color}.(' o'.($ui->{ dec_hor } x  $ui->{ map_area_w }  )).'o'.RESET."\n";
 	}
