@@ -95,10 +95,10 @@ sub terrains_16_colors{
 	#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
 	' ' => [  'plain', ' ', '', '',        0 ],
-	A => [ 'bridge', '-', 'Olive',  '',  0 ],
-	a => [ 'bridge', '|', 'Olive',  '',  0 ],
-	B => [ 'bridge', '/', 'Olive',  '',  0 ], # you need two of this
-    b => [ 'bridge', '\\', 'Olive',  '',  0 ],#   ''
+	A => [ 'bridge', '-', 'Maroon',  '',  0 ],
+	a => [ 'bridge', '|', 'Maroon',  '',  0 ],
+	B => [ 'bridge', '/', 'Maroon',  '',  0 ], # you need two of this
+    b => [ 'bridge', '\\', 'Maroon',  '',  0 ],#   ''
 	# C 
 	# c 
 	# D 
@@ -148,7 +148,7 @@ sub terrains_16_colors{
 	# X RESERVED for hero in the original map
 	# x 
 	# Y 
-	# y 
+	y => [ 'wood', '^', [ 'Olive', 'Green'], '',        0.5 ],
 	# Z 
 	# z
 		
