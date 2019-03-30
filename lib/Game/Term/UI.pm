@@ -48,45 +48,7 @@ sub new{
 	my $ui = bless {
 				#%interface_conf
 	}, $class;
-	# # LOAD CONFIGURATION into $ui and and class data %terrains
-	# # if the right object was passed to new 
-	# if ( defined $conf_obj and ref $conf_obj eq 'Game::Term::Configuration' ){
-		# # terrain is class data!!
-		# %terrain = $conf_obj->get_terrains();
-# #
-# foreach my $ter(sort keys %terrain){
-		
-		# print "\t '$ter' =>  [ ",
-			# (join ', ',map{ ref $_ eq 'ARRAY' ? "[qw( @$_ )]" : "'$_'" }@{$terrain{$ter}}),
-			# " ],\n" if $debug > 1;
-		# # foreground colors
-		# $terrain{$ter}->[2] =  ref $terrain{$ter}->[2] eq 'ARRAY' ?
-								# [ map{ color_names_to_ANSI($_) }@{$terrain{$ter}->[2]} ] : 
-								# ( defined  $terrain{$ter}->[3] ? color_names_to_ANSI( $terrain{$ter}->[3] ):'');
-		# # eventual background colors						
-		# $terrain{$ter}->[3] =  ref $terrain{$ter}->[3] eq 'ARRAY' ?
-								# [map{ color_names_to_ANSI($_) }@{$terrain{$ter}->[3]} ] : 
-								# ( defined  $terrain{$ter}->[3] ? color_names_to_ANSI( $terrain{$ter}->[3] ):'');
-	# }
-# #
-		
-		
-		# my %interface_conf = $conf_obj->get_interface();
-# # translate color names to ANSIx
-# $interface_conf{hero_color} = color_names_to_ANSI($interface_conf{hero_color});
-# $interface_conf{dec_color} = color_names_to_ANSI($interface_conf{dec_color});
-		# # apply
-		# foreach my $key ( keys %interface_conf ){
-			# print "DEBUG: configuration $key set..\n";# THIS CHANGE COLOR!! to $interface_conf{ $key }\n";
-			# $ui->{ $key } = $interface_conf{ $key };	
-		# }
-	# }
-	# # no configuration object was passed
-	# else{ $ui->load_configuration()  }
-	
-#use Data::Dump; dd $ui;
-
-$ui->load_configuration( $params{configuration} );	
+	$ui->load_configuration( $params{configuration} );	
 	return $ui;	
 }
 
@@ -95,13 +57,15 @@ sub load_configuration{
 	my $ui = shift;
 	my $conf_from = shift;
 	my $conf_obj;
+	# CONFIGURATION provided as object
 	if ( $conf_from and ref $conf_from eq 'Game::Term::Configuration'){
 		$conf_obj = $conf_from;
 		delete $ui->{configuration};
 	}
-	elsif ( $conf_from ){
+	elsif ( $conf_from ){ # LOAD FROM FILE ????
 		$conf_obj = Game::Term::Configuration->new( from => $conf_from );
 	}
+	# nothing provided as CONFIGURATION loading empty one
 	else{
 		$conf_obj = Game::Term::Configuration->new();
 		print "DEBUG: no specific configuration provided, loading a basic one\n" if $debug;

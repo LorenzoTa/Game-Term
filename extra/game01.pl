@@ -12,7 +12,7 @@ my $conf = Game::Term::Configuration->new();
 # $conf->{interface}{ext_tile} = '?';
 # $conf->{interface}{masked_map} = 0;
 # $conf->{interface}{fog_of_war} = 0;
-# $conf->{interface}{map_area_w} = 10;
+# $conf->{interface}{map_area_w} = 80;
 
 # UI called passing the configuration object
 my $ui = Game::Term::UI->new( configuration => $conf );
