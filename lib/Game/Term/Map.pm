@@ -111,39 +111,39 @@ sub fake_map{
 	}
 	elsif ($type =~ /^one$/i){
 		my $fake=<<EOM;
-01234567890123456789012345678901234567890123456789012345678901234567890123456789
-tt    ttttttttttttttttttttttttt                     tttttttt         ttttttttttt
-tt  ttttttttttttttttttttttttttttt            ttt    ttttttttt   tttttttttttttttt
-    tttttttttttttttttttttttttttttttttttttttttttt    ttttttttt   tttttttttttttttt
-    ttttt                   tttttttttttttttttttt         tttt   tttttttt   ttttt
-    ttt     tttttttt           tttttttttttttttt         ttttt   ttt       tttttt
-          tttttttttt                       tttt         tttt    ttt      ttttttt
-        ttttttttt     ttttttttttttttt      tttt   ttt   tttt    ttt      ttttt t
-       tttttttt     ttttttttttttttttttt     ttt   ttt   ttt     ttt      tttt  t
-      tttttt       ttttttttttttttttttttt    ttt   ttt   tttt             tttt tt
-     tttttt        ttttt          tttttt          ttt   tttttttttttt     tttt tt
-     tttt          tttt              ttt         tttt   tttttttttttt     ttttttt
-     tttt          ttt                   tttttttttttt    ttttttttttt      tttttt
-     ttttt                              ttttttttttttt                     tttt t
-     ttttt                              tttttttttttttttttttt       ttt     ttttt
-      tttt     ttttttt                        tttttttttttttttt     ttttt      tt
-         aa   tttttttt             ttttt      ttttttttttttttttt    ttttttt      
-       wwaawwwtttttttt             tttttttt              tttttt     tttttt     t
-       wwaawww tttt                 ttttttttt               ttttt     tttttttttt
-    t    aa WWWtt         tttttt     Otttttt                ttttt      ttttttttt
-         t AAAAA ttt         ttttttt      ttttt                 tttt      tttttt
-           AAAAA t        ttttttt      ttttt     ttttt       tttt           tttt
-   t  ttt   WWWwwwww      ttttttt      tttt      ttttt        ttt       tttttttt
-      ttt   wwwwwwwwtt                ttttt      ttttt      ttttt      ttttttttt
-      tttt      tttwwwttt            tthhtt     tttt       tttttt      ttttttttt
-      ttttt         wwwttttttttttttttthhhh     sssss       tttttt      ttttttttt
-      ttttt       bbwwttttttttttttthhhhhh      ssSSss      tttt             tttt
-       tttt     wwwbbwwwwtttttttthhhhhhh       ssSSSss                      tttt
-       tttt     wwwwbbwwwww                yy   sssssss                 tt  tttt
-       tttttttttWWWWWbbWwwwwwtttmmm      yyyy      ttt                 ttt  tttt
- t     ttttttttttttwwwbbWWWWWMMMMMM      TTTTTTTT                      ttt  tttt
-ttt    01234567890wwwwwbbwwwwwwwmmm      TTTTTTTT         tttttttttttttttttttttt
-ttt                                  X                tttttttttttttttttttttttttt
+tttt ttTTTTTTTTTTTTTTTTTTTTTTTTTTmmmMMWWwwMMttt ttmMMMMmmmmmmmmMtMMMMM hhhhhMMMM
+ttttt ttttTTTTTTTTTTTTTTTTTTTTTTTmmmmmWWMwmttttttmMMMmtttthhmmmMMmmmmmttt  httmm
+ttttttTTTTTttttttTTTTTttttttttttt  bbWWwwmmttttttmMM ht MttthhmMMmmm tt hhhhMMmm
+ ttttTTtttttttttttttttttttttttttt WWbbwtwmmttttttmMhhh  MMMthhmMMmmthhhhh tMtmmt
+ tttTTttt                   ttttWWWwwbbwtmmtttttt M hh   MMtttt tmm hhtth MMmmMt
+   tttt     tttttttt           WWwwwwwbbtttttttt  MMMMmm      tttMmhh tth Mmm tt
+   Tt     tttttttttt          WWwwhhhhh    tttt   MMMMMm         Mthhtt Mmmm mtt
+   ttt  ttwwwwwtt     ttttttAAAAAhhhhh     tttt       Mmmm      MMt  t Mmmtmmm t
+  tt   ttwwwwwwww   ttttttt AAAAAhhmMMM     ttt          m   MMmmhhh   Mm t t  t
+  t   tttwwWWWWww  ttttttt   WWwhhhmMMMM    ttt        mmm   Mmhhhmh MMMm t   tt
+     ttttwwBBWWww  tt tt     WWwwhhhMM                mmMMMMMhhhtmhh     tttt tt
+     ttttwBBWWWww  t  t       Wwwwhh             ttt   MMhhhhhttttmtmm  tttttttt
+     ttttBBwWWWww  t  hmmmh   WWwwww     tttttttttttt  MMhttttttttmmmm  tttttttt
+     tttBBwwwwww   tt hhhmh    WWwwww   tttttttTTtttt                m   ttttt t
+     ttttttwwwwtttttthhhhhh      WWww   ttttttttTTTTttttTttt       ttmmm   ttttt
+      ttt tttttt tt t            WWwww    tttttttttTTtttTTTttt     tttTt      tt
+             tt tt      WWWWWWaaWWwwww      tttttttttttttttTTtt    tttTttt      
+          hhhh  t   WWWWWWwwwwaawwwwww      tt           tttTtt     ttTTTt     t
+         mmhhhhtt WWWwwwwwwsssaa wwwww                      ttttt     ttTTtttttt
+      h mm ht  tssWWwwssssssss    sss                       ttttt      tTtttttTt
+     hhmmhttttttswWwssssssss       ss      tttt                 tttt      tttTtt
+     hhhhhttttttswWwsSSssSSs           ttttttt   ttttt       tttt           tTTT
+         ttttt sswwwssSSSSSs           tttttt    ttttt        tTt       ttttttTT
+        tttttsssswwWwsSSSSSSss        ttttttt    ttttt      tttTt      ttttttTTt
+        tt   sssswWwwsssSSSSSs       tthhttt    tttt       ttTTTt      tttTTTTTt
+       ttt ssssswWwwwssssSSsss   ttttthhhht    sssss       tTTttt      tttttttTt
+           ssssswWwwwwsssssss    tthhhhhht     ssSSss      tTTt             ttTT
+           sswwwwWWWwwwsssssss    hhhhhhtt     ssSSSss                      tttT
+          sswwWWWWWWWwwwssssss      ttttt  yyt tsssssss                ttt  tttT
+         sswwWWWWWWWWWWWwwwssss          yyyytttt  ttt           tt   tttt  ttTT
+ t      sswwWWWWWWWWWWWWWWWWwws          TTTTTTTttt    ttt ttttttttttttttt  ttTt
+ttt    ssswWWWWWWWWWWWWWWWWWWwww         TTTTTTTTTttt tt ttttTTTTtttttttttttTTTt
+ttt  ssssswWWWWWWWWWWWWWWWWWWWWWw    X  TTTTTTTTTTTtt tTTTTTTTttTTTTTTtttttttttt
 EOM
 		foreach my $row( split "\n", $fake){
 			push @$map,[ split '', $row ]
