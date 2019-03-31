@@ -48,22 +48,7 @@ sub new{
 	my $ui = bless {
 				#%interface_conf
 	}, $class;
-	# LOAD CONFIGURATION into $ui and and class data %terrains
-	# if the right object was passed to new 
-	if ( defined $conf_obj and ref $conf_obj eq 'Game::Term::Configuration' ){
-		# terrain is class data!!
-		%terrain = $conf_obj->get_terrains();
-		my %interface_conf = $conf_obj->get_interface();
-		# apply
-		foreach my $key ( keys %interface_conf ){
-			print "DEBUG: configuration $key set..\n";# THIS CHANGE COLOR!! to $interface_conf{ $key }\n";
-			$ui->{ $key } = $interface_conf{ $key };	
-		}
-	}
-	# no configuration object was passed
-	else{ $ui->load_configuration()  }
-	
-#use Data::Dump; dd $ui;	
+	$ui->load_configuration( $params{configuration} );	
 	return $ui;	
 }
 
@@ -72,9 +57,15 @@ sub load_configuration{
 	my $ui = shift;
 	my $conf_from = shift;
 	my $conf_obj;
-	if ( $conf_from ){
+	# CONFIGURATION provided as object
+	if ( $conf_from and ref $conf_from eq 'Game::Term::Configuration'){
+		$conf_obj = $conf_from;
+		delete $ui->{configuration};
+	}
+	elsif ( $conf_from ){ # LOAD FROM FILE ????
 		$conf_obj = Game::Term::Configuration->new( from => $conf_from );
 	}
+	# nothing provided as CONFIGURATION loading empty one
 	else{
 		$conf_obj = Game::Term::Configuration->new();
 		print "DEBUG: no specific configuration provided, loading a basic one\n" if $debug;
@@ -116,7 +107,7 @@ sub run{
 		my $map = Game::Term::Map->new(  );
 		print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
 		$ui->{map} = $map->{data};
-		
+	# use Data::Dump; dd $ui; exit;	
 		# enlarge the map to be scrollable
 		# set the hero's coordinates
 		# set real_map_first and real_map_last x,y
@@ -441,11 +432,20 @@ sub set_map_and_hero{
 	$ui->{real_map_last}{x} = $#{$ui->{map}->[0]} - $ui->{ map_area_w } ;
 	
 	# beautify map 
-	$ui->beautify_map();
-		
+	$ui->beautify_map();		
 	
 	$ui->set_no_scrolling_area();
 	
+	if ( $debug > 1 ){
+		local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+', '', 1];
+		local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+', '', 1];
+	
+		print 	"DEBUG: map with border (now each tile is [to_display,terrain letter, masked] ) with no_scroll vertexes (+ signs):\n",
+		map{ join'',( map{ $_->[0] }
+						@$_[ $ui->{real_map_first}{x}-1..$ui->{real_map_last}{x}+1] ),$/ 
+			} @{$ui->{map}}[ $ui->{real_map_first}{y}-1..$ui->{real_map_last}{y}];
+	}
+		
 }
 
 sub beautify_map{
@@ -522,15 +522,6 @@ sub set_no_scrolling_area{
 	}
 	print "DEBUG: no_scroll area from $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
 			"to $ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n" if $debug;
-	
-	local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+', '', 1];
-	local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+', '', 1];
-	
-	#print 	"DEBUG: map extended with no_scroll vertexes (+ signs):\n",map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
-	print 	"DEBUG: map extended (now each tile is [to_display,terrain letter, masked] ) with no_scroll vertexes (+ signs):\n",
-			map{ join'',(map{ $_->[0] }@$_),$/ } @{$ui->{map}} if $debug > 1;
-	
-	
 	
 }
 
