@@ -48,7 +48,8 @@ sub new{
 	my $ui = bless {
 				#%interface_conf
 	}, $class;
-	$ui->load_configuration( $params{configuration} );	
+	$ui->load_configuration( $params{configuration} );
+$ui->init();	
 	return $ui;	
 }
 
@@ -100,18 +101,28 @@ sub load_configuration{
 	}
 }
 
-
-sub run{
-		my $ui = shift;
+sub init{
+	my $ui = shift;
 		
 		my $map = Game::Term::Map->new(  );
 		print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
 		$ui->{map} = $map->{data};
-	# use Data::Dump; dd $ui; exit;	
+		
+		$ui->set_map_and_hero();
+		$ui->set_map_offsets();
+	
+
+}
+sub run{
+		my $ui = shift;
+		
+	# my $map = Game::Term::Map->new(  );
+	# print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
+	# $ui->{map} = $map->{data};
 		# enlarge the map to be scrollable
 		# set the hero's coordinates
 		# set real_map_first and real_map_last x,y
-		$ui->set_map_and_hero();
+	# $ui->set_map_and_hero();
 		
 		print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
 				" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
@@ -120,7 +131,7 @@ sub run{
 		
 		print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" if $debug;
 			
-		$ui->set_map_offsets();
+	# $ui->set_map_offsets();
 	
 		$ui->draw_map();
 		$ui->draw_menu( ["hero HP: 42","walk with WASD"] );	
