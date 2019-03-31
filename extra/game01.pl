@@ -16,10 +16,10 @@ my $conf = Game::Term::Configuration->new();
 
 # UI called passing the configuration object
 #my $ui = Game::Term::UI->new( configuration => $conf );
- my $ui = Game::Term::UI->new( configuration => $conf, debug => 2 );
+# my $ui = Game::Term::UI->new( configuration => $conf, debug => 2 );
 
 # bare UI with defaults
-# my $ui = Game::Term::UI->new(  );  # OK
+ my $ui = Game::Term::UI->new(  );  # OK
 
 # directly modify debugs
 # $Game::Term::UI::debug = 1;
