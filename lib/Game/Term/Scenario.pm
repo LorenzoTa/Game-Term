@@ -42,7 +42,7 @@ sub new{
 
 sub get_map_from_DATA{
 	my $scn = shift;
-	while (<DATA>){
+	while (<main::DATA>){
 			chomp;
 			push @{ $scn->{map} },[ split '', $_ ];
 	}

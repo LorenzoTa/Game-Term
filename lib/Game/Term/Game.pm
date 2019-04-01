@@ -18,7 +18,12 @@ sub new{
 	
 	# $param{ui} //= Game::Term::UI->new( configuration => $param{configuration} );
 	
-	$param{ui} //= Game::Term::UI->new( configuration => $param{configuration}, map => $param{map} );
+	$param{ui} //= Game::Term::UI->new( 
+										configuration => $param{configuration}, 
+										map => $param{map},
+										debug => $param{debug},
+										
+										);
 	
 	return bless {
 				is_running => 1,
