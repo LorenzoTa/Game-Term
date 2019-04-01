@@ -43,7 +43,7 @@ S                  S
  ttt    tTT t       
     tt    tT        
 tttttttttttttttt    
-  ttt   tt      nN  
+  ttt   tt      mM  
     wW              
          mM   ww    
              wWwW   
