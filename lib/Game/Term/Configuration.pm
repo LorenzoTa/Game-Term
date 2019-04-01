@@ -76,7 +76,7 @@ sub new{
 	# if $conf{from} ...
 	# read file..
 	# import.. 
-	my %terrains = terrains_16_colors();
+	my %terrains = terrains_256_colors();
 	
 	return bless {
 				interface => \%conf,
@@ -211,7 +211,7 @@ sub terrains_256_colors{
 	# X RESERVED for hero in the original map
 	# x 
 	# Y 
-	# y 
+	y => [ 'wood', '^', [ 'Olive', 'Green'], '',        0.5 ],
 	# Z 
 	# z
 		
