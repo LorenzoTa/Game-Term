@@ -48,7 +48,8 @@ sub new{
 	my $ui = bless {
 				#%interface_conf
 	}, $class;
-	$ui->load_configuration( $params{configuration} );	
+	$ui->load_configuration( $params{configuration} );
+	$ui->init();	
 	return $ui;	
 }
 
@@ -100,27 +101,89 @@ sub load_configuration{
 	}
 }
 
-
-sub run{
-		my $ui = shift;
+sub init{
+	my $ui = shift;
 		
 		my $map = Game::Term::Map->new(  );
 		print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
 		$ui->{map} = $map->{data};
-	# use Data::Dump; dd $ui; exit;	
+		
+		$ui->set_map_and_hero();
+			print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
+			" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
+		print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" if $debug;
+		$ui->set_map_offsets();
+	
+
+}
+
+sub show{
+		my $ui = shift;
+		
+		
+			my $key = ReadKey(0);
+			
+			sleep(	
+					$ui->{hero_slowness} + 
+					# the slowness #4 of the terrain original letter #1 where
+					# the hero currently is on th emap
+					$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]
+			);
+			print "DEBUG: slowness for terrain ".
+				$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
+				"\n" if $debug;
+			if( $ui->move( $key ) ){
+				local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
+				local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
+				local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'wood';
+				
+				# CHECK EVENT??????
+		
+				$ui->draw_map();
+				
+			if ($noscroll_debug){
+				 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+','+',1];
+				 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+','+',1];
+				 
+				 print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
+						"NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
+						"$ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n";
+				 print "OFF_Y used in print: $ui->{map_off_y} .. $ui->{map_off_y} + $ui->{map_area_h}\n";
+				 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
+			}
+			
+				$ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
+								"( $ui->{hero_terrain} ) sight: $ui->{hero_sight} ".
+								"slowness: ".
+								($ui->{hero_slowness} + 
+								$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]),
+									"key $key was pressed:"] );	
+
+			}
+			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;				
+		
+}
+
+
+sub run{
+		my $ui = shift;
+		
+	 my $map = Game::Term::Map->new(  );
+	# print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
+	 $ui->{map} = $map->{data};
 		# enlarge the map to be scrollable
 		# set the hero's coordinates
 		# set real_map_first and real_map_last x,y
-		$ui->set_map_and_hero();
+	 $ui->set_map_and_hero();
 		
-		print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
-				" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
+	print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
+			" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
 		# now BIG map, hero_pos and hero_side are initialized
 		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)		
 		
-		print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" if $debug;
+	print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" if $debug;
 			
-		$ui->set_map_offsets();
+	$ui->set_map_offsets();
 	
 		$ui->draw_map();
 		$ui->draw_menu( ["hero HP: 42","walk with WASD"] );	

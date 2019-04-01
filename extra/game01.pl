@@ -1,6 +1,16 @@
 use strict;
 use warnings;
+use Game::Term::Game;
 
+my $conf = Game::Term::Configuration->new();
+# changes to configuration...
+# $conf->{interface}{masked_map} = 0;
+
+my $game=Game::Term::Game->new( configuration => $conf); 
+
+$game->play()
+
+__DATA__
 use Game::Term::UI;
 use Game::Term::Configuration;
 use Game::Term::Map;

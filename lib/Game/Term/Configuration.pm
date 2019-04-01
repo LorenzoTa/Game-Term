@@ -211,7 +211,7 @@ sub terrains_256_colors{
 	# X RESERVED for hero in the original map
 	# x 
 	# Y 
-	# y 
+	y => [ 'wood', '^', [ 'Olive', 'Green'], '',        0.5 ],
 	# Z 
 	# z
 		
