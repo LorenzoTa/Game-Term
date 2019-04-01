@@ -18,13 +18,6 @@ sub new{
 	if( $param{map} and -e -f -s $param{map} ){ # from_file ????
 		$param{map} = Game::Term::Map->new( from => $param{map} )->{data};
 	}
-	# else grab map from DATA
-	# else{
-		# while (<DATA>){
-			# chomp;
-			# push @{$param{map}},[ split '', $_ ];
-		# }
-	# }
 	
 	my $scn = bless {
 	
@@ -48,6 +41,40 @@ sub get_map_from_DATA{
 	}
 }
 
+sub set_hero_position{
+	my $scn = shift;
+	my $input = shift;
+	my ( $side, $position);
+	if ( $input =~ /^(south|north|east|west)(\d+)$/i ){
+		$side = $1;
+		$position = $2;
+	}
+	else{ die "unable to parse hero position from string [$input] (expecting somethig like south13 or west25)"}
+	
+	if ( $side =~ /north/i ){
+		$scn->{map}[0][$position] = 'X';
+		#use Data::Dump; dd $scn; exit;
+		return;
+	}
+	elsif ( $side =~ /south/i ){
+		$scn->{map}[ $#{$scn->{map}}  ][$position] = 'X';
+		# use Data::Dump; dd $scn; exit;
+		return;
+	}
+	elsif ( $side =~ /east/i ){
+		$scn->{map}[ $position ][ $#{$scn->{map}[0]} ] = 'X';
+		# use Data::Dump; dd $scn; exit;
+		return;
+	}
+	elsif ( $side =~ /west/i ){
+		$scn->{map}[ $position ][ 0 ] = 'X';
+		# use Data::Dump; dd $scn; exit;
+		return;
+	}
+	else{die "something wrong in hero's position!"}
+	
+	
+}
 __DATA__
 S                  S
      tttt  T        

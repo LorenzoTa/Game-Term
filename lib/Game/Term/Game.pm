@@ -16,15 +16,16 @@ sub new{
 	# if $param{hero} or ..	
 	$param{configuration} //= Game::Term::Configuration->new();
 	
-	# $param{ui} //= Game::Term::UI->new( configuration => $param{configuration} );
+	$param{scenario} //= Game::Term::Scenario->new( );
 	
 	$param{ui} //= Game::Term::UI->new( 
 										configuration => $param{configuration}, 
-										map => $param{map},
+										# map => $param{map},
+										map => $param{scenario}->{map},
 										debug => $param{debug},
 										
 										);
-	
+	$param{scenario}->{map} = undef;
 	return bless {
 				is_running => 1,
 				current_scenario => '',

@@ -609,7 +609,8 @@ sub set_hero_pos{
 				else									{ die "Hero side not found!" }
 			}				
 		}
-	}	
+	}
+	unless( defined $ui->{hero_y} and defined $ui->{hero_x}){die "Hero not found!"}
 }
 
 # sub validate_conf{
