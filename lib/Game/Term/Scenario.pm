@@ -13,8 +13,7 @@ our $VERSION = '0.01';
 sub new{
 	my $class = shift;
 	my %param = @_;
-	# GET hero..
-	# if $param{hero} or ..	
+	
 	# if passed a file for the map
 	if( $param{map} and -e -f -s $param{map} ){
 		$param{map} = Game::Term::Map->new( from => *DATA )->{data};

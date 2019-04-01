@@ -48,6 +48,7 @@ sub new{
 	my $ui = bless {
 				#%interface_conf
 	}, $class;
+$ui->{map} = $params{map} // Game::Term::Map->new(  ); 
 	$ui->load_configuration( $params{configuration} );
 	$ui->init();	
 	return $ui;	
@@ -104,9 +105,10 @@ sub load_configuration{
 sub init{
 	my $ui = shift;
 		
-		my $map = Game::Term::Map->new(  );
-		print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
-		$ui->{map} = $map->{data};
+# my $map = Game::Term::Map->new(  );
+# print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
+print map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
+# $ui->{map} = $map->{data};
 		
 		$ui->set_map_and_hero();
 			print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",

@@ -1,12 +1,15 @@
 use strict;
 use warnings;
 use Game::Term::Game;
+use Game::Term::Scenario;
+
+my $scenario = Game::Term::Scenario->new();
 
 my $conf = Game::Term::Configuration->new();
 # changes to configuration...
 # $conf->{interface}{masked_map} = 0;
 
-my $game=Game::Term::Game->new( configuration => $conf); 
+my $game=Game::Term::Game->new( configuration => $conf, map => $scenario->{map}); 
 
 $game->play()
 

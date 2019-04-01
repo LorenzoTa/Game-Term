@@ -12,8 +12,14 @@ our $VERSION = '0.01';
 sub new{
 	my $class = shift;
 	my %param = @_;
+	# GET hero..
+	# if $param{hero} or ..	
 	$param{configuration} //= Game::Term::Configuration->new();
-	$param{ui} //= Game::Term::UI->new( configuration => $param{configuration} );
+	
+	# $param{ui} //= Game::Term::UI->new( configuration => $param{configuration} );
+	
+	$param{ui} //= Game::Term::UI->new( configuration => $param{configuration}, map => $param{map} );
+	
 	return bless {
 				is_running => 1,
 				current_scenario => '',
