@@ -76,7 +76,7 @@ sub new{
 	# if $conf{from} ...
 	# read file..
 	# import.. 
-	my %terrains = terrains_256_colors();
+	my %terrains = terrains_16_colors();
 	
 	return bless {
 				interface => \%conf,
