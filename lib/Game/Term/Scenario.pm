@@ -15,18 +15,18 @@ sub new{
 	my %param = @_;
 	
 	# if passed a file for the map
-	if( $param{map} and -e -f -s $param{map} ){
-		$param{map} = Game::Term::Map->new( from => *DATA )->{data};
+	if( $param{map} and -e -f -s $param{map} ){ # from_file ????
+		$param{map} = Game::Term::Map->new( from => $param{map} )->{data};
 	}
 	# else grab map from DATA
-	else{
-		while (<DATA>){
-			chomp;
-			push @{$param{map}},[ split '', $_ ];
-		}
-	}
+	# else{
+		# while (<DATA>){
+			# chomp;
+			# push @{$param{map}},[ split '', $_ ];
+		# }
+	# }
 	
-	return bless {
+	my $scn = bless {
 	
 		name => $param{name} // 'scenario name',
 		map	=> $param{map},
@@ -35,6 +35,17 @@ sub new{
 				
 	}, $class; 
 
+	$scn->get_map_from_DATA() unless ref $scn->{map} eq 'ARRAY';
+	
+	return $scn;
+}
+
+sub get_map_from_DATA{
+	my $scn = shift;
+	while (<DATA>){
+			chomp;
+			push @{ $scn->{map} },[ split '', $_ ];
+	}
 }
 
 __DATA__
