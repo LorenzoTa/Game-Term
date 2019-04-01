@@ -1,9 +1,16 @@
 use strict;
 use warnings;
 use Game::Term::Game;
-use Game::Term::Scenario;
 
-my $scenario = Game::Term::Scenario->new();
+#use Game::Term::Scenario;
+
+use Game::Term::ScenarioTest1;
+
+my $scenario = Game::Term::ScenarioTest1->new();
+
+$scenario->{name} ='Test Scenario 1';
+
+$scenario->get_map_from_DATA();
 
 my $conf = Game::Term::Configuration->new();
 # changes to configuration...

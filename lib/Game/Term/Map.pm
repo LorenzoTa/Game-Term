@@ -49,6 +49,12 @@ sub validate_conf{
 			push @{$conf{data}}, $_;
 		}
 	}
+	# elsif( fileno $conf{from} > 2){
+		# while(<$conf{from}>){
+				# chomp;
+				# push @{$conf{data}}, $_;
+			# }
+	# }
 	else{ die "at the moment only a file or an AoA are supported as maps" }
 
 	return %conf;
