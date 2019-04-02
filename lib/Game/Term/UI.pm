@@ -48,8 +48,10 @@ sub new{
 	my $ui = bless {
 				#%interface_conf
 	}, $class;
-$ui->{map} = $params{map} // Game::Term::Map->new(  ); 
+$ui->{map} = $params{map} // Game::Term::Map->new(  )->{data}; 
 	$ui->load_configuration( $params{configuration} );
+	
+	use Data::Dump; dd $ui; exit;
 	$ui->init();	
 	return $ui;	
 }
