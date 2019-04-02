@@ -268,7 +268,7 @@ sub draw_map{
 	system $ui->{ cls_cmd } unless $debug;
 	#print CLEAR unless $debug;
 	# get area of currently seen tiles (by coords)
-	my %seen ;#= $ui->illuminate();
+	my %seen = $ui->illuminate();
 	
 	# draw hero
 	# this must set $hero->{on_terrain}
@@ -496,8 +496,12 @@ sub must_scroll{
 sub illuminate{
 	my $ui = shift;
 	my %ret;
-	
-	foreach my $row ( $ui->{hero_y} - $ui->{hero_sight}  .. $ui->{hero_y}  + $ui->{hero_sight} ){
+	my $max_y = $ui->{hero_y}  + $ui->{hero_sight} < $#{ $ui->{map} } 	?
+				$ui->{hero_y}  + $ui->{hero_sight}						:
+				$#{ $ui->{map} };
+				
+	#foreach my $row ( $ui->{hero_y} - $ui->{hero_sight}  .. $ui->{hero_y}  + $ui->{hero_sight} ){
+	foreach my $row ( $ui->{hero_y} - $ui->{hero_sight}  .. $max_y ){
 		my $delta_x = $ui->{hero_sight} ** 2 - ($ui->{hero_y} - $row) ** 2;
 		if( $delta_x >= 0 ){				
 				$delta_x = int sqrt $delta_x;			
