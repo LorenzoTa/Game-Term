@@ -288,7 +288,7 @@ sub draw_map{
 							$ui->{dec_color}.$ui->{ dec_ver }.RESET :
 							$ui->{ dec_ver } );
 		# added: 					
-		if ($row < 0 or $row > $ui->{ map_area_h } ){
+		if ($row < 0 or $row > $ui->{ map_area_h } ){ #####??????????????
 			print +('?' x $ui->{ map_area_w }),
 					(	$ui->{dec_color} 						?
 						$ui->{dec_color}.$ui->{ dec_ver }.RESET :
