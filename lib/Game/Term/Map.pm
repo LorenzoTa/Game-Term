@@ -80,7 +80,7 @@ sub fake_map{
 	my ($type, $x, $y) = @_; 
 	my $map = [];
 	if ($type =~ /^S$/i){ # hero at S
-		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+		$map = [ map{ [(' ') x $x  ] } 0..$y - 1  ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
 				$$map[-1][0] 	= '#';
@@ -89,7 +89,7 @@ sub fake_map{
 				$$map[-1][ int($x/2) ] 	= 'X' ;#'X';
 	}
 	elsif ($type =~ /^N$/i){ # hero at N
-		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+		$map = [ map{ [(' ') x $x  ] } 0..$y - 1  ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
 				$$map[-1][0] 	= '#';
@@ -98,7 +98,7 @@ sub fake_map{
 				$$map[0][ int($x/2) ] 	=  'X' ;#'X';
 	}
 	elsif ($type =~ /^E$/i){ # hero at E
-		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+		$map = [ map{ [(' ') x $x  ] } 0..$y - 1   ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
 				$$map[-1][0] 	= '#';
@@ -107,7 +107,7 @@ sub fake_map{
 				$$map[ int($y/2) ][-1] 	=  'X' ;#'X';
 	}
 	elsif ($type =~ /^W$/i){ # hero at w
-		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+		$map = [ map{ [(' ') x $x  ] } 0..$y - 1   ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
 				$$map[-1][0] 	= '#';
