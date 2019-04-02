@@ -114,8 +114,8 @@ print map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
 # $ui->{map} = $map->{data};
 		
 		$ui->set_map_and_hero();
-			print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
-			" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
+			# print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
+			# " $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
 		print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" if $debug;
 		$ui->set_map_offsets();
 	
@@ -473,6 +473,72 @@ sub set_map_and_hero{
 	# change hero icon to []
 	$ui->{ hero_icon } = [ $ui->{ hero_color }.$ui->{ hero_icon }.RESET, $ui->{ hero_icon }, 1 ];
 	# add at top
+# my @map = map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ; 
+# # at the center
+# foreach my $orig_map_row( @{$ui->{map}} ){
+	# push @map,	[ 
+					# ($ui->{ ext_tile }) x $ui->{ map_area_w },
+						# @$orig_map_row,
+					# ($ui->{ ext_tile }) x $ui->{ map_area_w }
+				# ]
+# }
+# # add at bottom
+# push @map,map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ;
+
+# @{$ui->{map}} = @map;
+	
+# # set hero coordinates
+# $ui->{hero_x} += $ui->{ map_area_w } ; #+ 1; 
+# $ui->{hero_y} += $ui->{ map_area_h } + 1; 
+
+# # set top left corner coordinates (of the real map data)
+# $ui->{real_map_first}{x} = $ui->{ map_area_w } ;
+# $ui->{real_map_first}{y} = $ui->{ map_area_h } + 1;
+
+# # set bottom right corner coordinates
+# $ui->{real_map_last}{y} = $#{$ui->{map}} - $ui->{ map_area_h } ; 
+# $ui->{real_map_last}{x} = $#{$ui->{map}->[0]} - $ui->{ map_area_w } ;
+	
+	# beautify map 
+	$ui->beautify_map();		
+	
+	$ui->set_no_scrolling_area();
+	
+	if ( $debug > 1 ){
+		local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+', '', 1];
+		local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+', '', 1];
+	
+		print 	"DEBUG: map with border (now each tile is [to_display,terrain letter, masked] ) with no_scroll vertexes (+ signs):\n",
+		# map{ join'',( map{ $_->[0] }
+						# @$_[ $ui->{real_map_first}{x}-1..$ui->{real_map_last}{x}+1] ),$/ 
+			# } @{$ui->{map}}[ $ui->{real_map_first}{y}-1..$ui->{real_map_last}{y}];
+		map{ join'',( map{ $_->[0] }
+						@$_ ),$/ 
+			} @{$ui->{map}};
+	}
+		
+}
+sub set_map_and_heroORIGINAL{
+	my $ui = shift;
+
+	my $original_map_w = $#{$ui->{map}->[0]} + 1;
+	my $original_map_h = $#{$ui->{map}} + 1;
+	print "DEBUG: original map was $original_map_w x $original_map_h\n" if $debug;
+	# get hero position and side BEFORE enlarging
+	$ui->set_hero_pos();
+	# change external tile to []
+	$ui->{ ext_tile } = [ 
+							(
+								$ui->{dec_color} 							?
+								$ui->{dec_color}.$ui->{ ext_tile }.RESET 	:
+								$ui->{ ext_tile }
+							), 
+							$ui->{ ext_tile },
+							1	# unmasked
+						];
+	# change hero icon to []
+	$ui->{ hero_icon } = [ $ui->{ hero_color }.$ui->{ hero_icon }.RESET, $ui->{ hero_icon }, 1 ];
+	# add at top
 	my @map = map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ; 
 	# at the center
 	foreach my $orig_map_row( @{$ui->{map}} ){
@@ -515,13 +581,14 @@ sub set_map_and_hero{
 	}
 		
 }
-
 sub beautify_map{
 	# letter used in map, descr  possible renders,  possible fg colors,   speed penality
 
 	my $ui = shift;
-	foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y} - 1 ){ # WATCH this - 1 !!!!!
-		foreach my $col( $ui->{real_map_first}{x} .. $ui->{real_map_last}{x} ){
+# foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y} - 1 ){ # WATCH this - 1 !!!!!
+	# foreach my $col( $ui->{real_map_first}{x} .. $ui->{real_map_last}{x} ){
+	foreach my $row( 0..$#{$ui->{map}} ){ # WATCH this - 1 !!!!!
+		foreach my $col( 0 .. $#{$ui->{map}->[0]} ){
 			
 			# if the letter is defined in %terrain
 			if(exists $terrain{ $ui->{map}[$row][$col] } ){
