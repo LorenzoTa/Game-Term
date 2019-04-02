@@ -28,7 +28,7 @@ sub validate_conf{
 	# FROM param absent
 	unless ( $conf{from} ){
 	#die $conf{ fake_map };
-		$conf{ fake_map } //= 'S' ;
+		$conf{ fake_map } //= 's' ;
 		$conf{ fake_x } //= 10; #80;
 		$conf{ fake_y } //= 10; #20;
 

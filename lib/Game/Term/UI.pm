@@ -263,6 +263,84 @@ sub set_map_offsets{
 }
 sub draw_map{
 	my $ui = shift;
+#no warnings qw(uninitialized);
+	# clear screen
+	system $ui->{ cls_cmd } unless $debug;
+	#print CLEAR unless $debug;
+	# get area of currently seen tiles (by coords)
+	my %seen ;#= $ui->illuminate();
+	
+	# draw hero
+	# this must set $hero->{on_terrain}
+	local $ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
+	# MAP AREA:
+	# print decoration first row
+	if ($ui->{dec_color}){
+		print $ui->{dec_color}.(' o'.($ui->{ dec_hor } x  $ui->{ map_area_w }  )).'o'.RESET."\n";
+	}
+	else { print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";} 
+	# print map body with decorations
+	# iterate indexes of rows..
+	foreach my $row ( $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}   ){ 
+#print "$ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}\n";next;	
+				# print decoration vertical
+				print ' ',	($ui->{dec_color} 						?
+							$ui->{dec_color}.$ui->{ dec_ver }.RESET :
+							$ui->{ dec_ver } );
+		# added: 					
+		if ($row < 0 or $row > $ui->{ map_area_h } ){
+			print +('?' x $ui->{ map_area_w }),
+					(	$ui->{dec_color} 						?
+						$ui->{dec_color}.$ui->{ dec_ver }.RESET :
+						$ui->{ dec_ver }
+					),"\n";
+			next;
+		}
+
+	
+				# iterate cols by indexes 
+				foreach my $col  ( $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w}  ){
+					# if is seen (in the radius of illuminate) and still masked
+					if ( $seen{$row.'_'.$col} and $ui->{map}[$row][$col][2] == 0 ){
+						# set unmasked
+						$ui->{map}[$row][$col][2] = 1;
+						# print display
+						print $ui->{map}[$row][$col][0];					
+					}
+					# already unmasked but empty space (fog of war)
+		elsif( 	
+		$row <= $#{$ui->{map}} and
+		$col <= $#{$ui->{map}->[0]}	and
+				$ui->{map}[$row][$col][2] == 1 		and 
+				$ui->{map}[$row][$col][1] eq ' ' 	and # WITH [0]FAILS!!!!!
+				$ui->{fog_of_war}					and
+				!$seen{$row.'_'.$col}
+			)
+		{ 
+			print $ui->{fog_char} ;
+		}
+		# already unmasked: print display 
+		elsif( 
+		$row <= $#{$ui->{map}} and
+		$col <= $#{$ui->{map}->[0]}	and
+				$ui->{map}[$row][$col][2] == 1 ){ print $ui->{map}[$row][$col][0]; }
+					# print ' ' if still masked
+					else{ print ' '}
+				}
+				# print decoration vertical and newline
+				print +($ui->{dec_color} 						?
+							$ui->{dec_color}.$ui->{ dec_ver }.RESET :
+							$ui->{ dec_ver }),"\n" ;
+	}	
+	# print decoration last row
+	if ($ui->{dec_color}){
+		print $ui->{dec_color}.(' o'.($ui->{ dec_hor } x  $ui->{ map_area_w }  )).'o'.RESET."\n";
+	}
+	else { print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";}
+	
+}
+sub draw_mapORIGINAL{
+	my $ui = shift;
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
 	#print CLEAR unless $debug;
@@ -321,7 +399,6 @@ sub draw_map{
 	else { print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";}
 	
 }
-
 sub move{
 	my $ui = shift;
 	my $key = shift;
@@ -329,7 +406,8 @@ sub move{
 	# move with WASD
 	if ( $key eq 'w' 	
 		# we are inside the real map
-		and $ui->{hero_y} > $ui->{real_map_first}{y} 
+		#and $ui->{hero_y} > $ui->{real_map_first}{y} 
+		and $ui->{hero_y} > 0
 		and  is_walkable(
 			# map coord as hero X - 1, hero Y
 			$ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
@@ -343,9 +421,11 @@ sub move{
 		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
 		return 1;
     }
-	elsif ( $key eq 's'
+	# SOUTH
+	elsif ( $key eq 's'  and eval {print $ui->{hero_y}, '<',$#{ $ui->{map}},"\n" }
 			# we are inside the real map
-			and $ui->{hero_y} < $ui->{real_map_last}{y} - 1
+			#and $ui->{hero_y} < $ui->{real_map_last}{y} - 1
+			and $ui->{hero_y} < $#{$ui->{map}} 
 			and  is_walkable(
 						# map coord as hero X + 1, hero Y
 						$ui->{map}->[ $ui->{hero_y} + 1 ][	$ui->{hero_x} ]
@@ -360,7 +440,7 @@ sub move{
     }
 	elsif ( $key eq 'a' 
 			# we are inside the real map
-			and $ui->{hero_x} > $ui->{real_map_first}{x}
+			and $ui->{hero_x} > 0 #$ui->{real_map_first}{x}
 			and  is_walkable(
 							# map coord as hero X, hero Y - 1
 							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} - 1 ]
@@ -375,7 +455,7 @@ sub move{
     }
 	elsif ( $key eq 'd' 
 			# we are inside the real map
-			and $ui->{hero_x} < $ui->{real_map_last}{x}
+			and $ui->{hero_x} < $#{$ui->{map}[0]} #$ui->{real_map_last}{x}
 			and  is_walkable(
 							# map coord as hero X, hero Y + 1
 							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} + 1 ]

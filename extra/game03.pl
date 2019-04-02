@@ -17,7 +17,7 @@ my $conf = Game::Term::Configuration->new( );
 $conf->{interface}{masked_map} = 0;
 
 my $game=Game::Term::Game->new( 
-								debug=>0, 
+								debug=>2, 
 								configuration => $conf, 
 								#map => $scenario->{map},
 								scenario => $scenario,
