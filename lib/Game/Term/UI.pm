@@ -109,6 +109,7 @@ sub init{
 		
 # my $map = Game::Term::Map->new(  );
 # print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
+print "DEBUG: original received map:\n" if $debug > 1;
 print map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
 # $ui->{map} = $map->{data};
 		
