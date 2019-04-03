@@ -286,7 +286,6 @@ sub draw_map{
 				print ' ',$ui->{ dec_ver };
 		# added: 					
 		if ($row < 0 or $row > $#{$ui->{map}} ){ 
-			#print +('?' x $ui->{ map_area_w }),$ui->{ dec_ver },"\n";
 			print +($ui->{ext_tile} x $ui->{ map_area_w }),$ui->{ dec_ver },"\n";
 			next;
 		}
@@ -296,7 +295,7 @@ sub draw_map{
 					
 				# added:
 				if( $col < 0 or $col > $#{$ui->{map}[0]} ){
-					print "?";
+					print $ui->{ext_tile};
 					next;
 				}
 					
