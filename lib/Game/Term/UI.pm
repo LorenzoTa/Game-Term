@@ -275,26 +275,18 @@ sub draw_map{
 	local $ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
 	# MAP AREA:
 	# print decoration first row
-	if ($ui->{dec_color}){
-		print $ui->{dec_color}.(' o'.($ui->{ dec_hor } x  $ui->{ map_area_w }  )).'o'.RESET."\n";
-	}
-	else { print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";} 
+	print 	$ui->{dec_color},' o',
+			$ui->{ dec_hor } x ( $ui->{ map_area_w } ),
+			$ui->{dec_color},'o',RESET,"\n";	
 	# print map body with decorations
 	# iterate indexes of rows..
 	foreach my $row ( $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}   ){ 
-#print "$ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}\n";next;	
-				# print decoration vertical
-				print ' ',	($ui->{dec_color} 						?
-							$ui->{dec_color}.$ui->{ dec_ver }.RESET :
-							$ui->{ dec_ver } );
+
+	# print decoration vertical
+				print ' ',$ui->{ dec_ver };
 		# added: 					
-		#if ($row < 0 or $row > $ui->{ map_area_h } ){ #####??????????????
-		if ($row < 0 or $row > $#{$ui->{map}} ){ #####??????????????
-			print +('?' x $ui->{ map_area_w }),
-					(	$ui->{dec_color} 						?
-						$ui->{dec_color}.$ui->{ dec_ver }.RESET :
-						$ui->{ dec_ver }
-					),"\n";
+		if ($row < 0 or $row > $#{$ui->{map}} ){ 
+			print +('?' x $ui->{ map_area_w }),$ui->{ dec_ver },"\n";
 			next;
 		}
 	
@@ -340,10 +332,9 @@ sub draw_map{
 							$ui->{ dec_ver }),"\n" ;
 	}	
 	# print decoration last row
-	if ($ui->{dec_color}){
-		print $ui->{dec_color}.(' o'.($ui->{ dec_hor } x  $ui->{ map_area_w }  )).'o'.RESET."\n";
-	}
-	else { print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";}
+	print 	$ui->{dec_color},' o',
+			$ui->{ dec_hor } x ( $ui->{ map_area_w } ),
+			$ui->{dec_color},'o',RESET,"\n";	
 	
 }
 sub draw_mapORIGINAL{
@@ -674,11 +665,10 @@ sub set_map_and_heroORIGINAL{
 }
 sub beautify_map{
 	# letter used in map, descr  possible renders,  possible fg colors,   speed penality
-
 	my $ui = shift;
-# foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y} - 1 ){ # WATCH this - 1 !!!!!
-	# foreach my $col( $ui->{real_map_first}{x} .. $ui->{real_map_last}{x} ){
-	foreach my $row( 0..$#{$ui->{map}} ){ # WATCH this - 1 !!!!!
+	# ITERATE ROWS by index
+	foreach my $row( 0..$#{$ui->{map}} ){
+		# ITERATE COLUMNS by index
 		foreach my $col( 0 .. $#{$ui->{map}->[0]} ){
 			
 			# if the letter is defined in %terrain
@@ -711,6 +701,14 @@ sub beautify_map{
 			else {  $ui->{map}[$row][$col]  =  [ $ui->{map}[$row][$col], $ui->{map}[$row][$col], 0]}
 		}
 	}
+	# BEAUTIFY vertical decoration
+	$ui->{ dec_ver } = 	$ui->{dec_color} 						?
+						$ui->{dec_color}.$ui->{ dec_ver }.RESET :
+						$ui->{ dec_ver } ;
+	# BEAUTIFY horizontal decoration
+	$ui->{ dec_hor } = 	$ui->{dec_color} 						?
+						$ui->{dec_color}.$ui->{ dec_hor }.RESET :
+						$ui->{ dec_hor } ;
 }
 sub set_no_scrolling_area{
 	my $ui = shift;
@@ -772,8 +770,7 @@ sub set_hero_pos{
 		}
 	}
 	unless( defined $ui->{hero_y} and defined $ui->{hero_x}){die "Hero not found!"}
-	# added:
-	#$ui->{map}[][]=
+	
 }
 
 # sub validate_conf{
