@@ -296,10 +296,16 @@ sub draw_map{
 					),"\n";
 			next;
 		}
-
 	
 				# iterate cols by indexes 
 				foreach my $col  ( $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w}  ){
+					
+				# added:
+				if( $col < 0 or $col > $#{$ui->{map}[0]} ){
+					print "?";
+					next;
+				}
+					
 					# if is seen (in the radius of illuminate) and still masked
 					if ( $seen{$row.'_'.$col} and $ui->{map}[$row][$col][2] == 0 ){
 						# set unmasked
