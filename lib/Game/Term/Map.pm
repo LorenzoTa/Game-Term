@@ -28,9 +28,9 @@ sub validate_conf{
 	# FROM param absent
 	unless ( $conf{from} ){
 	#die $conf{ fake_map };
-		$conf{ fake_map } //= 'one' ;
-		$conf{ fake_x } //= 40; #80;
-		$conf{ fake_y } //= 20; #20;
+		$conf{ fake_map } //= 's' ;
+		$conf{ fake_x } //= 10; #80;
+		$conf{ fake_y } //= 10; #20;
 
 		$conf{data} = fake_map( $conf{ fake_map },$conf{ fake_x },$conf{ fake_y } );
 		map{ delete $conf{$_} }qw( fake_map fake_x fake_y );
@@ -80,40 +80,40 @@ sub fake_map{
 	my ($type, $x, $y) = @_; 
 	my $map = [];
 	if ($type =~ /^S$/i){ # hero at S
-		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+		$map = [ map{ [(' ') x $x  ] } 0..$y - 1  ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[-1][ int($x/2) ] 	= 'X' ;#'X';
+				#$$map[-1][ int($x/2) ] 	= 'X' ;#'X';
 	}
 	elsif ($type =~ /^N$/i){ # hero at N
-		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+		$map = [ map{ [(' ') x $x  ] } 0..$y - 1  ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[0][ int($x/2) ] 	=  'X' ;#'X';
+				#$$map[0][ int($x/2) ] 	=  'X' ;#'X';
 	}
 	elsif ($type =~ /^E$/i){ # hero at E
-		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+		$map = [ map{ [(' ') x $x  ] } 0..$y - 1   ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[ int($y/2) ][-1] 	=  'X' ;#'X';
+				#$$map[ int($y/2) ][-1] 	=  'X' ;#'X';
 	}
 	elsif ($type =~ /^W$/i){ # hero at w
-		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+		$map = [ map{ [(' ') x $x  ] } 0..$y - 1   ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[ int($y/2) ][0] 	=  'X' ;#'X';
+				#$$map[ int($y/2) ][0] 	=  'X' ;#'X';
 	}
 	elsif ($type =~ /^one$/i){
 		my $fake=<<EOM;
@@ -149,7 +149,7 @@ ttttttTTTTTttttttTTTTTttttttttttt  bbWWwwmmttttttmMM ht MttthhmMMmmm tt hhhhMMmm
          sswwWWWWWWWWWWWwwwssss          yyyytttt  ttt           tt   tttt  ttTT
  t      sswwWWWWWWWWWWWWWWWWwws          TTTTTTTttt    ttt ttttttttttttttt  ttTt
 ttt    ssswWWWWWWWWWWWWWWWWWWwww         TTTTTTTTTttt tt ttttTTTTtttttttttttTTTt
-ttt  ssssswWWWWWWWWWWWWWWWWWWWWWw    X  TTTTTTTTTTTtt tTTTTTTTttTTTTTTtttttttttt
+ttt  ssssswWWWWWWWWWWWWWWWWWWWWWw       TTTTTTTTTTTtt tTTTTTTTttTTTTTTtttttttttt
 EOM
 		foreach my $row( split "\n", $fake){
 			push @$map,[ split '', $row ]
@@ -167,7 +167,7 @@ tttttttttttttttt
          mM   ww
              wWwW
 
-#        X         #
+#                  #
 EOM
 	foreach my $row( split "\n", $fake){
 			push @$map,[ split '', $row ]
@@ -193,7 +193,7 @@ wwwWWWWWWwwwwww
       m             t
       mm
        m
-        m   X
+        m    
 EOM
 	foreach my $row( split "\n", $fake){
 			push @$map,[ split '', $row ]

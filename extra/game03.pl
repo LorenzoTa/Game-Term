@@ -5,16 +5,21 @@ use Game::Term::Game;
 use Game::Term::Scenario;
 
 
-my $scenario = Game::Term::Scenario->new();
-$scenario->{name} ='Test Scenario 1';
-$scenario->get_map_from_DATA();
+# # bare minimum scenario with map in DATA
+# my $scenario = Game::Term::Scenario->new();
+# $scenario->{name} ='Test Scenario 1';
+# $scenario->get_map_from_DATA();
+# $scenario->set_hero_position( $ARGV[0] // 'south11' );
 
-$scenario->set_hero_position( $ARGV[0] // 'south11' );
+# OR scenario with custom fake map
+my $scenario = Game::Term::Scenario->new( map=> Game::Term::Map->new(fake_map=>'one')->{data} );
+$scenario->{name} ='Test Scenario 1';
+$scenario->set_hero_position( $ARGV[0] // 'south38' );
 
 
 my $conf = Game::Term::Configuration->new( );
 # changes to configuration...
-$conf->{interface}{masked_map} = 0;
+# $conf->{interface}{masked_map} = 0;
 
 my $game=Game::Term::Game->new( 
 								debug=>0, 

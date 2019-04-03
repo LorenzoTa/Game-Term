@@ -48,8 +48,9 @@ sub new{
 	my $ui = bless {
 				#%interface_conf
 	}, $class;
-$ui->{map} = $params{map} // Game::Term::Map->new(  ); 
+	$ui->{map} = $params{map} // Game::Term::Map->new(  )->{data}; 
 	$ui->load_configuration( $params{configuration} );
+	
 	$ui->init();	
 	return $ui;	
 }
@@ -105,111 +106,39 @@ sub load_configuration{
 sub init{
 	my $ui = shift;
 		
-# my $map = Game::Term::Map->new(  );
-# print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
-print map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
-# $ui->{map} = $map->{data};
+	print "DEBUG: original received map:\n" if $debug > 1;
+	print map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
 		
-		$ui->set_map_and_hero();
-			print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
-			" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
-		print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" if $debug;
-		$ui->set_map_offsets();
+	$ui->set_map_and_hero();
+	print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" if $debug;
 	
-
+	$ui->set_map_offsets();
 }
 
 sub show{
 		my $ui = shift;
 		
-		
-			my $key = ReadKey(0);
+		my $key = ReadKey(0);
 			
-			sleep(	
-					$ui->{hero_slowness} + 
-					# the slowness #4 of the terrain original letter #1 where
-					# the hero currently is on th emap
-					$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]
-			);
-			print "DEBUG: slowness for terrain ".
-				$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
-				"\n" if $debug;
-			if( $ui->move( $key ) ){
-				local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
-				local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
-				local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'wood';
-				
-				# CHECK EVENT??????
-		
-				$ui->draw_map();
-				
-			if ($noscroll_debug){
-				 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+','+',1];
-				 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+','+',1];
-				 
-				 print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
-						"NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
-						"$ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n";
-				 print "OFF_Y used in print: $ui->{map_off_y} .. $ui->{map_off_y} + $ui->{map_area_h}\n";
-				 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
-			}
+		sleep(	
+				$ui->{hero_slowness} + 
+				# the slowness #4 of the terrain original letter #1 where
+				# the hero currently is on th emap
+				$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]
+		);
+		print "DEBUG: slowness for terrain ".
+			$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
+			"\n" if $debug;
 			
-				$ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
-								"( $ui->{hero_terrain} ) sight: $ui->{hero_sight} ".
-								"slowness: ".
-								($ui->{hero_slowness} + 
-								$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]),
-									"key $key was pressed:"] );	
-
-			}
-			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;				
-		
-}
-
-
-sub run{
-		my $ui = shift;
-		
-	 my $map = Game::Term::Map->new(  );
-	# print map{ join'',@$_,$/ } @{$map->{data}} if $debug > 1;
-	 $ui->{map} = $map->{data};
-		# enlarge the map to be scrollable
-		# set the hero's coordinates
-		# set real_map_first and real_map_last x,y
-	 $ui->set_map_and_hero();
-		
-	print "DEBUG: real map corners(x-y): $ui->{real_map_first}{x}-$ui->{real_map_first}{y}",
-			" $ui->{real_map_last}{x}-$ui->{real_map_first}{y}\n" if $debug;
-		# now BIG map, hero_pos and hero_side are initialized
-		# time to generate offsets for print: map_off_x and map_off_y (and the no_scroll region..)		
-		
-	print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" if $debug;
+		if( $ui->move( $key ) ){
+			local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
+			local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
+			local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'wood';
 			
-	$ui->set_map_offsets();
+			# CHECK EVENT??????
 	
-		$ui->draw_map();
-		$ui->draw_menu( ["hero HP: 42","walk with WASD"] );	
-		while(1){
-			my $key = ReadKey(0);
+			$ui->draw_map();
 			
-			sleep(	
-					$ui->{hero_slowness} + 
-					# the slowness #4 of the terrain original letter #1 where
-					# the hero currently is on th emap
-					$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]
-			);
-			print "DEBUG: slowness for terrain ".
-				$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
-				"\n" if $debug;
-			if( $ui->move( $key ) ){
-				local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
-				local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
-				local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'wood';
-				
-				# CHECK EVENT??????
-		
-				$ui->draw_map();
-				
 			if ($noscroll_debug){
 				 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+','+',1];
 				 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+','+',1];
@@ -220,25 +149,25 @@ sub run{
 				 print "OFF_Y used in print: $ui->{map_off_y} .. $ui->{map_off_y} + $ui->{map_area_h}\n";
 				 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
 			}
-			
-				$ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
-								"( $ui->{hero_terrain} ) sight: $ui->{hero_sight} ".
-								"slowness: ".
-								($ui->{hero_slowness} + 
-								$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]),
-									"key $key was pressed:"] );	
+		
+			$ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
+							"( $ui->{hero_terrain} ) sight: $ui->{hero_sight} ".
+							"slowness: ".
+							($ui->{hero_slowness} + 
+							$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]),
+								"key $key was pressed:"] );	
 
-			}
-			print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;				
 		}
+		print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;		
 }
+
 
 sub set_map_offsets{
 	my $ui = shift;	
 	if ( $ui->{hero_side} eq 'S' ){		
 		$ui->{map_off_x} =  $ui->{hero_x} - $ui->{map_area_w} / 2; 
 		$ui->{map_off_y} =  $ui->{hero_y} - $ui->{map_area_h} ;		
-		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
+		print "DEBUG: SOUTH map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
 	elsif ( $ui->{hero_side} eq 'N' ){		
 		$ui->{map_off_x} =  $ui->{hero_x} - $ui->{map_area_w} / 2;
@@ -262,60 +191,78 @@ sub draw_map{
 	my $ui = shift;
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
-	#print CLEAR unless $debug;
+	
 	# get area of currently seen tiles (by coords)
 	my %seen = $ui->illuminate();
 	
 	# draw hero
 	# this must set $hero->{on_terrain}
 	local $ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
+	
 	# MAP AREA:
 	# print decoration first row
-	if ($ui->{dec_color}){
-		print $ui->{dec_color}.(' o'.($ui->{ dec_hor } x  $ui->{ map_area_w }  )).'o'.RESET."\n";
-	}
-	else { print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";} 
+	print 	$ui->{dec_color},' o',
+			$ui->{ dec_hor } x ( $ui->{ map_area_w } ),
+			$ui->{dec_color},'o',RESET,"\n";	
+	
 	# print map body with decorations
-	# iterate indexes of rows..
-	foreach my $row ( $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}   ){ 	
-				# print decoration vertical
-				print ' ',	($ui->{dec_color} 						?
-							$ui->{dec_color}.$ui->{ dec_ver }.RESET :
-							$ui->{ dec_ver } );
-				
-				# iterate cols by indexes 
-				foreach my $col  ( $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w}  ){
-					# if is seen (in the radius of illuminate) and still masked
-					if ( $seen{$row.'_'.$col} and $ui->{map}[$row][$col][2] == 0 ){
-						# set unmasked
-						$ui->{map}[$row][$col][2] = 1;
-						# print display
-						print $ui->{map}[$row][$col][0];					
-					}
-					# already unmasked but empty space (fog of war)
-					elsif( 	$ui->{map}[$row][$col][2] == 1 		and 
-							$ui->{map}[$row][$col][1] eq ' ' 	and # WITH [0]FAILS!!!!!
-							$ui->{fog_of_war}					and
-							!$seen{$row.'_'.$col}
-						)
-					{ 
-						print $ui->{fog_char} ;
-					}
-					# already unmasked: print display 
-					elsif( $ui->{map}[$row][$col][2] == 1 ){ print $ui->{map}[$row][$col][0]; }
-					# print ' ' if still masked
-					else{ print ' '}
+	# iterate ROWS by indexe 
+	foreach my $row ( $ui->{map_off_y}..$ui->{map_off_y} + $ui->{map_area_h}   ){ 
+
+		# print decoration vertical
+		print ' ',$ui->{ dec_ver };
+		# print ext_tile entire row if needed
+		if ($row < 0 or $row > $#{$ui->{map}} ){ 
+			print +($ui->{ext_tile} x $ui->{ map_area_w }),$ui->{ dec_ver },"\n";
+			next;
+		}	
+		# iterate COLUMNS by indexe  
+		foreach my $col  ( $ui->{map_off_x} + 1 ..$ui->{map_off_x} + $ui->{map_area_w}  ){
+				# print ext_tile column if needed
+				if( $col < 0 or $col > $#{$ui->{map}[0]} ){
+					print $ui->{ext_tile};
+					next;
 				}
-				# print decoration vertical and newline
-				print +($ui->{dec_color} 						?
-							$ui->{dec_color}.$ui->{ dec_ver }.RESET :
-							$ui->{ dec_ver }),"\n" ;
+					
+				# if is seen (in the radius of illuminate) and still masked
+				if ( $seen{$row.'_'.$col} and $ui->{map}[$row][$col][2] == 0 ){
+					# set unmasked
+					$ui->{map}[$row][$col][2] = 1;
+					# print display
+					print $ui->{map}[$row][$col][0];					
+				}
+				# already unmasked but empty space (fog of war)
+				elsif( 	
+				$row <= $#{$ui->{map}} and
+				$col <= $#{$ui->{map}->[0]}	and
+						$ui->{map}[$row][$col][2] == 1 		and 
+						$ui->{map}[$row][$col][1] eq ' ' 	and # WITH [0]FAILS!!!!!
+						$ui->{fog_of_war}					and
+						!$seen{$row.'_'.$col}
+					)
+				{ 
+					print $ui->{fog_char} ;
+				}
+				# already unmasked: print display 
+				elsif( 
+				$row <= $#{$ui->{map}} and
+				$col <= $#{$ui->{map}->[0]}	and
+						$ui->{map}[$row][$col][2] == 1 )
+				{ 
+					print $ui->{map}[$row][$col][0]; 
+				}
+				# print ' ' if still masked
+				else{ print ' '}
+		}
+		# print decoration vertical and newline
+		print +($ui->{dec_color} 						?
+					$ui->{dec_color}.$ui->{ dec_ver }.RESET :
+					$ui->{ dec_ver }),"\n" ;
 	}	
 	# print decoration last row
-	if ($ui->{dec_color}){
-		print $ui->{dec_color}.(' o'.($ui->{ dec_hor } x  $ui->{ map_area_w }  )).'o'.RESET."\n";
-	}
-	else { print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";}
+	print 	$ui->{dec_color},' o',
+			$ui->{ dec_hor } x ( $ui->{ map_area_w } ),
+			$ui->{dec_color},'o',RESET,"\n";	
 	
 }
 
@@ -324,12 +271,13 @@ sub move{
 	my $key = shift;
 	
 	# move with WASD
-	if ( $key eq 'w' 	
-		# we are inside the real map
-		and $ui->{hero_y} > $ui->{real_map_first}{y} 
-		and  is_walkable(
-			# map coord as hero X - 1, hero Y
-			$ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
+	# NORTH
+	if ( 	$key eq 'w' 		and	
+			# we are inside the real map
+			$ui->{hero_y} > 0 	and
+			is_walkable(
+				# map coord as hero X - 1, hero Y
+				$ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
 			)
 					
 		){
@@ -340,10 +288,11 @@ sub move{
 		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
 		return 1;
     }
-	elsif ( $key eq 's'
+	# SOUTH
+	elsif (	$key eq 's' 					and 
 			# we are inside the real map
-			and $ui->{hero_y} < $ui->{real_map_last}{y} - 1
-			and  is_walkable(
+			$ui->{hero_y} < $#{$ui->{map}} 	and
+			is_walkable(
 						# map coord as hero X + 1, hero Y
 						$ui->{map}->[ $ui->{hero_y} + 1 ][	$ui->{hero_x} ]
 						)
@@ -355,10 +304,11 @@ sub move{
 		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
 		return 1;
     }
-	elsif ( $key eq 'a' 
+	# WEST
+	elsif ( $key eq 'a' 		and
 			# we are inside the real map
-			and $ui->{hero_x} > $ui->{real_map_first}{x}
-			and  is_walkable(
+			$ui->{hero_x} > 0 	and
+			is_walkable(
 							# map coord as hero X, hero Y - 1
 							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} - 1 ]
 							)
@@ -370,10 +320,11 @@ sub move{
 		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
 		return 1;
     }
-	elsif ( $key eq 'd' 
+	# EAST
+	elsif ( $key eq 'd' 						and
 			# we are inside the real map
-			and $ui->{hero_x} < $ui->{real_map_last}{x}
-			and  is_walkable(
+			$ui->{hero_x} < $#{$ui->{map}[0]} 	and
+			is_walkable(
 							# map coord as hero X, hero Y + 1
 							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} + 1 ]
 							)
@@ -413,8 +364,11 @@ sub must_scroll{
 sub illuminate{
 	my $ui = shift;
 	my %ret;
-	
-	foreach my $row ( $ui->{hero_y} - $ui->{hero_sight}  .. $ui->{hero_y}  + $ui->{hero_sight} ){
+	my $max_y = $ui->{hero_y}  + $ui->{hero_sight} < $#{ $ui->{map} } 	?
+				$ui->{hero_y}  + $ui->{hero_sight}						:
+				$#{ $ui->{map} };
+				
+	foreach my $row ( $ui->{hero_y} - $ui->{hero_sight}  .. $max_y ){
 		my $delta_x = $ui->{hero_sight} ** 2 - ($ui->{hero_y} - $row) ** 2;
 		if( $delta_x >= 0 ){				
 				$delta_x = int sqrt $delta_x;			
@@ -427,9 +381,6 @@ sub illuminate{
 }
 sub is_walkable{
 	my $tile = shift; 
-	# if( $tile->[1] eq ' ' ){ return 1 }
-	# elsif( $tile->[1] eq '+' ){ return 1 }
-	#print "DEBUG: tile -->",(join '|',@$tile),"<--\n";
 	
 	if ( $terrain{ $tile->[1]}->[4] < 5 ){ return 1}
 	else{return 0}
@@ -440,13 +391,11 @@ sub draw_menu{
 	my $messages = shift;
 	# MENU AREA:
 	# print decoration first row
-	#print ' o',$ui->{ dec_hor } x ($ui-> { map_area_w }), 'o',"\n";
-	if ($ui->{dec_color}){
-		print $ui->{dec_color}.(' o'.($ui->{ dec_hor } x  $ui->{ map_area_w }  )).'o'.RESET."\n";
-	}
-	else { print ' o',$ui->{ dec_hor } x ( $ui->{ map_area_w } ), 'o',"\n";}
-	# menu fake data
-	print ' ',$ui->{dec_color}.$ui->{ dec_ver }.RESET.$_."\n" for @$messages;
+	print 	$ui->{dec_color},' o',
+			$ui->{ dec_hor } x ( $ui->{ map_area_w } ),
+			$ui->{dec_color},'o',RESET,"\n";	
+	# menu data
+	print ' ',$ui->{ dec_ver }.$_."\n" for @$messages;
 }
 
 sub set_map_and_hero{
@@ -454,49 +403,14 @@ sub set_map_and_hero{
 
 	my $original_map_w = $#{$ui->{map}->[0]} + 1;
 	my $original_map_h = $#{$ui->{map}} + 1;
-	print "DEBUG: original map was $original_map_w x $original_map_h\n" if $debug;
-	# get hero position and side BEFORE enlarging
+	print "DEBUG: ???? original map was $original_map_w x $original_map_h\n" if $debug;
+	
+	# get hero position and side 
 	$ui->set_hero_pos();
-	# change external tile to []
-	$ui->{ ext_tile } = [ 
-							(
-								$ui->{dec_color} 							?
-								$ui->{dec_color}.$ui->{ ext_tile }.RESET 	:
-								$ui->{ ext_tile }
-							), 
-							$ui->{ ext_tile },
-							1	# unmasked
-						];
+	
 	# change hero icon to []
 	$ui->{ hero_icon } = [ $ui->{ hero_color }.$ui->{ hero_icon }.RESET, $ui->{ hero_icon }, 1 ];
-	# add at top
-	my @map = map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ; 
-	# at the center
-	foreach my $orig_map_row( @{$ui->{map}} ){
-		push @map,	[ 
-						($ui->{ ext_tile }) x $ui->{ map_area_w },
-							@$orig_map_row,
-						($ui->{ ext_tile }) x $ui->{ map_area_w }
-					]
-	}
-	# add at bottom
-	push @map,map { [ ($ui->{ ext_tile }) x ( $original_map_w + $ui->{ map_area_w } * 2 ) ]} 0..$ui->{ map_area_h } ;
-	
-	@{$ui->{map}} = @map;
-	
-	# set hero coordinates
-	$ui->{hero_x} += $ui->{ map_area_w } ; #+ 1; 
-	$ui->{hero_y} += $ui->{ map_area_h } + 1; 
-	
-	# set top left corner coordinates (of the real map data)
-	$ui->{real_map_first}{x} = $ui->{ map_area_w } ;
-	$ui->{real_map_first}{y} = $ui->{ map_area_h } + 1;
-	
-	# set bottom right corner coordinates
-	$ui->{real_map_last}{y} = $#{$ui->{map}} - $ui->{ map_area_h } ; 
-	$ui->{real_map_last}{x} = $#{$ui->{map}->[0]} - $ui->{ map_area_w } ;
-	
-	# beautify map 
+		
 	$ui->beautify_map();		
 	
 	$ui->set_no_scrolling_area();
@@ -506,19 +420,20 @@ sub set_map_and_hero{
 		local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+', '', 1];
 	
 		print 	"DEBUG: map with border (now each tile is [to_display,terrain letter, masked] ) with no_scroll vertexes (+ signs):\n",
-		map{ join'',( map{ $_->[0] }
-						@$_[ $ui->{real_map_first}{x}-1..$ui->{real_map_last}{x}+1] ),$/ 
-			} @{$ui->{map}}[ $ui->{real_map_first}{y}-1..$ui->{real_map_last}{y}];
+			map{ join'',( map{ $_->[0] }
+							@$_ ),$/ 
+				} @{$ui->{map}};
 	}
 		
 }
 
 sub beautify_map{
 	# letter used in map, descr  possible renders,  possible fg colors,   speed penality
-
 	my $ui = shift;
-	foreach my $row( $ui->{real_map_first}{y} .. $ui->{real_map_last}{y} - 1 ){ # WATCH this - 1 !!!!!
-		foreach my $col( $ui->{real_map_first}{x} .. $ui->{real_map_last}{x} ){
+	# ITERATE ROWS by index
+	foreach my $row( 0..$#{$ui->{map}} ){
+		# ITERATE COLUMNS by index
+		foreach my $col( 0 .. $#{$ui->{map}->[0]} ){
 			
 			# if the letter is defined in %terrain
 			if(exists $terrain{ $ui->{map}[$row][$col] } ){
@@ -550,6 +465,18 @@ sub beautify_map{
 			else {  $ui->{map}[$row][$col]  =  [ $ui->{map}[$row][$col], $ui->{map}[$row][$col], 0]}
 		}
 	}
+	# BEAUTIFY vertical decoration
+	$ui->{ dec_ver } = 	$ui->{dec_color} 						?
+						$ui->{dec_color}.$ui->{ dec_ver }.RESET :
+						$ui->{ dec_ver } ;
+	# BEAUTIFY horizontal decoration
+	$ui->{ dec_hor } = 	$ui->{dec_color} 						?
+						$ui->{dec_color}.$ui->{ dec_hor }.RESET :
+						$ui->{ dec_hor } ;
+	# BEAUTIFY external (fake) tiles
+	$ui->{ ext_tile } = $ui->{dec_color} 						?
+						$ui->{dec_color}.$ui->{ ext_tile }.RESET :
+						$ui->{ ext_tile } ;
 }
 sub set_no_scrolling_area{
 	my $ui = shift;
@@ -597,7 +524,7 @@ sub set_hero_pos{
 	foreach my $row ( 0..$#{$ui->{map}} ){
 		foreach my $col ( 0..$#{$ui->{map}->[$row]} ){
 			if ( ${$ui->{map}}[$row][$col] eq 'X' ){
-				print "DEBUG: (original map) found hero at row $row col $col\n" if $debug;
+				print "DEBUG: original map found hero at row $row col $col\n" if $debug;
 				# clean this tile
 				${$ui->{map}}[$row][$col] = ' ';
 				$ui->{hero_y} = $row;
@@ -611,36 +538,8 @@ sub set_hero_pos{
 		}
 	}
 	unless( defined $ui->{hero_y} and defined $ui->{hero_x}){die "Hero not found!"}
+	
 }
-
-# sub validate_conf{
-	# my %conf = @_;
-	# # set internally to get coord of the first element of the map
-	# $conf{ real_map_first} = { x => undef, y => undef };
-	# # set internally to get coord of the last element of the map
-	# $conf{ real_map_last} = { x => undef, y => undef };
-
-	# $conf{ cls_cmd }     //= $^O eq 'MSWin32' ? 'cls' : 'clear';
-	
-	
-	# # get and set internally
-	# $conf{ hero_x } = undef;
-	# $conf{ hero_y } = undef;
-	# $conf{ hero_side } = '';
-	
-	
-	# # get and set internally
-	# $conf{ map } //=[];
-	# $conf{ map_off_x } = 0;
-	# $conf{ map_off_y } = 0;
-	# $conf{ scrolling } = 0;
-
-	# $conf{ no_scroll_area} = { min_x=>'',max_x=>'',min_y=>'',max_y=>'' };
-	
-		
-	# return %conf;
-# }
-
 
 sub color_names_to_ANSI {
 	my %conv = (
