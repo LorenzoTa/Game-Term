@@ -219,7 +219,7 @@ sub terrains_256_colors{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ map_area_w } //= 20; #80;
+	$conf{ map_area_w } //= 50; #80;
 	$conf{ map_area_h } //=  20; #20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;

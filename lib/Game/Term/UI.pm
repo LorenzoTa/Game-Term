@@ -420,7 +420,7 @@ sub move{
 		return 1;
     }
 	# SOUTH
-	elsif ( $key eq 's'  and eval {print $ui->{hero_y}, '<',$#{ $ui->{map}},"\n" }
+	elsif ( $key eq 's'  
 			# we are inside the real map
 			#and $ui->{hero_y} < $ui->{real_map_last}{y} - 1
 			and $ui->{hero_y} < $#{$ui->{map}} 
