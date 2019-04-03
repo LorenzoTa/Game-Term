@@ -286,7 +286,8 @@ sub draw_map{
 				print ' ',$ui->{ dec_ver };
 		# added: 					
 		if ($row < 0 or $row > $#{$ui->{map}} ){ 
-			print +('?' x $ui->{ map_area_w }),$ui->{ dec_ver },"\n";
+			#print +('?' x $ui->{ map_area_w }),$ui->{ dec_ver },"\n";
+			print +($ui->{ext_tile} x $ui->{ map_area_w }),$ui->{ dec_ver },"\n";
 			next;
 		}
 	
@@ -529,7 +530,8 @@ sub draw_menu{
 			$ui->{ dec_hor } x ( $ui->{ map_area_w } ),
 			$ui->{dec_color},'o',RESET,"\n";	
 	# menu fake data
-	print ' ',$ui->{dec_color}.$ui->{ dec_ver }.RESET.$_."\n" for @$messages;
+	#print ' ',$ui->{dec_color}.$ui->{ dec_ver }.RESET.$_."\n" for @$messages;
+	print ' ',$ui->{ dec_ver }.$_."\n" for @$messages;
 }
 
 sub set_map_and_hero{
@@ -541,15 +543,15 @@ sub set_map_and_hero{
 	# get hero position and side BEFORE enlarging
 	$ui->set_hero_pos();
 	# change external tile to []
-	$ui->{ ext_tile } = [ 
-							(
-								$ui->{dec_color} 							?
-								$ui->{dec_color}.$ui->{ ext_tile }.RESET 	:
-								$ui->{ ext_tile }
-							), 
-							$ui->{ ext_tile },
-							1	# unmasked
-						];
+# $ui->{ ext_tile } = [ 
+						# (
+							# $ui->{dec_color} 							?
+							# $ui->{dec_color}.$ui->{ ext_tile }.RESET 	:
+							# $ui->{ ext_tile }
+						# ), 
+						# $ui->{ ext_tile },
+						# 1	# unmasked
+					# ];
 	# change hero icon to []
 	$ui->{ hero_icon } = [ $ui->{ hero_color }.$ui->{ hero_icon }.RESET, $ui->{ hero_icon }, 1 ];
 	# add at top
@@ -707,6 +709,10 @@ sub beautify_map{
 	$ui->{ dec_hor } = 	$ui->{dec_color} 						?
 						$ui->{dec_color}.$ui->{ dec_hor }.RESET :
 						$ui->{ dec_hor } ;
+	# BEAUTIFY external (fake) tiles
+	$ui->{ ext_tile } = $ui->{dec_color} 						?
+						$ui->{dec_color}.$ui->{ ext_tile }.RESET :
+						$ui->{ ext_tile } ;
 }
 sub set_no_scrolling_area{
 	my $ui = shift;
