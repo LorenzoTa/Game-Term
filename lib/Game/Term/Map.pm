@@ -86,7 +86,7 @@ sub fake_map{
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[-1][ int($x/2) ] 	= 'X' ;#'X';
+				#$$map[-1][ int($x/2) ] 	= 'X' ;#'X';
 	}
 	elsif ($type =~ /^N$/i){ # hero at N
 		$map = [ map{ [(' ') x $x  ] } 0..$y - 1  ];
@@ -95,7 +95,7 @@ sub fake_map{
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[0][ int($x/2) ] 	=  'X' ;#'X';
+				#$$map[0][ int($x/2) ] 	=  'X' ;#'X';
 	}
 	elsif ($type =~ /^E$/i){ # hero at E
 		$map = [ map{ [(' ') x $x  ] } 0..$y - 1   ];
@@ -104,7 +104,7 @@ sub fake_map{
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[ int($y/2) ][-1] 	=  'X' ;#'X';
+				#$$map[ int($y/2) ][-1] 	=  'X' ;#'X';
 	}
 	elsif ($type =~ /^W$/i){ # hero at w
 		$map = [ map{ [(' ') x $x  ] } 0..$y - 1   ];
@@ -113,7 +113,7 @@ sub fake_map{
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[ int($y/2) ][0] 	=  'X' ;#'X';
+				#$$map[ int($y/2) ][0] 	=  'X' ;#'X';
 	}
 	elsif ($type =~ /^one$/i){
 		my $fake=<<EOM;
@@ -167,7 +167,7 @@ tttttttttttttttt
          mM   ww
              wWwW
 
-#        X         #
+#                  #
 EOM
 	foreach my $row( split "\n", $fake){
 			push @$map,[ split '', $row ]
@@ -193,7 +193,7 @@ wwwWWWWWWwwwwww
       m             t
       mm
        m
-        m   X
+        m    
 EOM
 	foreach my $row( split "\n", $fake){
 			push @$map,[ split '', $row ]
