@@ -149,7 +149,7 @@ ttttttTTTTTttttttTTTTTttttttttttt  bbWWwwmmttttttmMM ht MttthhmMMmmm tt hhhhMMmm
          sswwWWWWWWWWWWWwwwssss          yyyytttt  ttt           tt   tttt  ttTT
  t      sswwWWWWWWWWWWWWWWWWwws          TTTTTTTttt    ttt ttttttttttttttt  ttTt
 ttt    ssswWWWWWWWWWWWWWWWWWWwww         TTTTTTTTTttt tt ttttTTTTtttttttttttTTTt
-ttt  ssssswWWWWWWWWWWWWWWWWWWWWWw    X  TTTTTTTTTTTtt tTTTTTTTttTTTTTTtttttttttt
+ttt  ssssswWWWWWWWWWWWWWWWWWWWWWw       TTTTTTTTTTTtt tTTTTTTTttTTTTTTtttttttttt
 EOM
 		foreach my $row( split "\n", $fake){
 			push @$map,[ split '', $row ]

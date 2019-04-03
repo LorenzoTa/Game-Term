@@ -5,11 +5,11 @@ use Game::Term::Game;
 use Game::Term::Scenario;
 
 
-my $scenario = Game::Term::Scenario->new();
+my $scenario = Game::Term::Scenario->new( map=> Game::Term::Map->new(fake_map=>'one')->{data} );
 $scenario->{name} ='Test Scenario 1';
-$scenario->get_map_from_DATA();
+#$scenario->get_map_from_DATA();
 
-$scenario->set_hero_position( $ARGV[0] // 'south11' );
+$scenario->set_hero_position( $ARGV[0] // 'south38' );
 
 
 my $conf = Game::Term::Configuration->new( );

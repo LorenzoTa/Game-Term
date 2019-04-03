@@ -241,7 +241,7 @@ sub set_map_offsets{
 	if ( $ui->{hero_side} eq 'S' ){		
 		$ui->{map_off_x} =  $ui->{hero_x} - $ui->{map_area_w} / 2; 
 		$ui->{map_off_y} =  $ui->{hero_y} - $ui->{map_area_h} ;		
-		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
+		print "DEBUG: SOUTH map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
 	elsif ( $ui->{hero_side} eq 'N' ){		
 		$ui->{map_off_x} =  $ui->{hero_x} - $ui->{map_area_w} / 2;
@@ -288,7 +288,8 @@ sub draw_map{
 							$ui->{dec_color}.$ui->{ dec_ver }.RESET :
 							$ui->{ dec_ver } );
 		# added: 					
-		if ($row < 0 or $row > $ui->{ map_area_h } ){ #####??????????????
+		#if ($row < 0 or $row > $ui->{ map_area_h } ){ #####??????????????
+		if ($row < 0 or $row > $#{$ui->{map}} ){ #####??????????????
 			print +('?' x $ui->{ map_area_w }),
 					(	$ui->{dec_color} 						?
 						$ui->{dec_color}.$ui->{ dec_ver }.RESET :
@@ -547,7 +548,7 @@ sub set_map_and_hero{
 
 	my $original_map_w = $#{$ui->{map}->[0]} + 1;
 	my $original_map_h = $#{$ui->{map}} + 1;
-	print "DEBUG: original map was $original_map_w x $original_map_h\n" if $debug;
+	print "DEBUG: ???? original map was $original_map_w x $original_map_h\n" if $debug;
 	# get hero position and side BEFORE enlarging
 	$ui->set_hero_pos();
 	# change external tile to []
@@ -757,7 +758,7 @@ sub set_hero_pos{
 	foreach my $row ( 0..$#{$ui->{map}} ){
 		foreach my $col ( 0..$#{$ui->{map}->[$row]} ){
 			if ( ${$ui->{map}}[$row][$col] eq 'X' ){
-				print "DEBUG: (original map) found hero at row $row col $col\n" if $debug;
+				print "DEBUG: original map found hero at row $row col $col\n" if $debug;
 				# clean this tile
 				${$ui->{map}}[$row][$col] = ' ';
 				$ui->{hero_y} = $row;
@@ -771,6 +772,8 @@ sub set_hero_pos{
 		}
 	}
 	unless( defined $ui->{hero_y} and defined $ui->{hero_x}){die "Hero not found!"}
+	# added:
+	#$ui->{map}[][]=
 }
 
 # sub validate_conf{
