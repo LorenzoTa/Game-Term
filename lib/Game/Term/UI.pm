@@ -1138,10 +1138,14 @@ https://int10h.org/oldschool-pc-fonts/fontlist/
 --> but: https://superuser.com/questions/920440/how-to-add-additional-fonts-to-the-windows-console-windows
 
 how to install a font for cmd.exe https://www.techrepublic.com/blog/windows-and-office/quick-tip-add-fonts-to-the-command-prompt/
-
+https://www.windowsperl.com/2014/04/25/the-command-prompt-and-fonts/
 raster fonts ?? https://github.com/idispatch/raster-fonts	
 
 https://www.thefreewindows.com/3467/edit-your-fonts-with-fony/ fony.exe mmh.. no ttf
+
+
+---> https://fonts.google.com/?category=Monospace
+
 
 perl -we "use strict; use warnings; use Term::ANSIColor qw(:constants); my %colors = (B_GREEN => $^O eq 'MSWin32' ? BOLD GREEN : BRIGHT_GREEN); my $bg = ON_GREEN; print $bg.$colors{B_GREEN}, 32323, RESET"
 perl -e "use Term::ANSIColor qw(:constants); $B_GREEN = $^O eq 'Linux' ? BRIGHT_GREEN : BOLD GREEN; print $B_GREEN, 32323, RESET"
