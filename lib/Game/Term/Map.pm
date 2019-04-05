@@ -10,7 +10,12 @@ our $VERSION = '0.01';
 
 sub new{
 	my $class = shift;
-	my %conf = validate_conf( @_ );	
+
+	my %conf = validate_conf( @_ );
+
+	# $conf{data} is here now..
+	validate_data( $conf{data} );
+
 	return bless {
 				%conf
 	}, $class;
@@ -20,138 +25,181 @@ sub new{
 
 sub validate_conf{
 	my %conf = @_;
-	$conf{ fake_map } //= 'one' ;
-	$conf{ fake_x } //= 40; #80;
-	$conf{ fake_y } //= 20; #20;
-	
-	$conf{data} = fake_map( $conf{ fake_map },$conf{ fake_x },$conf{ fake_y } );
+	# FROM param absent
+	unless ( $conf{from} ){
+	#die $conf{ fake_map };
+		$conf{ fake_map } //= 's' ;
+		$conf{ fake_x } //= 10; #80;
+		$conf{ fake_y } //= 10; #20;
+
+		$conf{data} = fake_map( $conf{ fake_map },$conf{ fake_x },$conf{ fake_y } );
+		map{ delete $conf{$_} }qw( fake_map fake_x fake_y );
+		return %conf;
+	}
+	# FROM param present
+	$conf{data} = [];
+	if ( ref $conf{from} eq 'ARRAY' ){
+		map{ die "not received an array of arrays!" unless ref $_ eq 'ARRAY' }@{$conf{from}};
+		$conf{data} = $conf{from};
+	}
+	elsif( -e -f -s $conf{from} ){
+		open my $fh, '<', $conf{from} or die "unable to open [$conf{from}] map file";
+		while(<$fh>){
+			chomp;
+			push @{$conf{data}}, $_;
+		}
+	}
+	# elsif( fileno $conf{from} > 2){
+		# while(<$conf{from}>){
+				# chomp;
+				# push @{$conf{data}}, $_;
+			# }
+	# }
+	else{ die "at the moment only a file or an AoA are supported as maps" }
+
 	return %conf;
 }
 
+sub validate_data{
+	my $aoa = shift;
+	my $same_len = undef;
+	my $c_row = 0;
+	foreach my $row ( @$aoa ){
+		my @row = ($row=~/./g);#split '',$row;
+		#print +(join '',@$row)," el: $#{$row}\n"; next;
+		if ( defined $same_len and $same_len != $#{$row} ){
+			die "map data:\n[",(join '',@$row),"]\nat row $c_row is of different lenght ( ",$#{$row}," comparing with $same_len)";
+		}
+		else{ $same_len = $#{$row};}
+		$c_row++;
+	}
+}
+
+
 sub fake_map{
-	my ($type, $x, $y) = @_;
+	my ($type, $x, $y) = @_; 
 	my $map = [];
-	if ($type =~ /^S/i){ # hero at S
-		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+	if ($type =~ /^S$/i){ # hero at S
+		$map = [ map{ [(' ') x $x  ] } 0..$y - 1  ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[-1][ int($x/2) ] 	= 'X' ;#'X';
+				#$$map[-1][ int($x/2) ] 	= 'X' ;#'X';
 	}
-	elsif ($type =~ /^N/i){ # hero at N
-		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+	elsif ($type =~ /^N$/i){ # hero at N
+		$map = [ map{ [(' ') x $x  ] } 0..$y - 1  ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[0][ int($x/2) ] 	=  'X' ;#'X';
+				#$$map[0][ int($x/2) ] 	=  'X' ;#'X';
 	}
-	elsif ($type =~ /^E/i){ # hero at E
-		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+	elsif ($type =~ /^E$/i){ # hero at E
+		$map = [ map{ [(' ') x $x  ] } 0..$y - 1   ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[ int($y/2) ][-1] 	=  'X' ;#'X';
+				#$$map[ int($y/2) ][-1] 	=  'X' ;#'X';
 	}
-	elsif ($type =~ /^W/i){ # hero at w
-		$map = [ map{ [(' ') x $x  ] } 0..$y   ];
+	elsif ($type =~ /^W$/i){ # hero at w
+		$map = [ map{ [(' ') x $x  ] } 0..$y - 1   ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
 				$$map[-1][0] 	= '#';
 				$$map[-1][-1] 	= '#';
 				# fake hero
-				$$map[ int($y/2) ][0] 	=  'X' ;#'X';
+				#$$map[ int($y/2) ][0] 	=  'X' ;#'X';
 	}
-	elsif ($type =~ /^one/i){ 
+	elsif ($type =~ /^one$/i){
 		my $fake=<<EOM;
-01234567890123456789012345678901234567890123      012345678901234567890123456789
-tt    ttttttttttttttttttttttttt                     tttttttt         ttttttttttt
-tt  ttttttttttttttttttttttttttttt            ttt    ttttttttt   tttttttttttttttt
-    tttttttttttttttttttttttttttttttttttttttttttt    ttttttttt   tttttttttttttttt
-    ttttt                   tttttttttttttttttttt         tttt   tttttttt   ttttt
-    ttt     tttttttt           tttttttttttttttt         ttttt   ttt       tttttt
-          tttttttttt                       tttt         tttt    ttt      ttttttt
-        ttttttttt     ttttttttttttttt      tttt   ttt   tttt    ttt      ttttt t
-       tttttttt     ttttttttttttttttttt     ttt   ttt   ttt     ttt      tttt  t
-      tttttt       ttttttttttttttttttttt    ttt   ttt   tttt             tttt tt
-     tttttt        ttttt          tttttt          ttt   tttttttttttt     tttt tt
-     tttt          tttt              ttt         tttt   tttttttttttt     ttttttt
-     tttt          ttt                   tttttttttttt    ttttttttttt      tttttt
-     ttttt                              ttttttttttttt                     tttt t
-     ttttt                              tttttttttttttttttttt       ttt     ttttt
-      tttt     ttttttt                        tttttttttttttttt     ttttt      tt
-         aa   tttttttt             ttttt      ttttttttttttttttt    ttttttt      
-   t   wwaawwwtttttttt             tttttttt              tttttt     tttttt     t
-       wwaawww tttt                 ttttttttt               ttttt     tttttttttt
-    t    aa WWWtt         tttttt     Otttttt                ttttt      ttttttttt
-         t AAAAA ttt         ttttttt      ttttt                 tttt      tttttt
-           AAAAA t        ttttttt      ttttt     ttttt       tttt           tttt
-   t  ttt   WWWwwwww      ttttttt      tttt      ttttt        ttt       tttttttt
-      ttt   wwwwwwwwtt                ttttt      ttttt      ttttt      ttttttttt
-      tttt      tttwwwttt            tthhtt     tttt       tttttt      ttttttttt
-      ttttt         wwwttttttttttttttthhhh     sssss       tttttt      ttttttttt
-      ttttt       bbwwttttttttttttthhhhhh      ssSSss      tttt             tttt
-       tttt     wwwbbwwwwtttttttthhhhhhh       ssSSSss                      tttt
-       tttt     wwwwbbwwwww                     sssssss                 tt  tttt
-       tttttttttWWWWWbbWwwwwwtttmmm                ttt                 ttt  tttt
- t     ttttttttttttwwwbbWWWWWMMMMMM      TTTTTTTT                      ttt  tttt
-ttt    01234567890wwwwwbbwwwwwwwmmm      TTTTTTTT         tttttttttttttttttttttt
-ttt                                  X                tttttttttttttttttttttttttt
+tttt ttTTTTTTTTTTTTTTTTTTTTTTTTTTmmmMMWWwwMMttt ttmMMMMmmmmmmmmMtMMMMM hhhhhMMMM
+ttttt ttttTTTTTTTTTTTTTTTTTTTTTTTmmmmmWWMwmttttttmMMMmtttthhmmmMMmmmmmttt  httmm
+ttttttTTTTTttttttTTTTTttttttttttt  bbWWwwmmttttttmMM ht MttthhmMMmmm tt hhhhMMmm
+ ttttTTtttttttttttttttttttttttttt WWbbwtwmmttttttmMhhh  MMMthhmMMmmthhhhh tMtmmt
+ tttTTttt                   ttttWWWwwbbwtmmtttttt M hh   MMtttt tmm hhtth MMmmMt
+   tttt     tttttttt           WWwwwwwbbtttttttt  MMMMmm      tttMmhh tth Mmm tt
+   Tt     tttttttttt          WWwwhhhhh    tttt   MMMMMm         Mthhtt Mmmm mtt
+   ttt  ttwwwwwtt     ttttttAAAAAhhhhh     tttt       Mmmm      MMt  t Mmmtmmm t
+  tt   ttwwwwwwww   ttttttt AAAAAhhmMMM     ttt          m   MMmmhhh   Mm t t  t
+  t   tttwwWWWWww  ttttttt   WWwhhhmMMMM    ttt        mmm   Mmhhhmh MMMm t   tt
+     ttttwwBBWWww  tt tt     WWwwhhhMM                mmMMMMMhhhtmhh     tttt tt
+     ttttwBBWWWww  t  t       Wwwwhh             ttt   MMhhhhhttttmtmm  tttttttt
+     ttttBBwWWWww  t  hmmmh   WWwwww     tttttttttttt  MMhttttttttmmmm  tttttttt
+     tttBBwwwwww   tt hhhmh    WWwwww   tttttttTTtttt                m   ttttt t
+     ttttttwwwwtttttthhhhhh      WWww   ttttttttTTTTttttTttt       ttmmm   ttttt
+      ttt tttttt tt t            WWwww    tttttttttTTtttTTTttt     tttTt      tt
+             tt tt      WWWWWWaaWWwwww      tttttttttttttttTTtt    tttTttt      
+          hhhh  t   WWWWWWwwwwaawwwwww      tt           tttTtt     ttTTTt     t
+         mmhhhhtt WWWwwwwwwsssaa wwwww                      ttttt     ttTTtttttt
+      h mm ht  tssWWwwssssssss    sss                       ttttt      tTtttttTt
+     hhmmhttttttswWwssssssss       ss      tttt                 tttt      tttTtt
+     hhhhhttttttswWwsSSssSSs           ttttttt   ttttt       tttt           tTTT
+         ttttt sswwwssSSSSSs           tttttt    ttttt        tTt       ttttttTT
+        tttttsssswwWwsSSSSSSss        ttttttt    ttttt      tttTt      ttttttTTt
+        tt   sssswWwwsssSSSSSs       tthhttt    tttt       ttTTTt      tttTTTTTt
+       ttt ssssswWwwwssssSSsss   ttttthhhht    sssss       tTTttt      tttttttTt
+           ssssswWwwwwsssssss    tthhhhhht     ssSSss      tTTt             ttTT
+           sswwwwWWWwwwsssssss    hhhhhhtt     ssSSSss                      tttT
+          sswwWWWWWWWwwwssssss      ttttt  yyt tsssssss                ttt  tttT
+         sswwWWWWWWWWWWWwwwssss          yyyytttt  ttt           tt   tttt  ttTT
+ t      sswwWWWWWWWWWWWWWWWWwws          TTTTTTTttt    ttt ttttttttttttttt  ttTt
+ttt    ssswWWWWWWWWWWWWWWWWWWwww         TTTTTTTTTttt tt ttttTTTTtttttttttttTTTt
+ttt  ssssswWWWWWWWWWWWWWWWWWWWWWw       TTTTTTTTTTTtt tTTTTTTTttTTTTTTtttttttttt
 EOM
 		foreach my $row( split "\n", $fake){
 			push @$map,[ split '', $row ]
 		}
 	}
-	elsif ($type =~ /^render/i){ 
+	elsif ($type =~ /^render$/i){
 		my $fake=<<EOM;
 #                  #
-     tttt  T        
- ttt    tTT t       
-    tt    tT        
-tttttttttttttttt    
-  ttt   tt      nN  
-    wW              
-         mM   ww    
-             wWwW   
-                    
-#        X         #
+     tttt  T
+ ttt    tTT t
+    tt    tT
+tttttttttttttttt
+  ttt   tt      nN
+    wW
+         mM   ww
+             wWwW
+
+#                  #
 EOM
 	foreach my $row( split "\n", $fake){
 			push @$map,[ split '', $row ]
 		}
 	}
-	elsif ($type =~ /^two/i){ 
-		my $fake=<<EOM;  
-wwwWWWWWWwwwwww          
-  wWWWWWWwwww            
-  wWWWWwww               
-   wwwww    tt     tt    
-   wwww     tttt  tt tt  
-              tt TTT tt  
-  mm M       t  TTTTTt   
-   mmM       tttTTTTTtt  
-    mMMM        TTTTT    
-  m m MM       tTTTTt    
-  m mMM        t  ttt    
-  m  MMMMM     ttttt     
-  mm mmmM          ttt   
-       m            t    
-      mm            t    
-      m             t    
-      mm                 
-       m                 
-        m   X            
+	elsif ($type =~ /^two$/i){
+		my $fake=<<EOM;
+wwwWWWWWWwwwwww
+  wWWWWWWwwww
+  wWWWWwww
+   wwwww    tt     tt
+   wwww     tttt  tt tt
+              tt TTT tt
+  mm M       t  TTTTTt
+   mmM       tttTTTTTtt
+    mMMM        TTTTT
+  m m MM       tTTTTt
+  m mMM        t  ttt
+  m  MMMMM     ttttt
+  mm mmmM          ttt
+       m            t
+      mm            t
+      m             t
+      mm
+       m
+        m    
 EOM
 	foreach my $row( split "\n", $fake){
 			push @$map,[ split '', $row ]
 		}
-	}        
-                         
+	}
+
     else{die}
 	return $map;
 

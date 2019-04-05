@@ -3,7 +3,7 @@ package Game::Term::Configuration;
 use 5.014;
 use strict;
 use warnings;
-
+use Carp;
 
 use Term::ANSIColor qw(RESET :constants :constants256);
 
@@ -76,7 +76,23 @@ sub new{
 	# if $conf{from} ...
 	# read file..
 	# import.. 
-	my %terrains = terrains_16_colors();
+	# manage palette
+	my %terrains;
+	if ( ! exists $conf{map_colors}  ){
+		%terrains = terrains_16_colors();
+	}
+	elsif ( $conf{map_colors} == 256 ){
+		%terrains = terrains_256_colors();
+	}
+	elsif ( $conf{map_colors} == 16 ){
+		%terrains = terrains_16_colors();
+	}
+	elsif ( $conf{map_colors} == 2 ){
+		%terrains = terrains_2_colors();
+		# also clear colors for interface colored elements
+		$conf{dec_color}=$conf{hero_color}='';
+	}
+	else{ %terrains = terrains_16_colors(); }
 	
 	return bless {
 				interface => \%conf,
@@ -91,14 +107,18 @@ sub get_terrains{
 	my $conf = shift;
 	return %{$conf->{terrains}};
 }
+sub terrains_2_colors{
+	my %terr = terrains_16_colors();
+	%terr = map{ $_ => [ $terr{$_}[0],$terr{$_}[1],'','',$terr{$_}[4] ] } keys %terr;
+}
 sub terrains_16_colors{
 	#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
 	' ' => [  'plain', ' ', '', '',        0 ],
-	A => [ 'bridge', '-', 'Olive',  '',  0 ],
-	a => [ 'bridge', '|', 'Olive',  '',  0 ],
-	B => [ 'bridge', '/', 'Olive',  '',  0 ], # you need two of this
-    b => [ 'bridge', '\\', 'Olive',  '',  0 ],#   ''
+	A => [ 'bridge', '-', 'Maroon',  '',  0 ],
+	a => [ 'bridge', '|', 'Maroon',  '',  0 ],
+	B => [ 'bridge', '/', 'Maroon',  '',  0 ], # you need two of this
+    b => [ 'bridge', '\\', 'Maroon',  '',  0 ],#   ''
 	# C 
 	# c 
 	# D 
@@ -148,13 +168,83 @@ sub terrains_16_colors{
 	# X RESERVED for hero in the original map
 	# x 
 	# Y 
-	# y 
+	y => [ 'wood', '^', [ 'Olive', 'Green'], '',        0.5 ],
 	# Z 
 	# z
 		
 }
+
+sub terrains_256_colors{
+	#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
+# letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
+	' ' => [  'plain', ' ', '', '',        0 ],
+	A => [ 'bridge', '-', 'Olive',  '',  0 ],
+	a => [ 'bridge', '|', 'Olive',  '',  0 ],
+	B => [ 'bridge', '/', 'Olive',  '',  0 ], # you need two of this
+    b => [ 'bridge', '\\', 'Olive',  '',  0 ],#   ''
+	# C 
+	# c 
+	# D 
+	# d 
+	# E 
+	# e 
+	# F 
+	# f 
+	# G 
+	# g 
+	# H 
+	h => [ 'hill', 'm', [ 'Olive', 'Green' ],  '',  0.8 ],
+	# I 
+	# i 
+	# J 
+	# j ͡
+	# K 
+	# k 
+	# L 
+	# l 
+	M => [ 'unwalkable mountain', 'M', [ 'Grey', 'Grey' ],  '',  999 ],         # 
+	m => [ 'mountain', 'M', [ 'Olive', 'Green' ],  '',  3 ],
+	# N
+	# n
+	# O 
+	# o 
+	# P 
+	# p
+	# Q 
+	# q 
+	# R 
+	# r 
+	S => [ 'unwalkable swamp', [qw( ~ - ~ - ~)], 'DarkSeaGreen4', 'On_Yellow4',  999 ],
+	s => [ 'swamp', '-', [qw( Gold3 Khaki3 DarkOliveGreen1)],  '',       1 ],
+	T => [ 'unwalkable wood', 'O', [ qw( DarkGreen Green4 DarkGreen Green4 DarkGreen Green4 Orange4 Yellow4 DarkOrange3)], 'On_Grey7',  999 ], 
+	t => [ 'wood', ['O', 'o'], [ qw( DarkGreen Green4 DarkGreen Green4 DarkGreen Green4 Orange4 Yellow4 DarkOrange3)], '',        0.5 ],
+	#t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
+	# U 
+	# u
+	# V 
+	# v 
+	#W => [  'deep water', [qw(~ ~ ~ ~),' '], [ ANSI39, ANSI45, ANSI51, ANSI87, ANSI14], UNDERLINE.BLUE, 999 ],
+	#w => [  'shallow water', [qw(~ ~ ~ ~),' '], [ ANSI18, ANSI19, ANSI21, ANSI27, ANSI123], '', 2 ],
+	W => [ 'deep water', '~',  [qw(DodgerBlue3 DeepSkyBlue2 Turquoise2)] , [qw(On_DarkBlue On_Blue3)], 999 ],
+	w => [ 'shallow water',[qw(~ - ~ ~)], [qw(DodgerBlue3 DeepSkyBlue2 Turquoise2)], [qw(On_DeepSkyBlue4 On_DeepSkyBlue3)], 2 ],
+	
+	# X RESERVED for hero in the original map
+	# x 
+	# Y 
+	y => [ 'wood', '^', [ 'Olive', 'Green'], '',        0.5 ],
+	# Z 
+	# z
+		
+}
+
 sub validate_conf{
 	my %conf = @_;
+	
+	if( $conf{map_colors} ){
+		croak "configuration 'colors' accepts 2, 16 or 256" 
+			unless $conf{map_colors} =~/^(2|16|256)$/;
+	}
+	
 	$conf{ map_area_w } //= 50; #80;
 	$conf{ map_area_h } //=  20; #20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
