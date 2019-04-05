@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Test::More qw(no_plan);
 use Test::Exception;
+use File::Spec;
 use Game::Term::Map;
 
 dies_ok { my $map = Game::Term::Map->new( fake_map => 'not_existing' ); } 
@@ -46,9 +47,19 @@ if ( $ENV{TEST_VERBOSE }){
 }
 
 my $valid4 = Game::Term::Map->new( fake_map => 'SMALL', fake_y => 20, fake_x => 20 );
-ok ( $valid1->{data}[19][0] eq $valid1->{data}[19][19], 
+ok ( $valid4->{data}[19][0] eq $valid4->{data}[19][19], 
 			"expected (custom sized) last row tiles (valid fake_map)");
 
 
+my $tempfile = File::Spec->catfile( File::Spec->tmpdir(),
+									'map-'.int(rand(1000)).int(rand(1000)).'.txt');
+open my $fh, '>', $tempfile or BAIL_OUT "unble to open [$tempfile] for writing!";
+foreach my $row(@{$valid4->{data}}){
+		print $fh +(join '', @$row),$/;
+}
+note "created [$tempfile]\n";
 
-
+my $valid5 = Game::Term::Map->new( from => $tempfile );
+use Data::Dump; dd $valid5;
+ok ( $valid5->{data}[19][0] eq $valid5->{data}[19][19], 
+			"valid map from file: $tempfile");

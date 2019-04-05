@@ -42,11 +42,11 @@ sub validate_conf{
 		map{ die "not received an array of arrays!" unless ref $_ eq 'ARRAY' }@{$conf{from}};
 		$conf{data} = $conf{from};
 	}
-	elsif( -e -f -s $conf{from} ){
+	elsif( -e  $conf{from} ){
 		open my $fh, '<', $conf{from} or die "unable to open [$conf{from}] map file";
 		while(<$fh>){
 			chomp;
-			push @{$conf{data}}, $_;
+			push @{$conf{data}}, [split '',$_];
 		}
 	}
 	# elsif( fileno $conf{from} > 2){
@@ -55,7 +55,7 @@ sub validate_conf{
 				# push @{$conf{data}}, $_;
 			# }
 	# }
-	else{ die "at the moment only a file or an AoA are supported as maps" }
+	else{ die "at the moment only a file or an AoA are supported as maps (received: $conf{from})" }
 
 	return %conf;
 }
