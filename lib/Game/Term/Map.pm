@@ -28,7 +28,7 @@ sub validate_conf{
 	# FROM param absent
 	unless ( $conf{from} ){
 	#die $conf{ fake_map };
-		$conf{ fake_map } //= 's' ;
+		$conf{ fake_map } //= 'small' ;
 		$conf{ fake_x } //= 10; #80;
 		$conf{ fake_y } //= 10; #20;
 
@@ -79,7 +79,8 @@ sub validate_data{
 sub fake_map{
 	my ($type, $x, $y) = @_; 
 	my $map = [];
-	if ($type =~ /^S$/i){ # hero at S
+	##if ($type =~ /^S$/i){ # hero at S
+	if ($type =~ /^SMALL$/i){ # hero at S
 		$map = [ map{ [(' ') x $x  ] } 0..$y - 1  ];
 				$$map[0][0] 	= '#';
 				$$map[0][-1] 	= '#';
@@ -88,33 +89,33 @@ sub fake_map{
 				# fake hero
 				#$$map[-1][ int($x/2) ] 	= 'X' ;#'X';
 	}
-	elsif ($type =~ /^N$/i){ # hero at N
-		$map = [ map{ [(' ') x $x  ] } 0..$y - 1  ];
-				$$map[0][0] 	= '#';
-				$$map[0][-1] 	= '#';
-				$$map[-1][0] 	= '#';
-				$$map[-1][-1] 	= '#';
-				# fake hero
-				#$$map[0][ int($x/2) ] 	=  'X' ;#'X';
-	}
-	elsif ($type =~ /^E$/i){ # hero at E
-		$map = [ map{ [(' ') x $x  ] } 0..$y - 1   ];
-				$$map[0][0] 	= '#';
-				$$map[0][-1] 	= '#';
-				$$map[-1][0] 	= '#';
-				$$map[-1][-1] 	= '#';
-				# fake hero
-				#$$map[ int($y/2) ][-1] 	=  'X' ;#'X';
-	}
-	elsif ($type =~ /^W$/i){ # hero at w
-		$map = [ map{ [(' ') x $x  ] } 0..$y - 1   ];
-				$$map[0][0] 	= '#';
-				$$map[0][-1] 	= '#';
-				$$map[-1][0] 	= '#';
-				$$map[-1][-1] 	= '#';
-				# fake hero
-				#$$map[ int($y/2) ][0] 	=  'X' ;#'X';
-	}
+	# elsif ($type =~ /^N$/i){ # hero at N
+		# $map = [ map{ [(' ') x $x  ] } 0..$y - 1  ];
+				# $$map[0][0] 	= '#';
+				# $$map[0][-1] 	= '#';
+				# $$map[-1][0] 	= '#';
+				# $$map[-1][-1] 	= '#';
+				# # fake hero
+				# #$$map[0][ int($x/2) ] 	=  'X' ;#'X';
+	# }
+	# elsif ($type =~ /^E$/i){ # hero at E
+		# $map = [ map{ [(' ') x $x  ] } 0..$y - 1   ];
+				# $$map[0][0] 	= '#';
+				# $$map[0][-1] 	= '#';
+				# $$map[-1][0] 	= '#';
+				# $$map[-1][-1] 	= '#';
+				# # fake hero
+				# #$$map[ int($y/2) ][-1] 	=  'X' ;#'X';
+	# }
+	# elsif ($type =~ /^W$/i){ # hero at w
+		# $map = [ map{ [(' ') x $x  ] } 0..$y - 1   ];
+				# $$map[0][0] 	= '#';
+				# $$map[0][-1] 	= '#';
+				# $$map[-1][0] 	= '#';
+				# $$map[-1][-1] 	= '#';
+				# # fake hero
+				# #$$map[ int($y/2) ][0] 	=  'X' ;#'X';
+	# }
 	elsif ($type =~ /^one$/i){
 		my $fake=<<EOM;
 tttt ttTTTTTTTTTTTTTTTTTTTTTTTTTTmmmMMWWwwMMttt ttmMMMMmmmmmmmmMtMMMMM hhhhhMMMM
@@ -158,15 +159,15 @@ EOM
 	elsif ($type =~ /^render$/i){
 		my $fake=<<EOM;
 #                  #
-     tttt  T
- ttt    tTT t
-    tt    tT
-tttttttttttttttt
-  ttt   tt      nN
-    wW
-         mM   ww
-             wWwW
-
+     tttt  T        
+ ttt    tTT t       
+    tt    tT        
+tttttttttttttttt    
+  ttt   tt      nN  
+    wW              
+         mM   ww    
+             wWwW   
+                    
 #                  #
 EOM
 	foreach my $row( split "\n", $fake){
