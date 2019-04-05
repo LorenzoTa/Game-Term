@@ -3,7 +3,7 @@ package Game::Term::Configuration;
 use 5.014;
 use strict;
 use warnings;
-
+use Carp;
 
 use Term::ANSIColor qw(RESET :constants :constants256);
 
@@ -76,7 +76,23 @@ sub new{
 	# if $conf{from} ...
 	# read file..
 	# import.. 
-	my %terrains = terrains_16_colors();
+	# manage palette
+	my %terrains;
+	if ( ! exists $conf{map_colors}  ){
+		%terrains = terrains_16_colors();
+	}
+	elsif ( $conf{map_colors} == 256 ){
+		%terrains = terrains_256_colors();
+	}
+	elsif ( $conf{map_colors} == 16 ){
+		%terrains = terrains_16_colors();
+	}
+	elsif ( $conf{map_colors} == 2 ){
+		%terrains = terrains_2_colors();
+		# also clear colors for interface colored elements
+		$conf{dec_color}=$conf{hero_color}='';
+	}
+	else{ %terrains = terrains_16_colors(); }
 	
 	return bless {
 				interface => \%conf,
@@ -90,6 +106,10 @@ sub get_interface{
 sub get_terrains{
 	my $conf = shift;
 	return %{$conf->{terrains}};
+}
+sub terrains_2_colors{
+	my %terr = terrains_16_colors();
+	%terr = map{ $_ => [ $terr{$_}[0],$terr{$_}[1],'','',$terr{$_}[4] ] } keys %terr;
 }
 sub terrains_16_colors{
 	#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
@@ -219,6 +239,12 @@ sub terrains_256_colors{
 
 sub validate_conf{
 	my %conf = @_;
+	
+	if( $conf{map_colors} ){
+		croak "configuration 'colors' accepts 2, 16 or 256" 
+			unless $conf{map_colors} =~/^(2|16|256)$/;
+	}
+	
 	$conf{ map_area_w } //= 50; #80;
 	$conf{ map_area_h } //=  20; #20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
