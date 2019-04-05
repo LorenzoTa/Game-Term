@@ -57,9 +57,11 @@ open my $fh, '>', $tempfile or BAIL_OUT "unble to open [$tempfile] for writing!"
 foreach my $row(@{$valid4->{data}}){
 		print $fh +(join '', @$row),$/;
 }
+close $fh;
 note "created [$tempfile]\n";
 
 my $valid5 = Game::Term::Map->new( from => $tempfile );
-use Data::Dump; dd $valid5;
 ok ( $valid5->{data}[19][0] eq $valid5->{data}[19][19], 
 			"valid map from file: $tempfile");
+unlink $tempfile;
+note "removed [$tempfile]\n";

@@ -42,7 +42,7 @@ sub validate_conf{
 		map{ die "not received an array of arrays!" unless ref $_ eq 'ARRAY' }@{$conf{from}};
 		$conf{data} = $conf{from};
 	}
-	elsif( -e  $conf{from} ){
+	elsif( -e -f -s  $conf{from} ){
 		open my $fh, '<', $conf{from} or die "unable to open [$conf{from}] map file";
 		while(<$fh>){
 			chomp;
