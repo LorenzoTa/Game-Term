@@ -4,6 +4,7 @@ use 5.014;
 use strict;
 use warnings;
 use Term::ReadKey;
+use Term::ReadLine;
 use List::Util qw( max min );
 use Term::ANSIColor qw(RESET :constants :constants256);
 use Time::HiRes qw ( sleep );
@@ -20,8 +21,27 @@ our $debug = 0;
 our $noscroll_debug = 0;
 # terrain is class data!!
 my %terrain;
-
-
+# commands are class data!!
+my %commands =(
+	return => sub{ 	my $obj = shift; 
+					$obj->{mode}='map'; 
+					#$obj->show();
+					$obj->draw_map();
+					$obj->draw_menu(["hero HP: 42","walk with WASD"]);
+				},
+	legenda => sub{ my $obj = shift; 
+					print "to be implemented\n";
+					# $obj->draw_map();
+					# $obj->draw_menu(["hero HP: 42","walk with WASD"]);
+				},
+);
+my $term = Term::ReadLine->new('Simple Perl calc');
+$term->Attribs->{completion_function} = sub {
+            my ($text, $line, $start) = @_;
+            # uncomment next line to see debug stuff while you stress autocomplete
+            #print 'DEBUG: $text, $line, $start = >'.(join '< >',$text, $line, $start)."<\n";
+            return grep { /^$text/i } sort keys %commands ;
+    };
 # SOME NOTES ABOUT MAP:
 # The map is initially loaded from the data field of the Game::Term::Map object.
 # It is the AoA containing one character per tile (terrains) and containing the hero's
@@ -35,7 +55,23 @@ my %terrain;
 # types of informations.
 
 # Each tile will end to be:  [ 0:to_display,  1:original_terrain_letter,  2:unmasked ]
-
+BEGIN {
+		# https://www.perlmonks.org/?node_id=1108329
+        # you can force Term::ReadLine to load the ::Perl
+        # by setting the ENV PERL_RL variable
+        # but you have to do it in a begin block
+        # before the use statement
+        # try to comment next line: probably ::Perl will be loaded
+        # anyway if it is installed
+        # try to set to a non available sub module
+        # see details: https://metacpan.org/pod/Term::ReadLine#ENVIRONMENT
+     $ENV{PERL_RL}="Perl";
+        # on win32 systems it ENV TERM is 'dumb'
+        # autocompletion is not possible.
+        # try to comment next line on win32 and watch how does not work
+        # see also http://bvr.github.io/2010/11/term-readline/
+     $ENV{TERM} = 'not dumb' if $^O eq 'MSWin32';
+}
 
 
 sub new{
@@ -117,6 +153,30 @@ sub init{
 
 sub show{
 		my $ui = shift;
+		# COMMAND MODE
+		if ( $ui->{mode} and $ui->{mode} eq 'command' ){
+			$ui->draw_map();
+			$ui->draw_menu(["command mode","use TAB to show available commands"]);
+			ReadMode 'normal';
+			  my $line = $term->readline('>');
+			#$|++;
+			#return;
+			chomp $line;
+			$line=~s/\s+//g;
+			if ($commands{$line}){
+				# me NO
+				# $ui->$commands{$line}->();
+				# ME OK
+				$commands{$line}->($ui);
+				# Corion
+				# my $method = $ui->can( $commands{$line} );
+				# $ui->$method();
+				# choroba
+				#$ui->${\$commands{$line}}->();
+			}
+			else{return}
+		}	
+		# MAP MODE
 		ReadMode 'cbreak';
 		my $key = ReadKey(0);
 			
@@ -129,7 +189,7 @@ sub show{
 		print "DEBUG: slowness for terrain ".
 			$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
 			"\n" if $debug;
-			
+		
 		if( $ui->move( $key ) ){
 			local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
 			local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
@@ -158,6 +218,8 @@ sub show{
 								"key $key was pressed:"] );	
 
 		}
+		
+		
 		print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;		
 }
 
@@ -336,6 +398,7 @@ sub move{
 		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
 		return 1;
     }
+	elsif( $key eq ':' ){ $ui->{mode} = 'command'; return 0}
 	else{
 		print "DEBUG: no movement possible ([$key] was pressed)\n" if $debug;
 		return 0;
