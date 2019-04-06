@@ -39,12 +39,12 @@ ok ( $valid1->{data}[0][9] eq '#', "expected last, (default sized) tile (valid f
 ok ( $valid1->{data}[9][0] eq $valid1->{data}[9][9], 
 			"expected (default sized) last row tiles (valid fake_map)");
 
-if ( $ENV{TEST_VERBOSE }){
-	note"map received:";
-	foreach my $row(@{$valid1->{data}}){
-		print +(join '', @$row),$/;
-	}
-}
+# if ( $ENV{TEST_VERBOSE }){
+	# note"map received:";
+	# foreach my $row(@{$valid1->{data}}){
+		# print +(join '', @$row),$/;
+	# }
+# }
 
 my $valid4 = Game::Term::Map->new( fake_map => 'SMALL', fake_y => 20, fake_x => 20 );
 ok ( $valid4->{data}[19][0] eq $valid4->{data}[19][19], 
@@ -61,7 +61,20 @@ close $fh;
 note "created [$tempfile]\n";
 
 my $valid5 = Game::Term::Map->new( from => $tempfile );
-ok ( $valid5->{data}[19][0] eq $valid5->{data}[19][19], 
-			"valid map from file: $tempfile");
+ok ( $valid5->{data}[19][0] eq $valid5->{data}[19][19], "valid map from file: $tempfile");
+ok (!$valid5->{data}[20][0],"not too much rows" );
+ok (!$valid5->{data}[0][20],"not too much columns" );
+
+open my $fh, '>>', $tempfile or BAIL_OUT "unble to open [$tempfile] for appending!";
+print $fh "aaa\naa\na\naaaa\n";
+close $fh;
+dies_ok { Game::Term::Map->new( from => $tempfile ) } 
+		"expecting to die with not rectangular map file";
 unlink $tempfile;
 note "removed [$tempfile]\n";
+
+dies_ok { Game::Term::Map->new( from => 'Should_Not_Exist.txt' ) } 
+		"expecting to die with not existing file";
+
+
+
