@@ -12,7 +12,7 @@ use Carp;
 use Game::Term::Configuration;
 use Game::Term::Map;
 
-ReadMode 'cbreak';
+#ReadMode 'cbreak';
 
 our $VERSION = '0.01';
 
@@ -117,7 +117,7 @@ sub init{
 
 sub show{
 		my $ui = shift;
-		
+		ReadMode 'cbreak';
 		my $key = ReadKey(0);
 			
 		sleep(	
