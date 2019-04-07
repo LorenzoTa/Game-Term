@@ -5,6 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
+use YAML qw(Dump DumpFile LoadFile);
 use Term::ANSIColor qw(RESET :constants :constants256);
 
 # CLEAR           RESET             BOLD            DARK
@@ -71,7 +72,33 @@ use Term::ANSIColor qw(RESET :constants :constants256);
 
 sub new{
 	my $class = shift;
+	
 	my %conf = validate_conf( @_ );
+	
+	$conf{from} //= './GameTermConfDefault.conf'; #use Data::Dump; dd %conf;exit;
+	# GameTermConf.conf or given file have precedence
+	if ( $conf{from} and -e -s -f -r $conf{from} ){
+		print "found '$conf{from}' loading this one\n";
+		my $conf;
+		{
+			local $@;
+			eval { $conf = LoadFile( $conf{from} ) };
+			if ( $@ ){
+				croak "ERROR loading configuration!\n $@ $! $^E\n";
+			}
+			else{ print "configuration loaded from '$conf{from}'\n" }
+		}
+		croak "loaded object is not a Game::Term::Configuration one!"
+					unless $conf->isa('Game::Term::Configuration');
+		if ( $conf->{interface}{map_colors} == 2 ){
+			%{$conf->{terrains}} = terrains_2_colors();
+		}
+		elsif ( $conf->{interface}{map_colors} == 252 ){
+			%{$conf->{terrains}} = terrains_256_colors();
+		}
+		else{%{$conf->{terrains}} = terrains_16_colors()}		
+		return $conf;
+	}
 	
 	# if $conf{from} ...
 	# read file..
@@ -94,10 +121,20 @@ sub new{
 	}
 	else{ %terrains = terrains_16_colors(); }
 	
-	return bless {
+	my $conf = bless {
 				interface => \%conf,
 				terrains =>  \%terrains,
 	}, $class;
+	
+	{
+		local $@;
+		eval { DumpFile('./GameTermConfDefault.conf', $conf) };
+		if ( $@ ){
+			print "ERROR saving configuration!\n $@ $! $^E\n";
+		}
+		else{ print "default configuration saved to './GameTermConfDefault.conf'\n" }
+	}	
+	return $conf;
 }
 sub get_interface{
 	my $conf = shift;
@@ -244,7 +281,7 @@ sub validate_conf{
 		croak "configuration 'colors' accepts 2, 16 or 256" 
 			unless $conf{map_colors} =~/^(2|16|256)$/;
 	}
-	
+	$conf{ map_colors } //= 16;
 	$conf{ map_area_w } //= 50; #80;
 	$conf{ map_area_h } //=  20; #20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };

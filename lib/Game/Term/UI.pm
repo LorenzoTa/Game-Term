@@ -9,6 +9,7 @@ use List::Util qw( max min );
 use Term::ANSIColor qw(RESET :constants :constants256);
 use Time::HiRes qw ( sleep );
 use Carp;
+use YAML qw(Dump DumpFile LoadFile);
 
 use Game::Term::Configuration;
 use Game::Term::Map;
@@ -23,17 +24,80 @@ our $noscroll_debug = 0;
 my %terrain;
 # commands are class data!!
 my %commands =(
-	return => sub{ 	my $obj = shift; 
+	# COOMANDS EXECUTED BY UI
+	return_to_game=> sub{ 	my $obj = shift; 
 					$obj->{mode}='map'; 
 					#$obj->show();
 					$obj->draw_map();
-					$obj->draw_menu(["hero HP: 42","walk with WASD"]);
-				},
-	legenda => sub{ my $obj = shift; 
+					$obj->draw_menu(["hero HP: 42","walk with WASD or : to enter command mode"]);
+	},
+	show_legenda => sub{ my $obj = shift; 
 					print "to be implemented\n";
 					# $obj->draw_map();
 					# $obj->draw_menu(["hero HP: 42","walk with WASD"]);
-				},
+	},
+	# dump_configuration => sub{ my $obj = shift; 
+					# #print STDERR Dump %terrain;
+					# #use Data::Dump; dd $obj->{configuration};
+					# my $conf = Game::Term::Configuration->new();
+					# print Dump $conf;
+					
+	# },
+	# save_configuration => sub{ my $obj = shift;
+					# my $filepath = shift;
+					# unless ($filepath){
+						# print "provide a file path to save the configuration\n";
+						# return;
+					# }
+					# my $conf = Game::Term::Configuration->new();
+					# {
+						# local $@;
+						# eval { DumpFile($filepath, $conf) };
+						# if ( $@ ){
+							# print "ERROR saving configuration!\n $@ $! $^E\n";
+						# }
+						# else{ print "configuration saved to $filepath\n" }
+					# }					
+	# },
+	load_configuration => sub{ my $obj = shift;
+					my $filepath = shift;
+					unless ($filepath){
+						print "provide a file path to load the configuration from\n";
+						return;
+					}
+					#my $conf = Game::Term::Configuration->new($filepath);
+					$obj->load_configuration( $filepath );
+					# $obj->init();
+					$obj->{ hero_icon } = [ $obj->{ hero_color }.$obj->{ hero_icon }.RESET, $obj->{ hero_icon }, 1 ];
+	
+					$obj->beautify_map();
+					# local $obj->{map} = [$obj->{map}[0][0]];
+					# use Data::Dump; dd $obj;#exit;
+	},
+	# dump_ui => sub{
+		# my $obj = shift;
+		# local $obj->{map} = [$obj->{map}[0][0]];
+		# use Data::Dump; dd $obj;#exit;
+	# },
+	
+	# COMMAND EXECUTED BY GAME (returned to game as strings)
+	save => sub {
+			my ($ui, @args) = @_;
+			$args[0] //= (join'_',split /:|\s+/,scalar localtime(time)).'-save.yaml';
+			return ('save', $args[0]);
+	},
+	load => sub {
+			my $ui = shift;
+			my $filepath = shift;
+			unless ($filepath){
+				print "provide a file path to load the game from\n";
+				return;
+			}
+			return ('load', $filepath );
+	},
+	
+	
+	
 );
 my $term = Term::ReadLine->new('Simple Perl calc');
 $term->Attribs->{completion_function} = sub {
@@ -86,8 +150,10 @@ sub new{
 	}, $class;
 	$ui->{map} = $params{map} // Game::Term::Map->new(  )->{data}; 
 	$ui->load_configuration( $params{configuration} );
-	
 	$ui->init();	
+	# local $ui->{map} = [$ui->{map}[0][0]];
+					# use Data::Dump; dd $ui;#exit;
+	
 	return $ui;	
 }
 
@@ -99,10 +165,13 @@ sub load_configuration{
 	# CONFIGURATION provided as object
 	if ( $conf_from and ref $conf_from eq 'Game::Term::Configuration'){
 		$conf_obj = $conf_from;
-		delete $ui->{configuration};
+		#delete $ui->{configuration}; ??????????????
+		print "DEBUG: configuration provided as object\n" if $debug;
 	}
-	elsif ( $conf_from ){ # LOAD FROM FILE ????
+	# CONFIGURATION provided as file
+	elsif (-e -s -f -r $conf_from ){ 
 		$conf_obj = Game::Term::Configuration->new( from => $conf_from );
+		print "DEBUG: configuration provided as file\n" if $debug;
 	}
 	# nothing provided as CONFIGURATION loading empty one
 	else{
@@ -155,24 +224,31 @@ sub show{
 		my $ui = shift;
 		# COMMAND MODE
 		if ( $ui->{mode} and $ui->{mode} eq 'command' ){
-			$ui->draw_map();
-			$ui->draw_menu(["command mode","use TAB to show available commands"]);
+			# $ui->draw_map();
+			# $ui->draw_menu(["command mode","use TAB to show available commands"]);
 			ReadMode 'normal';
-			  my $line = $term->readline('>');
+			my $line = $term->readline('>');
 			#$|++;
-			#return;
+			return unless $line;
 			chomp $line;
-			$line=~s/\s+//g;
-			if ($commands{$line}){
+			
+			$line=~s/\s+$//g;
+			
+			#return $line;
+			
+			my ($cmd,@args)= split /\s+/,$line;
+			if ($commands{$cmd}){
 				# me NO
-				# $ui->$commands{$line}->();
+				# $ui->$commands{$cmd}->();
 				# ME OK
-				$commands{$line}->($ui);
+			#$commands{$cmd}->($ui,@args);
 				# Corion
-				# my $method = $ui->can( $commands{$line} );
+				# my $method = $ui->can( $commands{$cmd} );
 				# $ui->$method();
 				# choroba
-				#$ui->${\$commands{$line}}->();
+				#$ui->${\$commands{$cmd}}->();
+			#return;
+			return $commands{$cmd}->($ui,@args);
 			}
 			else{return}
 		}	
@@ -398,7 +474,12 @@ sub move{
 		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
 		return 1;
     }
-	elsif( $key eq ':' ){ $ui->{mode} = 'command'; return 0}
+	elsif( $key eq ':' ){ 
+			$ui->{mode} = 'command'; 
+			$ui->draw_map();
+			$ui->draw_menu(["command mode","use TAB to show available commands"]);
+			return 0
+	}
 	else{
 		print "DEBUG: no movement possible ([$key] was pressed)\n" if $debug;
 		return 0;
@@ -497,6 +578,11 @@ sub beautify_map{
 	foreach my $row( 0..$#{$ui->{map}} ){
 		# ITERATE COLUMNS by index
 		foreach my $col( 0 .. $#{$ui->{map}->[0]} ){
+			# to allow configuration reload:
+			# IF was already processed reverse from ARRAY to chr
+			if (ref $ui->{map}[$row][$col] eq 'ARRAY'){
+				$ui->{map}[$row][$col] = $ui->{map}[$row][$col]->[1];#die"[$original_letter]";
+			}
 			
 			# if the letter is defined in %terrain
 			if(exists $terrain{ $ui->{map}[$row][$col] } ){
@@ -523,6 +609,7 @@ sub beautify_map{
 						$ui->{map}[$row][$col]				, # 1 original letter of terrain
 						( $ui->{masked_map} ? 0 : 1)		, # 2 unmasked
 				];
+				
 			}
 			# letter not defined in %terrain final tile is anonymous array too
 			else {  $ui->{map}[$row][$col]  =  [ $ui->{map}[$row][$col], $ui->{map}[$row][$col], 0]}

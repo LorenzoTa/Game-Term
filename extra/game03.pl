@@ -17,7 +17,9 @@ $scenario->{name} ='Test Scenario 1';
 $scenario->set_hero_position( $ARGV[0] // 'south38' );
 
 
-my $conf = Game::Term::Configuration->new( );
+my $conf = Game::Term::Configuration->new();
+# OR
+#my $conf = Game::Term::Configuration->new( from=>'./conf.txt' );
 # changes to configuration...
 # $conf->{interface}{masked_map} = 0;
 
@@ -26,7 +28,9 @@ my $game=Game::Term::Game->new(
 								configuration => $conf, 
 								#map => $scenario->{map},
 								scenario => $scenario,
-							); 
+							);
+# use YAML qw(Dump DumpFile LoadFile);
+# DumpFile('game.yaml',$game);							
 # use Data::Dump; local $game->{ui}->{map} = [qw(fake data)]; dd $game; exit;
 # use Data::Dump; local $scenario->{map} = [qw(fake data)]; dd $scenario; exit;
 #use Data::Dump;   dd $scenario; exit;
