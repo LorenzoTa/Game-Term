@@ -19,6 +19,8 @@ WriteMakefile(
     },
     PREREQ_PM => {
         'Term::ANSIColor'              => '4.00', # https://metacpan.org/changes/distribution/Term-ANSIColor#L70
+		'YAML'	=> '0',
+		# 
         #'Foo::Bar::Module' => '5.0401',
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
