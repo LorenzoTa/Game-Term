@@ -46,7 +46,8 @@ sub play{
 	while($game->{is_running}){
 		# update energy for [hero, actors]
 		# if hero's energy is enough
-		$game->{ui}->show();
+		my @ret = $game->{ui}->show();
+		print "in Game.pm received: [@ret]\n";
 	}
 }
 

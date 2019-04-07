@@ -24,6 +24,7 @@ our $noscroll_debug = 0;
 my %terrain;
 # commands are class data!!
 my %commands =(
+	# COOMANDS EXECUTED BY UI
 	return_to_game=> sub{ 	my $obj = shift; 
 					$obj->{mode}='map'; 
 					#$obj->show();
@@ -42,22 +43,22 @@ my %commands =(
 					# print Dump $conf;
 					
 	# },
-	save_configuration => sub{ my $obj = shift;
-					my $filepath = shift;
-					unless ($filepath){
-						print "provide a file path to save the configuration\n";
-						return;
-					}
-					my $conf = Game::Term::Configuration->new();
-					{
-						local $@;
-						eval { DumpFile($filepath, $conf) };
-						if ( $@ ){
-							print "ERROR saving configuration!\n $@ $! $^E\n";
-						}
-						else{ print "configuration saved to $filepath\n" }
-					}					
-	},
+	# save_configuration => sub{ my $obj = shift;
+					# my $filepath = shift;
+					# unless ($filepath){
+						# print "provide a file path to save the configuration\n";
+						# return;
+					# }
+					# my $conf = Game::Term::Configuration->new();
+					# {
+						# local $@;
+						# eval { DumpFile($filepath, $conf) };
+						# if ( $@ ){
+							# print "ERROR saving configuration!\n $@ $! $^E\n";
+						# }
+						# else{ print "configuration saved to $filepath\n" }
+					# }					
+	# },
 	load_configuration => sub{ my $obj = shift;
 					my $filepath = shift;
 					unless ($filepath){
@@ -73,6 +74,20 @@ my %commands =(
 					# local $obj->{map} = [$obj->{map}[0][0]];
 					# use Data::Dump; dd $obj;#exit;
 	},
+	# dump_ui => sub{
+		# my $obj = shift;
+		# local $obj->{map} = [$obj->{map}[0][0]];
+		# use Data::Dump; dd $obj;#exit;
+	# },
+	
+	# COMMAND EXECUTED BY GAME (returned to game as strings)
+	save => sub {
+			my ($ui, @args) = @_;
+			$args[0] //= (join'_',split /:|\s+/,scalar localtime(time)).'-save.yaml';
+			return ('save', $args[0]);
+	},
+	
+	
 	
 	
 );
@@ -210,18 +225,22 @@ sub show{
 			chomp $line;
 			
 			$line=~s/\s+$//g;
+			
+			#return $line;
+			
 			my ($cmd,@args)= split /\s+/,$line;
 			if ($commands{$cmd}){
 				# me NO
 				# $ui->$commands{$cmd}->();
 				# ME OK
-				$commands{$cmd}->($ui,@args);
+			#$commands{$cmd}->($ui,@args);
 				# Corion
 				# my $method = $ui->can( $commands{$cmd} );
 				# $ui->$method();
 				# choroba
 				#$ui->${\$commands{$cmd}}->();
-				return;
+			#return;
+			return $commands{$cmd}->($ui,@args);
 			}
 			else{return}
 		}	

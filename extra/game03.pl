@@ -24,11 +24,13 @@ my $conf = Game::Term::Configuration->new();
 # $conf->{interface}{masked_map} = 0;
 
 my $game=Game::Term::Game->new( 
-								debug=>0, 
+								debug=>1, 
 								configuration => $conf, 
 								#map => $scenario->{map},
 								scenario => $scenario,
-							); 
+							);
+use YAML qw(Dump DumpFile LoadFile);
+DumpFile('game.yaml',$game);							
 # use Data::Dump; local $game->{ui}->{map} = [qw(fake data)]; dd $game; exit;
 # use Data::Dump; local $scenario->{map} = [qw(fake data)]; dd $scenario; exit;
 #use Data::Dump;   dd $scenario; exit;
