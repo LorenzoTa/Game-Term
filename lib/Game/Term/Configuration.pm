@@ -75,7 +75,7 @@ sub new{
 	
 	my %conf = validate_conf( @_ );
 	
-	$conf{from} //= './GameTermConf.conf'; #use Data::Dump; dd %conf;exit;
+	$conf{from} //= './GameTermConfDefault.conf'; #use Data::Dump; dd %conf;exit;
 	# GameTermConf.conf or given file have precedence
 	if ( $conf{from} and -e -s -f -r $conf{from} ){
 		print "found '$conf{from}' loading this one\n";
@@ -90,6 +90,13 @@ sub new{
 		}
 		croak "loaded object is not a Game::Term::Configuration one!"
 					unless $conf->isa('Game::Term::Configuration');
+		if ( $conf->{interface}{map_colors} == 2 ){
+			%{$conf->{terrains}} = terrains_2_colors();
+		}
+		elsif ( $conf->{interface}{map_colors} == 252 ){
+			%{$conf->{terrains}} = terrains_256_colors();
+		}
+		else{%{$conf->{terrains}} = terrains_16_colors()}		
 		return $conf;
 	}
 	
@@ -114,10 +121,20 @@ sub new{
 	}
 	else{ %terrains = terrains_16_colors(); }
 	
-	return bless {
+	my $conf = bless {
 				interface => \%conf,
 				terrains =>  \%terrains,
 	}, $class;
+	
+	{
+		local $@;
+		eval { DumpFile('./GameTermConfDefault.conf', $conf) };
+		if ( $@ ){
+			print "ERROR saving configuration!\n $@ $! $^E\n";
+		}
+		else{ print "default configuration saved to './GameTermConfDefault.conf'\n" }
+	}	
+	return $conf;
 }
 sub get_interface{
 	my $conf = shift;
