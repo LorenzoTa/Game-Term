@@ -5,6 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
+use YAML;
 use Term::ANSIColor qw(RESET :constants :constants256);
 
 # CLEAR           RESET             BOLD            DARK

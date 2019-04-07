@@ -9,6 +9,7 @@ use List::Util qw( max min );
 use Term::ANSIColor qw(RESET :constants :constants256);
 use Time::HiRes qw ( sleep );
 use Carp;
+use YAML qw(Dump DumpFile);
 
 use Game::Term::Configuration;
 use Game::Term::Map;
@@ -23,16 +24,42 @@ our $noscroll_debug = 0;
 my %terrain;
 # commands are class data!!
 my %commands =(
-	return => sub{ 	my $obj = shift; 
+	return_to_game=> sub{ 	my $obj = shift; 
 					$obj->{mode}='map'; 
 					#$obj->show();
 					$obj->draw_map();
 					$obj->draw_menu(["hero HP: 42","walk with WASD"]);
 				},
-	legenda => sub{ my $obj = shift; 
+	show_legenda => sub{ my $obj = shift; 
 					print "to be implemented\n";
 					# $obj->draw_map();
 					# $obj->draw_menu(["hero HP: 42","walk with WASD"]);
+				},
+	dump_configuration => sub{ my $obj = shift; 
+					#print STDERR Dump %terrain;
+					#use Data::Dump; dd $obj->{configuration};
+					my $conf = Game::Term::Configuration->new();
+					print Dump $conf;
+					
+				},
+	save_configuration => sub{ my $obj = shift;
+					my $filepath = shift;
+					unless ($filepath){
+						print "provide a file path to save the configuration\n";
+						return;
+					}
+					my $conf = Game::Term::Configuration->new();
+					{
+						local $@;
+						eval { DumpFile($filepath, $conf) };
+						if ( $@ ){
+							print "ERROR saving configuration!\n $@ $! $^E\n";
+						}
+						else{ print "configuration saved to $filepath\n" }
+					}
+					
+					
+					
 				},
 );
 my $term = Term::ReadLine->new('Simple Perl calc');
@@ -99,7 +126,7 @@ sub load_configuration{
 	# CONFIGURATION provided as object
 	if ( $conf_from and ref $conf_from eq 'Game::Term::Configuration'){
 		$conf_obj = $conf_from;
-		delete $ui->{configuration};
+		#delete $ui->{configuration}; ??????????????
 	}
 	elsif ( $conf_from ){ # LOAD FROM FILE ????
 		$conf_obj = Game::Term::Configuration->new( from => $conf_from );
@@ -155,24 +182,27 @@ sub show{
 		my $ui = shift;
 		# COMMAND MODE
 		if ( $ui->{mode} and $ui->{mode} eq 'command' ){
-			$ui->draw_map();
-			$ui->draw_menu(["command mode","use TAB to show available commands"]);
+			# $ui->draw_map();
+			# $ui->draw_menu(["command mode","use TAB to show available commands"]);
 			ReadMode 'normal';
-			  my $line = $term->readline('>');
+			my $line = $term->readline('>');
 			#$|++;
-			#return;
+			return unless $line;
 			chomp $line;
-			$line=~s/\s+//g;
-			if ($commands{$line}){
+			
+			$line=~s/\s+$//g;
+			my ($cmd,@args)= split /\s+/,$line;
+			if ($commands{$cmd}){
 				# me NO
-				# $ui->$commands{$line}->();
+				# $ui->$commands{$cmd}->();
 				# ME OK
-				$commands{$line}->($ui);
+				$commands{$cmd}->($ui,@args);
 				# Corion
-				# my $method = $ui->can( $commands{$line} );
+				# my $method = $ui->can( $commands{$cmd} );
 				# $ui->$method();
 				# choroba
-				#$ui->${\$commands{$line}}->();
+				#$ui->${\$commands{$cmd}}->();
+				return;
 			}
 			else{return}
 		}	
@@ -398,7 +428,12 @@ sub move{
 		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
 		return 1;
     }
-	elsif( $key eq ':' ){ $ui->{mode} = 'command'; return 0}
+	elsif( $key eq ':' ){ 
+			$ui->{mode} = 'command'; 
+			$ui->draw_map();
+			$ui->draw_menu(["command mode","use TAB to show available commands"]);
+			return 0
+	}
 	else{
 		print "DEBUG: no movement possible ([$key] was pressed)\n" if $debug;
 		return 0;
