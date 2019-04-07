@@ -86,7 +86,15 @@ my %commands =(
 			$args[0] //= (join'_',split /:|\s+/,scalar localtime(time)).'-save.yaml';
 			return ('save', $args[0]);
 	},
-	
+	load => sub {
+			my $ui = shift;
+			my $filepath = shift;
+			unless ($filepath){
+				print "provide a file path to load the game from\n";
+				return;
+			}
+			return ('load', $filepath );
+	},
 	
 	
 	

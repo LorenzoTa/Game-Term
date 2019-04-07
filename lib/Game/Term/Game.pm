@@ -61,12 +61,18 @@ sub commands{
 	my %table = (
 	
 		save=>sub{
-			print "save sub command received: @_\n";
+			#print "save sub command received: @_\n";
 			DumpFile( $_[0], $game );
 		},
-	
+		load=>sub{
+			#print "save sub command received: @_\n";
+			$game = LoadFile( $_[0] );
+			
+			local $game->{ui}->{map} = [['fake', 'data']];
+			use Data::Dump; dd $game;#
+		},
 	);
-	if( exists $table{$cmd} ){ print "$cmd command exists\n";$table{$cmd}->(@args) }
+	if( exists $table{$cmd} ){ $table{$cmd}->(@args) }
 }
 
 
