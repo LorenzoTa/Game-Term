@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-use YAML;
+use YAML qw(Dump DumpFile LoadFile);
 use Term::ANSIColor qw(RESET :constants :constants256);
 
 # CLEAR           RESET             BOLD            DARK
@@ -72,7 +72,30 @@ use Term::ANSIColor qw(RESET :constants :constants256);
 
 sub new{
 	my $class = shift;
+	
 	my %conf = validate_conf( @_ );
+	
+	$conf{from} //= './GameTermConf.conf';
+	# GameTermConf.conf or given file have precedence
+	if (-e -s -f -r $conf{from} ){
+		print "found '$conf{from}' loading this one\n";
+		my $conf;
+		{
+			local $@;
+			eval { $conf = LoadFile( $conf{from} ) };
+			if ( $@ ){
+				croak "ERROR loading configuration!\n $@ $! $^E\n";
+			}
+			else{ print "configuration loaded from '$conf{from}'\n" }
+		}
+		croak "loaded object is not a Game::Term::Configuration one!"
+					unless $conf->isa('Game::Term::Configuration');
+		return $conf;
+	}
+	# then loaded from file if specified
+	if ($conf{from} and -e -s -f -r $conf{from}){
+	
+	}
 	
 	# if $conf{from} ...
 	# read file..

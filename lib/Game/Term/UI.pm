@@ -9,7 +9,7 @@ use List::Util qw( max min );
 use Term::ANSIColor qw(RESET :constants :constants256);
 use Time::HiRes qw ( sleep );
 use Carp;
-use YAML qw(Dump DumpFile);
+use YAML qw(Dump DumpFile LoadFile);
 
 use Game::Term::Configuration;
 use Game::Term::Map;
@@ -28,7 +28,7 @@ my %commands =(
 					$obj->{mode}='map'; 
 					#$obj->show();
 					$obj->draw_map();
-					$obj->draw_menu(["hero HP: 42","walk with WASD"]);
+					$obj->draw_menu(["hero HP: 42","walk with WASD or : to enter command mode"]);
 				},
 	show_legenda => sub{ my $obj = shift; 
 					print "to be implemented\n";
@@ -56,10 +56,23 @@ my %commands =(
 							print "ERROR saving configuration!\n $@ $! $^E\n";
 						}
 						else{ print "configuration saved to $filepath\n" }
+					}					
+				},
+	load_configuration => sub{ my $obj = shift;
+					my $filepath = shift;
+					unless ($filepath){
+						print "provide a file path to load the configuration from\n";
+						return;
 					}
-					
-					
-					
+					my $conf;
+					{
+						local $@;
+						eval { $conf = LoadFile($filepath) };
+						if ( $@ ){
+							print "ERROR loading configuration!\n $@ $! $^E\n";
+						}
+						else{ print "configuration loaded from $filepath\n" }
+					}
 				},
 );
 my $term = Term::ReadLine->new('Simple Perl calc');

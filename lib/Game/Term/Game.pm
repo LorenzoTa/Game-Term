@@ -40,7 +40,7 @@ sub play{
 	my $game = shift;
 	
 		$game->{ui}->draw_map();
-		$game->{ui}->draw_menu( ["hero HP: 42","walk with WASD"] );	
+		$game->{ui}->draw_menu( ["hero HP: 42","walk with WASD or : to enter command mode"] );	
 
 	
 	while($game->{is_running}){
