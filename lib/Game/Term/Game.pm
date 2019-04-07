@@ -66,7 +66,7 @@ sub commands{
 		},
 		load=>sub{
 			#print "save sub command received: @_\n";
-			$game = LoadFile( $_[0] );
+			%{$game} = %{LoadFile( $_[0] )};
 			
 			local $game->{ui}->{map} = [['fake', 'data']];
 			use Data::Dump; dd $game;#
