@@ -75,9 +75,9 @@ sub new{
 	
 	my %conf = validate_conf( @_ );
 	
-	$conf{from} //= './GameTermConf.conf';
+	$conf{from} //= './GameTermConf.conf'; #use Data::Dump; dd %conf;exit;
 	# GameTermConf.conf or given file have precedence
-	if (-e -s -f -r $conf{from} ){
+	if ( $conf{from} and -e -s -f -r $conf{from} ){
 		print "found '$conf{from}' loading this one\n";
 		my $conf;
 		{
@@ -91,10 +91,6 @@ sub new{
 		croak "loaded object is not a Game::Term::Configuration one!"
 					unless $conf->isa('Game::Term::Configuration');
 		return $conf;
-	}
-	# then loaded from file if specified
-	if ($conf{from} and -e -s -f -r $conf{from}){
-	
 	}
 	
 	# if $conf{from} ...
@@ -268,7 +264,7 @@ sub validate_conf{
 		croak "configuration 'colors' accepts 2, 16 or 256" 
 			unless $conf{map_colors} =~/^(2|16|256)$/;
 	}
-	
+	$conf{ map_colors } //= 16;
 	$conf{ map_area_w } //= 50; #80;
 	$conf{ map_area_h } //=  20; #20;
 	$conf{ menu_area_w } //= $conf{ map_area_w };

@@ -29,19 +29,19 @@ my %commands =(
 					#$obj->show();
 					$obj->draw_map();
 					$obj->draw_menu(["hero HP: 42","walk with WASD or : to enter command mode"]);
-				},
+	},
 	show_legenda => sub{ my $obj = shift; 
 					print "to be implemented\n";
 					# $obj->draw_map();
 					# $obj->draw_menu(["hero HP: 42","walk with WASD"]);
-				},
-	dump_configuration => sub{ my $obj = shift; 
-					#print STDERR Dump %terrain;
-					#use Data::Dump; dd $obj->{configuration};
-					my $conf = Game::Term::Configuration->new();
-					print Dump $conf;
+	},
+	# dump_configuration => sub{ my $obj = shift; 
+					# #print STDERR Dump %terrain;
+					# #use Data::Dump; dd $obj->{configuration};
+					# my $conf = Game::Term::Configuration->new();
+					# print Dump $conf;
 					
-				},
+	# },
 	save_configuration => sub{ my $obj = shift;
 					my $filepath = shift;
 					unless ($filepath){
@@ -57,23 +57,24 @@ my %commands =(
 						}
 						else{ print "configuration saved to $filepath\n" }
 					}					
-				},
+	},
 	load_configuration => sub{ my $obj = shift;
 					my $filepath = shift;
 					unless ($filepath){
 						print "provide a file path to load the configuration from\n";
 						return;
 					}
-					my $conf;
-					{
-						local $@;
-						eval { $conf = LoadFile($filepath) };
-						if ( $@ ){
-							print "ERROR loading configuration!\n $@ $! $^E\n";
-						}
-						else{ print "configuration loaded from $filepath\n" }
-					}
-				},
+					#my $conf = Game::Term::Configuration->new($filepath);
+					$obj->load_configuration( $filepath );
+					# $obj->init();
+					$obj->{ hero_icon } = [ $obj->{ hero_color }.$obj->{ hero_icon }.RESET, $obj->{ hero_icon }, 1 ];
+	
+					$obj->beautify_map();
+					# local $obj->{map} = [$obj->{map}[0][0]];
+					# use Data::Dump; dd $obj;#exit;
+	},
+	
+	
 );
 my $term = Term::ReadLine->new('Simple Perl calc');
 $term->Attribs->{completion_function} = sub {
@@ -126,8 +127,10 @@ sub new{
 	}, $class;
 	$ui->{map} = $params{map} // Game::Term::Map->new(  )->{data}; 
 	$ui->load_configuration( $params{configuration} );
-	
 	$ui->init();	
+	# local $ui->{map} = [$ui->{map}[0][0]];
+					# use Data::Dump; dd $ui;#exit;
+	
 	return $ui;	
 }
 
@@ -140,9 +143,12 @@ sub load_configuration{
 	if ( $conf_from and ref $conf_from eq 'Game::Term::Configuration'){
 		$conf_obj = $conf_from;
 		#delete $ui->{configuration}; ??????????????
+		print "DEBUG: configuration provided as object\n" if $debug;
 	}
-	elsif ( $conf_from ){ # LOAD FROM FILE ????
+	# CONFIGURATION provided as file
+	elsif (-e -s -f -r $conf_from ){ 
 		$conf_obj = Game::Term::Configuration->new( from => $conf_from );
+		print "DEBUG: configuration provided as file\n" if $debug;
 	}
 	# nothing provided as CONFIGURATION loading empty one
 	else{
@@ -545,6 +551,11 @@ sub beautify_map{
 	foreach my $row( 0..$#{$ui->{map}} ){
 		# ITERATE COLUMNS by index
 		foreach my $col( 0 .. $#{$ui->{map}->[0]} ){
+			# to allow configuration reload:
+			# IF was already processed reverse from ARRAY to chr
+			if (ref $ui->{map}[$row][$col] eq 'ARRAY'){
+				$ui->{map}[$row][$col] = $ui->{map}[$row][$col]->[1];#die"[$original_letter]";
+			}
 			
 			# if the letter is defined in %terrain
 			if(exists $terrain{ $ui->{map}[$row][$col] } ){
@@ -571,6 +582,7 @@ sub beautify_map{
 						$ui->{map}[$row][$col]				, # 1 original letter of terrain
 						( $ui->{masked_map} ? 0 : 1)		, # 2 unmasked
 				];
+				
 			}
 			# letter not defined in %terrain final tile is anonymous array too
 			else {  $ui->{map}[$row][$col]  =  [ $ui->{map}[$row][$col], $ui->{map}[$row][$col], 0]}

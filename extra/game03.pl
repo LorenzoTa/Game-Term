@@ -19,12 +19,12 @@ $scenario->set_hero_position( $ARGV[0] // 'south38' );
 
 my $conf = Game::Term::Configuration->new();
 # OR
-# my $conf = Game::Term::Configuration->new( from=>'conf.txt' );
+#my $conf = Game::Term::Configuration->new( from=>'./conf.txt' );
 # changes to configuration...
 # $conf->{interface}{masked_map} = 0;
 
 my $game=Game::Term::Game->new( 
-								debug=>1, 
+								debug=>0, 
 								configuration => $conf, 
 								#map => $scenario->{map},
 								scenario => $scenario,
