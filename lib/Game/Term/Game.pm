@@ -4,6 +4,9 @@ use 5.014;
 use strict;
 use warnings;
 
+use YAML qw(Dump DumpFile LoadFile);
+
+
 use Game::Term::Configuration;
 use Game::Term::UI;
 
@@ -48,10 +51,23 @@ sub play{
 		# if hero's energy is enough
 		my @ret = $game->{ui}->show();
 		print "in Game.pm received: [@ret]\n";
+		$game->commands(@ret);
 	}
 }
 
-
+sub commands{
+	my $game = shift;
+	my ($cmd,@args) = @_;
+	my %table = (
+	
+		save=>sub{
+			print "save sub command received: @_\n";
+			DumpFile( $_[0], $game );
+		},
+	
+	);
+	if( exists $table{$cmd} ){ print "$cmd command exists\n";$table{$cmd}->(@args) }
+}
 
 
 

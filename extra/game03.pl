@@ -29,8 +29,8 @@ my $game=Game::Term::Game->new(
 								#map => $scenario->{map},
 								scenario => $scenario,
 							);
-use YAML qw(Dump DumpFile LoadFile);
-DumpFile('game.yaml',$game);							
+# use YAML qw(Dump DumpFile LoadFile);
+# DumpFile('game.yaml',$game);							
 # use Data::Dump; local $game->{ui}->{map} = [qw(fake data)]; dd $game; exit;
 # use Data::Dump; local $scenario->{map} = [qw(fake data)]; dd $scenario; exit;
 #use Data::Dump;   dd $scenario; exit;
