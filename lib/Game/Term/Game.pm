@@ -50,7 +50,7 @@ sub play{
 		# update energy for [hero, actors]
 		# if hero's energy is enough
 		my @ret = $game->{ui}->show();
-		print "in Game.pm received: [@ret]\n";
+		#print "in Game.pm received: [@ret]\n";
 		$game->commands(@ret);
 	}
 }
@@ -66,13 +66,15 @@ sub commands{
 		},
 		load=>sub{
 			#print "save sub command received: @_\n";
+			#<mst> though %{$obj} = %{LoadFile(...)} might be better
+			# a big thank to mst for the trick!!!
 			%{$game} = %{LoadFile( $_[0] )};
 			
-			local $game->{ui}->{map} = [['fake', 'data']];
-			use Data::Dump; dd $game;#
+			# local $game->{ui}->{map} = [['fake', 'data']];
+			# use Data::Dump; dd $game;#
 		},
 	);
-	if( exists $table{$cmd} ){ $table{$cmd}->(@args) }
+	if( $table{$cmd} and exists $table{$cmd} ){ $table{$cmd}->(@args) }
 }
 
 
