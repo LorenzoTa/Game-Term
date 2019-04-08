@@ -10,6 +10,9 @@ use YAML qw(Dump DumpFile LoadFile);
 use Game::Term::Configuration;
 use Game::Term::UI;
 
+use Game::Term::Actor;
+use Game::Term::Actor::Hero;
+
 our $VERSION = '0.01';
 
 sub new{
@@ -32,8 +35,11 @@ sub new{
 	return bless {
 				is_running => 1,
 				current_scenario => '',
-				hero	=> undef,
-				actors	=> [],
+				hero => $param{hero},
+				actors	=> [ 
+							Game::Term::Actor->new(name=>'UNO',energy_gain=>4),
+							Game::Term::Actor->new(name=>'DUE',energy_gain=>6) 
+							],
 				configuration => $param{configuration} ,
 				ui	=> $param{ui},
 	}, $class;
@@ -44,14 +50,32 @@ sub play{
 	
 		$game->{ui}->draw_map();
 		$game->{ui}->draw_menu( ["hero HP: 42","walk with WASD or : to enter command mode"] );	
-
-	
+#use Data::Dump;
+#dd $game;	
 	while($game->{is_running}){
 		# update energy for [hero, actors]
 		# if hero's energy is enough
-		my @ret = $game->{ui}->show();
-		#print "in Game.pm received: [@ret]\n";
-		$game->commands(@ret);
+		
+		foreach my $actor ( $game->{hero}, @{$game->{actors}} ){ # , @{$game->{actors}}
+			$actor->{energy} += $actor->{energy_gain};
+			print __PACKAGE__," DEBUG '$actor->{name}' energy $actor->{energy}\n";
+			
+			if ( $actor->{energy} >= 10 ){
+				print __PACKAGE__," DEBUG '$actor->{name}' --> can move\n";
+				$actor->{energy} -= 10;
+				
+				if ( $actor->isa('Game::Term::Actor::Hero') ){
+					my @ret = $game->{ui}->show();
+					#print "in Game.pm received: [@ret]\n";
+					$game->commands(@ret);
+				}
+			}
+		}
+		
+		
+		# my @ret = $game->{ui}->show();
+		# #print "in Game.pm received: [@ret]\n";
+		# $game->commands(@ret);
 	}
 }
 

@@ -17,6 +17,7 @@ sub validate_conf{
 	my %params = @_;
 	$params{name} //= 'unnamed';
 	$params{hitpoints} //= 1;
+	$params{energy} //= 0;
 	$params{energy_gain} //= 5;
 	$params{energy_gain_multipliers} = {
 		h => 0.8, # hill 0.8
