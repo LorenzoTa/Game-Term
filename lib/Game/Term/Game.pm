@@ -63,13 +63,14 @@ sub commands{
 		save=>sub{
 			#print "save sub command received: @_\n";
 			DumpFile( $_[0], $game );
+			print "succesfully saved game to $_[0]\n";
 		},
 		load=>sub{
 			#print "save sub command received: @_\n";
 			#<mst> though %{$obj} = %{LoadFile(...)} might be better
 			# a big thank to mst for the trick!!!
 			%{$game} = %{LoadFile( $_[0] )};
-			
+			print "succesfully loaded game from a save file\n";
 			# local $game->{ui}->{map} = [['fake', 'data']];
 			# use Data::Dump; dd $game;#
 		},
