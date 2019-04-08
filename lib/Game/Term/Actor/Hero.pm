@@ -1,9 +1,25 @@
-package Game::Term::Hero;
+package Game::Term::Actor::Hero;
 
 use 5.014;
 use strict;
 use warnings;
 
+use parent 'Game::Term::Actor';
+
+sub new{
+	my $class = shift;
+	my %params = validate_conf(@_);
+	my $self  = $class->SUPER::new(@_);
+	$self->{bag}=[];
+	return $self;	
+}
+
+sub validate_conf{
+	return @_;
+}
+
+1; # End of Game::Term::Hero
+__DATA__
 =head1 NAME
 
 Game::Term::Hero - The great new Game::Term::Hero!
@@ -13,9 +29,6 @@ Game::Term::Hero - The great new Game::Term::Hero!
 Version 0.01
 
 =cut
-
-our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -35,19 +48,6 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
-
-=cut
-
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
-}
 
 =head1 AUTHOR
 
@@ -137,5 +137,3 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 =cut
-
-1; # End of Game::Term::Hero
