@@ -50,9 +50,8 @@ sub play{
 	
 		$game->{ui}->draw_map();
 		$game->{ui}->draw_menu( ["hero HP: 42","walk with WASD or : to enter command mode"] );	
-#use Data::Dump;
-#dd $game;	
-	while($game->{is_running}){
+
+		while($game->{is_running}){
 		# update energy for [hero, actors]
 		# if hero's energy is enough
 		
