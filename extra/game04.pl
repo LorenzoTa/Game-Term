@@ -28,7 +28,7 @@ my $conf = Game::Term::Configuration->new();
 my $hero = Game::Term::Actor::Hero->new( name => 'My New Hero' );
 #use Data::Dump; dd $hero; exit;
 my $game=Game::Term::Game->new( 
-								debug=>0, 
+								debug=>1, 
 								configuration => $conf, 
 								#map => $scenario->{map},
 								scenario => $scenario,

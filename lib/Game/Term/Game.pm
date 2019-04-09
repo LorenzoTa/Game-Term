@@ -54,19 +54,17 @@ sub play{
 		while($game->{is_running}){
 		# update energy for [hero, actors]
 		# if hero's energy is enough
-	# my @ret = $game->{ui}->show();
-	# print "in Game.pm received: [@ret]\n";
-	# $game->commands(@ret);
+	
 		foreach my $actor ( $game->{hero}, @{$game->{actors}} ){ # , @{$game->{actors}}
 			$actor->{energy} += $actor->{energy_gain};
 			print __PACKAGE__," DEBUG '$actor->{name}' energy $actor->{energy}\n";
 			
 			if ( $actor->{energy} >= 10 ){
-				print __PACKAGE__," DEBUG '$actor->{name}' --> can move\n";
+				print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n";
 				$actor->{energy} -= 10;
 				
 				if ( $actor->isa('Game::Term::Actor::Hero') ){
-					my @ret = $game->{ui}->show();
+					my @ret = $game->{ui}->show(); #<-------------------
 					print "in Game.pm received: [@ret]\n";
 					$game->commands(@ret);
 				}
