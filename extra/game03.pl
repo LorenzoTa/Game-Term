@@ -4,6 +4,8 @@ use Game::Term::Game;
 
 use Game::Term::Scenario;
 
+use Game::Term::Actor;
+use Game::Term::Actor::Hero;
 
 # # bare minimum scenario with map in DATA
 # my $scenario = Game::Term::Scenario->new();
