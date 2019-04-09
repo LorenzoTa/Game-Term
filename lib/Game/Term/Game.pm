@@ -54,7 +54,9 @@ sub play{
 		while($game->{is_running}){
 		# update energy for [hero, actors]
 		# if hero's energy is enough
-		
+	# my @ret = $game->{ui}->show();
+	# print "in Game.pm received: [@ret]\n";
+	# $game->commands(@ret);
 		foreach my $actor ( $game->{hero}, @{$game->{actors}} ){ # , @{$game->{actors}}
 			$actor->{energy} += $actor->{energy_gain};
 			print __PACKAGE__," DEBUG '$actor->{name}' energy $actor->{energy}\n";
@@ -65,9 +67,10 @@ sub play{
 				
 				if ( $actor->isa('Game::Term::Actor::Hero') ){
 					my @ret = $game->{ui}->show();
-					#print "in Game.pm received: [@ret]\n";
+					print "in Game.pm received: [@ret]\n";
 					$game->commands(@ret);
 				}
+				#else{$game->{ui}->draw_map();}
 			}
 		}
 		
@@ -96,6 +99,10 @@ sub commands{
 			print "succesfully loaded game from a save file\n";
 			# local $game->{ui}->{map} = [['fake', 'data']];
 			# use Data::Dump; dd $game;#
+	$game->{ui}->{mode} = 'map';
+	# the below line prevent:Use of freed value in iteration
+	# infact we are iterating over actors when reloading $game containing them
+	$game->play();
 		},
 	);
 	if( $table{$cmd} and exists $table{$cmd} ){ $table{$cmd}->(@args) }
