@@ -65,29 +65,30 @@ sub play{
 			# FOREACH HERO,ACTORS
 			foreach my $actor ( $game->{hero}, @{$game->{actors}} ){ 			
 				# ACTOR CAN MOVE
-				if ( $actor->{energy} >= 10 ){
+				if ( $actor->{energy} >= 10 and $actor->isa('Game::Term::Actor::Hero') ){
 					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n";
-					# PLAYER: GET USER COMMAND
-					if ( $actor->isa('Game::Term::Actor::Hero') ){
+					# PLAYER: GET USER COMMAND	
 						
-						my @usr_cmd = $game->{ui}->get_user_command();
-						next unless @usr_cmd;
-						print "in Game.pm 'map' received: [@usr_cmd]\n";
-						
-						if ($usr_cmd[0] eq ':'){
-							$game->{ui}->{mode} = 'command';
-							last;
-						}
-						
-						$game->commands(@usr_cmd) ;
-						$actor->{energy} -= 10;
+					my @usr_cmd = $game->{ui}->get_user_command();
+					next unless @usr_cmd; # ??? last ???
+					print "in Game.pm 'map' received: [@usr_cmd]\n";
+					
+					if ($usr_cmd[0] eq ':'){
+						$game->{ui}->{mode} = 'command';
+						last;
 					}
-					# NPC: AUTOMOVE
-					else{						
+					
+					$game->commands(@usr_cmd) ;
+					$actor->{energy} -= 10;
+				}	
+				# NPC: AUTOMOVE
+				elsif( $actor->{energy} >= 10 ){
+						print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n";
+					
 						# $actor->automove() if $actor->can('automove');
 						# $game->{ui}->draw_map(); ??
 						$actor->{energy} -= 10;					
-					}					
+										
 				}
 				# CANNOT MOVE
 				else{
