@@ -48,10 +48,10 @@ sub new{
 sub play{
 	my $game = shift;
 	
-		$game->{ui}->draw_map();
-		$game->{ui}->draw_menu( ["hero HP: 42","walk with WASD or : to enter command mode"] );	
+	$game->{ui}->draw_map();
+	$game->{ui}->draw_menu( ["hero HP: 42","walk with WASD or : to enter command mode"] );	
 
-		while($game->{is_running}){
+	while($game->{is_running}){
 		# COMMAND
 		if ($game->{ui}->{mode} and $game->{ui}->{mode} eq 'command' ){
 			my @usr_cmd = $game->{ui}->get_user_command();
@@ -62,51 +62,42 @@ sub play{
 		}
 		# MAP
 		else{
-			foreach my $actor ( $game->{hero}, @{$game->{actors}} ){ # , @{$game->{actors}}
-			#$actor->{energy} += $actor->{energy_gain};
-			# print __PACKAGE__," DEBUG '$actor->{name}' energy $actor->{energy}\n";
-			
-			if ( $actor->{energy} >= 10 ){
-				print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n";
-				# PLAYER
-				if ( $actor->isa('Game::Term::Actor::Hero') ){
-					
-					#my @ret = $game->{ui}->show(); #<-------------------
-					my @usr_cmd = $game->{ui}->get_user_command();
-					next unless @usr_cmd;
-					print "in Game.pm 'map' received: [@usr_cmd]\n";
-					
-					if ($usr_cmd[0] eq ':'){
-						$game->{ui}->{mode} = 'command';
-						last;
+			# FOREACH HERO,ACTORS
+			foreach my $actor ( $game->{hero}, @{$game->{actors}} ){ 			
+				# ACTOR CAN MOVE
+				if ( $actor->{energy} >= 10 ){
+					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n";
+					# PLAYER: GET USER COMMAND
+					if ( $actor->isa('Game::Term::Actor::Hero') ){
+						
+						my @usr_cmd = $game->{ui}->get_user_command();
+						next unless @usr_cmd;
+						print "in Game.pm 'map' received: [@usr_cmd]\n";
+						
+						if ($usr_cmd[0] eq ':'){
+							$game->{ui}->{mode} = 'command';
+							last;
+						}
+						
+						$game->commands(@usr_cmd) ;
+						$actor->{energy} -= 10;
 					}
-					
-					$game->commands(@usr_cmd) ;
-					$actor->{energy} -= 10;
+					# NPC: AUTOMOVE
+					else{						
+						# $actor->automove() if $actor->can('automove');
+						# $game->{ui}->draw_map(); ??
+						$actor->{energy} -= 10;					
+					}					
 				}
-				# NPC
+				# CANNOT MOVE
 				else{
-					
-					# $actor->automove() if $actor->can('automove');
-					# $game->{ui}->draw_map(); ??
-					$actor->{energy} -= 10;
-				
+					$actor->{energy} += $actor->{energy_gain};
+					print __PACKAGE__," DEBUG '$actor->{name}' ends with energy $actor->{energy}\n";
 				}
-				
-			}
-			else{
-				$actor->{energy} += $actor->{energy_gain};
-				print __PACKAGE__," DEBUG '$actor->{name}' energy $actor->{energy}\n";
-			}
 			
 			}
 		}
-		
-		
-		
-		# my @ret = $game->{ui}->show();
-		# #print "in Game.pm received: [@ret]\n";
-		# $game->commands(@ret);
+	
 	}
 }
 
