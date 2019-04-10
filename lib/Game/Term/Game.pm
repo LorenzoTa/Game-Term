@@ -15,9 +15,12 @@ use Game::Term::Actor::Hero;
 
 our $VERSION = '0.01';
 
+my $debug = 0;
+
 sub new{
 	my $class = shift;
 	my %param = @_;
+	$debug = $param{debug};
 	# GET hero..
 	# if $param{hero} or ..	
 	$param{configuration} //= Game::Term::Configuration->new();
@@ -47,7 +50,9 @@ sub new{
 
 sub play{
 	my $game = shift;
-	
+	#INIT
+	$game->{hero}->{y} = $game->{ui}->{hero_y};
+	$game->{hero}->{x} = $game->{ui}->{hero_x};
 	$game->{ui}->draw_map();
 	$game->{ui}->draw_menu( ["hero HP: 42","walk with WASD or : to enter command mode"] );	
 
@@ -135,12 +140,44 @@ sub playORIGINAL{
 		# $game->commands(@ret);
 	}
 }
-
+sub is_walkable{
+	my $game = shift;
+	# ~ copied from UI
+	my $tile = shift; 
+	if ( $game->{configuration}->{terrains}{ $tile->[1] }->[4] < 5 ){ return 1}
+	else{return 0}
+}
 sub commands{
 	my $game = shift;
 	my ($cmd,@args) = @_;
 	my %table = (
-		
+		w => sub{
+			if ( 
+				# we are inside the real map
+				$game->{ui}->{hero_y} > 0 	and
+				$game->is_walkable(
+					$game->{ui}->{map}->[ $game->{ui}->{hero_y} - 1 ]
+										[ $game->{ui}->{hero_x} ]
+				)
+						
+			){
+        
+				$game->{hero}->{y}--;				
+				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{hero}->{on_tile} = $game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}->{y} ]
+													[ $game->{hero}->{x} ]->[1]  
+												}->[0];
+				$game->{ui}->draw_map();
+				print __PACKAGE__, 
+					" HERO on $game->{hero}->{on_tile} ",
+					"at y: $game->{hero}->{y} x: $game->{hero}->{x}\n" if $debug;
+				
+				return 1;
+			}
+		},
 		save=>sub{
 			#print "save sub command received: @_\n";
 			DumpFile( $_[0], $game );
@@ -165,4 +202,4 @@ sub commands{
 
 
 
-
+1;

@@ -263,9 +263,8 @@ sub get_user_command{
 			else{return}
 		}
 		
-		
-		
-		
+		########################################
+		# NO MORE..
 		ReadMode 'cbreak';
 		my $key = ReadKey(0);
 			
