@@ -257,10 +257,10 @@ sub get_user_command{
 		else{
 			ReadMode 'cbreak';
 			my $key = ReadKey(0);
-			if( $ui->move( $key ) ){
+			#if( $ui->move( $key ) ){
 				return $key;
-			}
-			else{return}
+			#}
+			#else{return}
 		}
 		
 		########################################

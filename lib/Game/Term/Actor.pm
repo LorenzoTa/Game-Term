@@ -29,7 +29,7 @@ sub validate_conf{
 	};
 	$params{icon} = 'X';
 	$params{color} = 'Blue';
-	$params{on_tile} = '';
+	$params{on_tile} = ' ';
 	$params{x} = undef;
 	$params{y} = undef;
 	return %params;

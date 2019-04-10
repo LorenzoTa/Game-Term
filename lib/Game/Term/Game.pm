@@ -51,8 +51,9 @@ sub new{
 sub play{
 	my $game = shift;
 	#INIT
-	$game->{hero}->{y} = $game->{ui}->{hero_y};
-	$game->{hero}->{x} = $game->{ui}->{hero_x};
+	# $game->{hero}->{y} = $game->{ui}->{hero_y};
+	# $game->{hero}->{x} = $game->{ui}->{hero_x};
+	# $game->{ui}->{map}[$game->{hero}->{y}][$game->{hero}->{x}] = [ " \e[0m",' ',0];
 	$game->{ui}->draw_map();
 	$game->{ui}->draw_menu( ["hero HP: 42","walk with WASD or : to enter command mode"] );	
 
@@ -151,6 +152,7 @@ sub commands{
 	my $game = shift;
 	my ($cmd,@args) = @_;
 	my %table = (
+		# MOVE NORTH
 		w => sub{
 			if ( 
 				# we are inside the real map
@@ -162,10 +164,13 @@ sub commands{
 						
 			){
         
-				$game->{hero}->{y}--;				
+				#$game->{hero}->{y}--;
+				$game->{ui}->{hero_y}--;
 				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-				$game->{hero}->{on_tile} = $game->{configuration}->{terrains}->
+				$game->{ui}->{hero_terrain} = 
+				#$game->{hero}->{on_tile} 	= 
+											$game->{configuration}->{terrains}->
 												{$game->{ui}->{map}->
 													[ $game->{hero}->{y} ]
 													[ $game->{hero}->{x} ]->[1]  
@@ -173,7 +178,38 @@ sub commands{
 				$game->{ui}->draw_map();
 				print __PACKAGE__, 
 					" HERO on $game->{hero}->{on_tile} ",
-					"at y: $game->{hero}->{y} x: $game->{hero}->{x}\n" if $debug;
+					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
+				
+				return 1;
+			}
+		},
+		# MOVE SOUTH
+		s => sub{
+			if ( 
+				# we are inside the real map
+				$game->{ui}->{hero_y} < $#{$game->{ui}->{map}} 	and
+				$game->is_walkable(
+					$game->{ui}->{map}->[ $game->{ui}->{hero_y} + 1 ]
+										[ $game->{ui}->{hero_x} ]
+				)
+						
+			){
+        
+				#$game->{hero}->{y}--;
+				$game->{ui}->{hero_y}++;
+				$game->{ui}->{map_off_y}++ if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{ui}->{hero_terrain} = 
+				#$game->{hero}->{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}->{y} ]
+													[ $game->{hero}->{x} ]->[1]  
+												}->[0];
+				$game->{ui}->draw_map();
+				print __PACKAGE__, 
+					" HERO on $game->{hero}->{on_tile} ",
+					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
 				
 				return 1;
 			}
