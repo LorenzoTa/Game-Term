@@ -28,8 +28,9 @@ my %commands =(
 	return_to_game=> sub{ 	my $obj = shift; 
 					$obj->{mode}='map'; 
 					#$obj->show();
-					$obj->draw_map();
-					$obj->draw_menu(["hero HP: 42","walk with WASD or : to enter command mode"]);
+					# $obj->draw_map();
+					# $obj->draw_menu(["hero HP: 42","walk with WASD or : to enter command mode"]);
+					return;
 	},
 	show_legenda => sub{ my $obj = shift; 
 					print "to be implemented\n";
@@ -220,7 +221,7 @@ sub init{
 	$ui->set_map_offsets();
 }
 
-sub show{
+sub get_user_command{
 		my $ui = shift;
 		# COMMAND MODE
 		if ( $ui->{mode} and $ui->{mode} eq 'command' ){
@@ -249,6 +250,99 @@ sub show{
 				#$ui->${\$commands{$cmd}}->();
 			#return;
 			return $commands{$cmd}->($ui,@args);
+			}
+			else{return}
+		}	
+		# MAP MODE
+		else{
+			ReadMode 'cbreak';
+			my $key = ReadKey(0);
+			if( $ui->move( $key ) ){
+				return $key;
+			}
+			else{return}
+		}
+		
+		
+		
+		
+		ReadMode 'cbreak';
+		my $key = ReadKey(0);
+			
+		sleep(	
+				$ui->{hero_slowness} + 
+				# the slowness #4 of the terrain original letter #1 where
+				# the hero currently is on th emap
+				$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]
+		);
+		print "DEBUG: slowness for terrain ".
+			$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
+			"\n" if $debug;
+		
+		if( $ui->move( $key ) ){
+			local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
+			local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
+			local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'wood';
+			
+			# CHECK EVENT??????
+	
+			$ui->draw_map();
+			
+			if ($noscroll_debug){
+				 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+','+',1];
+				 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+','+',1];
+				 
+				 print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
+						"NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
+						"$ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n";
+				 print "OFF_Y used in print: $ui->{map_off_y} .. $ui->{map_off_y} + $ui->{map_area_h}\n";
+				 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
+			}
+		
+			$ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
+							"( $ui->{hero_terrain} ) sight: $ui->{hero_sight} ".
+							"slowness: ".
+							($ui->{hero_slowness} + 
+							$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]),
+								"key $key was pressed:"] );	
+
+		}
+		
+		
+		print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;		
+}
+
+
+
+sub show{
+		my $ui = shift;
+		# COMMAND MODE
+		if ( $ui->{mode} and $ui->{mode} eq 'command' ){
+			# $ui->draw_map();
+			# $ui->draw_menu(["command mode","use TAB to show available commands"]);
+			ReadMode 'normal';
+			my $line = $term->readline('>');
+			#$|++;
+			return unless $line;
+			chomp $line;
+			
+			$line=~s/\s+$//g;
+			
+			#return $line;
+			
+			my ($cmd,@args)= split /\s+/,$line;
+			if ($commands{$cmd}){
+				# me NO
+				# $ui->$commands{$cmd}->();
+				# ME OK
+			#$commands{$cmd}->($ui,@args);
+				# Corion
+				# my $method = $ui->can( $commands{$cmd} );
+				# $ui->$method();
+				# choroba
+				#$ui->${\$commands{$cmd}}->();
+				#return; RETURN TO GAME->PLAY
+				return $commands{$cmd}->($ui,@args);
 			}
 			else{return}
 		}	
@@ -476,9 +570,9 @@ sub move{
     }
 	elsif( $key eq ':' ){ 
 			$ui->{mode} = 'command'; 
-			$ui->draw_map();
-			$ui->draw_menu(["command mode","use TAB to show available commands"]);
-			return 0
+			# $ui->draw_map();
+			# $ui->draw_menu(["command mode","use TAB to show available commands"]);
+			return 1;
 	}
 	else{
 		print "DEBUG: no movement possible ([$key] was pressed)\n" if $debug;

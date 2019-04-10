@@ -281,6 +281,9 @@ sub validate_conf{
 		croak "configuration 'colors' accepts 2, 16 or 256" 
 			unless $conf{map_colors} =~/^(2|16|256)$/;
 	}
+	
+	$conf{mode} //= 'map';
+	
 	$conf{ map_colors } //= 16;
 	$conf{ map_area_w } //= 50; #80;
 	$conf{ map_area_h } //=  20; #20;

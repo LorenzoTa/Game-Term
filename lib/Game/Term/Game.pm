@@ -37,8 +37,8 @@ sub new{
 				current_scenario => '',
 				hero => $param{hero},
 				actors	=> [ 
-							Game::Term::Actor->new(name=>'UNO',energy_gain=>4),
-							Game::Term::Actor->new(name=>'DUE',energy_gain=>6) 
+							Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
+							#Game::Term::Actor->new(name=>'DUE',energy_gain=>6) 
 							],
 				configuration => $param{configuration} ,
 				ui	=> $param{ui},
@@ -46,6 +46,71 @@ sub new{
 }
 
 sub play{
+	my $game = shift;
+	
+		$game->{ui}->draw_map();
+		$game->{ui}->draw_menu( ["hero HP: 42","walk with WASD or : to enter command mode"] );	
+
+		while($game->{is_running}){
+		# COMMAND
+		if ($game->{ui}->{mode} and $game->{ui}->{mode} eq 'command' ){
+			my @usr_cmd = $game->{ui}->get_user_command();
+			next unless @usr_cmd;
+			print "in Game.pm 'command' received: [@usr_cmd]\n";
+			$game->commands(@usr_cmd);
+			next;
+		}
+		# MAP
+		else{
+			foreach my $actor ( $game->{hero}, @{$game->{actors}} ){ # , @{$game->{actors}}
+			#$actor->{energy} += $actor->{energy_gain};
+			# print __PACKAGE__," DEBUG '$actor->{name}' energy $actor->{energy}\n";
+			
+			if ( $actor->{energy} >= 10 ){
+				print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n";
+				# PLAYER
+				if ( $actor->isa('Game::Term::Actor::Hero') ){
+					
+					#my @ret = $game->{ui}->show(); #<-------------------
+					my @usr_cmd = $game->{ui}->get_user_command();
+					next unless @usr_cmd;
+					print "in Game.pm 'map' received: [@usr_cmd]\n";
+					
+					if ($usr_cmd[0] eq ':'){
+						$game->{ui}->{mode} = 'command';
+						last;
+					}
+					
+					$game->commands(@usr_cmd) ;
+					$actor->{energy} -= 10;
+				}
+				# NPC
+				else{
+					
+					# $actor->automove() if $actor->can('automove');
+					# $game->{ui}->draw_map(); ??
+					$actor->{energy} -= 10;
+				
+				}
+				
+			}
+			else{
+				$actor->{energy} += $actor->{energy_gain};
+				print __PACKAGE__," DEBUG '$actor->{name}' energy $actor->{energy}\n";
+			}
+			
+			}
+		}
+		
+		
+		
+		# my @ret = $game->{ui}->show();
+		# #print "in Game.pm received: [@ret]\n";
+		# $game->commands(@ret);
+	}
+}
+
+sub playORIGINAL{
 	my $game = shift;
 	
 		$game->{ui}->draw_map();
@@ -83,7 +148,7 @@ sub commands{
 	my $game = shift;
 	my ($cmd,@args) = @_;
 	my %table = (
-	
+		
 		save=>sub{
 			#print "save sub command received: @_\n";
 			DumpFile( $_[0], $game );
@@ -97,10 +162,10 @@ sub commands{
 			print "succesfully loaded game from a save file\n";
 			# local $game->{ui}->{map} = [['fake', 'data']];
 			# use Data::Dump; dd $game;#
-	$game->{ui}->{mode} = 'map';
-	# the below line prevent:Use of freed value in iteration
-	# infact we are iterating over actors when reloading $game containing them
-	$game->play();
+			$game->{ui}->{mode} = 'map';
+			# the below line prevent:Use of freed value in iteration
+			# infact we are iterating over actors when reloading $game containing them
+			$game->play();
 		},
 	);
 	if( $table{$cmd} and exists $table{$cmd} ){ $table{$cmd}->(@args) }
