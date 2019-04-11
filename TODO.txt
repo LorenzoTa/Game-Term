@@ -1,3 +1,9 @@
+-Use of uninitialized value in array element at .\lib/Game/Term/Game.pm line 207.
+hero MUST have a bit of dual life: in UI and in Hero
+This has to be limited at minimum, probably in the wasd movement function only setting twice x and y and on_tile.
+Also to notice that hero's x and y are set in init game phase taking values from UI hero_x hero_y
+
+
 
 
 resolved: BUG: Use of uninitialized value in print at... sub draw_map appears
