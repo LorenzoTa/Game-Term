@@ -49,7 +49,7 @@ sub set_hero_position{
 		$side = $1;
 		$position = $2;
 	}
-	else{ croak "unable to parse hero position from string [$input] (expecting something like south13 or west25)"}
+	else{ croak "Unable to parse hero position from string [$input] (expecting something like south13 or west25)"}
 	
 	if ( $side =~ /north/i ){
 		croak "Hero outside map! ". 
