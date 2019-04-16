@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use YAML qw(Dump DumpFile LoadFile);
-
+use Time::HiRes qw ( sleep );
 
 use Game::Term::Configuration;
 use Game::Term::UI;
@@ -86,6 +86,13 @@ sub play{
 					}
 					# movement OK
 					if ( $game->commands(@usr_cmd) ){
+						sleep(	
+							$game->{ui}->{hero_slowness} + 
+							# the slowness #4 of the terrain original letter #1 where
+							# the hero currently is on the map
+							$game->{configuration}->{terrains}->{$game->{ui}->{map}->[ $game->{hero}->{y} ][ $game->{hero}->{x} ]->[1]}->[4]
+						);
+					
 						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} + 2 
 							if $game->{ui}->{hero_terrain} eq 'hill';
 						local $game->{ui}->{hero_sight}  = $game->{ui}->{hero_sight} + 4 
