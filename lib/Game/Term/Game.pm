@@ -53,6 +53,7 @@ sub play{
 	#INIT
 	# $game->{hero}->{y} = $game->{ui}->{hero_y};
 	# $game->{hero}->{x} = $game->{ui}->{hero_x};
+	# ?? opposite: hero->on_tile = map
 	# $game->{ui}->{map}[$game->{hero}->{y}][$game->{hero}->{x}] = [ " \e[0m",' ',0];
 	$game->{ui}->draw_map();
 	$game->{ui}->draw_menu( ["hero HP: 42","walk with WASD or : to enter command mode"] );	
