@@ -85,7 +85,7 @@ sub play{
 						last;
 					}
 					
-					$game->commands(@usr_cmd) ;
+					$game->{ui}->draw_map() if $game->commands(@usr_cmd) ;
 					$actor->{energy} -= 10;
 				}	
 				# NPC: AUTOMOVE
@@ -176,7 +176,7 @@ sub commands{
 													[ $game->{hero}->{y} ]
 													[ $game->{hero}->{x} ]->[1]  
 												}->[0];
-				$game->{ui}->draw_map();
+				# $game->{ui}->draw_map();
 				print __PACKAGE__, 
 					" HERO on $game->{hero}->{on_tile} ",
 					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
@@ -207,7 +207,7 @@ sub commands{
 													[ $game->{hero}->{y} ]
 													[ $game->{hero}->{x} ]->[1]  
 												}->[0];
-				$game->{ui}->draw_map();
+				# $game->{ui}->draw_map();
 				print __PACKAGE__, 
 					" HERO on $game->{hero}->{on_tile} ",
 					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
@@ -239,7 +239,7 @@ sub commands{
 													[ $game->{hero}->{y} ]
 													[ $game->{hero}->{x} ]->[1]  
 												}->[0];
-				$game->{ui}->draw_map();
+				# $game->{ui}->draw_map();
 				print __PACKAGE__, 
 					" HERO on $game->{hero}->{on_tile} ",
 					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
@@ -270,7 +270,7 @@ sub commands{
 													[ $game->{hero}->{y} ]
 													[ $game->{hero}->{x} ]->[1]  
 												}->[0];
-				$game->{ui}->draw_map();
+				# $game->{ui}->draw_map();
 				print __PACKAGE__, 
 					" HERO on $game->{hero}->{on_tile} ",
 					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
