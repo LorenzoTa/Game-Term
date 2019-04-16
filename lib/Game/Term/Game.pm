@@ -51,8 +51,8 @@ sub new{
 sub play{
 	my $game = shift;
 	#INIT
-	# $game->{hero}->{y} = $game->{ui}->{hero_y};
-	# $game->{hero}->{x} = $game->{ui}->{hero_x};
+	$game->{hero}->{y} = $game->{ui}->{hero_y};
+	$game->{hero}->{x} = $game->{ui}->{hero_x};
 	# ?? opposite: hero->on_tile = map
 	# $game->{ui}->{map}[$game->{hero}->{y}][$game->{hero}->{x}] = [ " \e[0m",' ',0];
 	$game->{ui}->draw_map();
@@ -165,12 +165,12 @@ sub commands{
 						
 			){
         
-				#$game->{hero}->{y}--;
+				$game->{hero}->{y}--;
 				$game->{ui}->{hero_y}--;
 				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
 				$game->{ui}->{hero_terrain} = 
-				#$game->{hero}->{on_tile} 	= 
+				$game->{hero}->{on_tile} 	= 
 											$game->{configuration}->{terrains}->
 												{$game->{ui}->{map}->
 													[ $game->{hero}->{y} ]
@@ -196,12 +196,12 @@ sub commands{
 						
 			){
         
-				#$game->{hero}->{y}--;
+				$game->{hero}->{y}--;
 				$game->{ui}->{hero_y}++;
 				$game->{ui}->{map_off_y}++ if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
 				$game->{ui}->{hero_terrain} = 
-				#$game->{hero}->{on_tile} 	= 
+				$game->{hero}->{on_tile} 	= 
 											$game->{configuration}->{terrains}->
 												{$game->{ui}->{map}->
 													[ $game->{hero}->{y} ]
