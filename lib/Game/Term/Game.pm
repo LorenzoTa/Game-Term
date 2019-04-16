@@ -84,9 +84,18 @@ sub play{
 						$game->{ui}->{mode} = 'command';
 						last;
 					}
+					# movement OK
+					if ( $game->commands(@usr_cmd) ){
+						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} + 2 
+							if $game->{ui}->{hero_terrain} eq 'hill';
+						local $game->{ui}->{hero_sight}  = $game->{ui}->{hero_sight} + 4 
+							if $game->{ui}->{hero_terrain} eq 'mountain';
+						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} - 2 
+							if $game->{ui}->{hero_terrain} eq 'wood';
+						$game->{ui}->draw_map();
+						$actor->{energy} -= 10;
+					}
 					
-					$game->{ui}->draw_map() if $game->commands(@usr_cmd) ;
-					$actor->{energy} -= 10;
 				}	
 				# NPC: AUTOMOVE
 				elsif( $actor->{energy} >= 10 ){
