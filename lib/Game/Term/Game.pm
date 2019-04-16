@@ -230,7 +230,7 @@ sub commands{
         
 				$game->{hero}->{x}--;
 				$game->{ui}->{hero_x}--;
-				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();				
+				$game->{ui}->{map_off_x}-- if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
 				$game->{ui}->{hero_terrain} = 
 				$game->{hero}->{on_tile} 	= 

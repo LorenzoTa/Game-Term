@@ -19,7 +19,7 @@ use Game::Term::Map;
 our $VERSION = '0.01';
 
 our $debug = 0;
-our $noscroll_debug = 0;
+our $noscroll_debug = 1;
 # terrain is class data!!
 my %terrain;
 # commands are class data!!
