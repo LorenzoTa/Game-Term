@@ -3,7 +3,7 @@ package Game::Term::Scenario;
 use 5.014;
 use strict;
 use warnings;
-
+use Carp;
 use Game::Term::Map;
 
 our $VERSION = '0.01';
@@ -59,6 +59,9 @@ sub set_hero_position{
 	elsif ( $side =~ /south/i ){
 		$scn->{map}[ $#{$scn->{map}}  ][$position] = 'X';
 		# use Data::Dump; dd $scn; exit;
+		croak "Hero outside map! ". 
+				"Valid positions: 0-$#{$scn->{map}[0]} and $position was given"
+				if $position > $#{$scn->{map}[0]};
 		return;
 	}
 	elsif ( $side =~ /east/i ){

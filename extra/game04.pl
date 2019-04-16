@@ -18,9 +18,9 @@ use Game::Term::Actor::Hero;
 # $scenario->{name} ='Test Scenario 1';
 # $scenario->set_hero_position( $ARGV[0] // 'south38' );
 
-my $scenario = Game::Term::Scenario->new( map=> Game::Term::Map->new(fake_map=>'render')->{data} );
+my $scenario = Game::Term::Scenario->new( map=> Game::Term::Map->new(fake_map=>'small')->{data} );
 $scenario->{name} ='Test Scenario 1';
-$scenario->set_hero_position( $ARGV[0] // 'south5' );
+$scenario->set_hero_position( $ARGV[0] // 'south10' );
 
 
 my $conf = Game::Term::Configuration->new();

@@ -656,7 +656,7 @@ sub set_map_and_hero{
 		local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+', '', 1];
 		local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+', '', 1];
 	
-		print 	"DEBUG: map with border (now each tile is [to_display,terrain letter, masked] ) with no_scroll vertexes (+ signs):\n",
+		print "DEBUG: map beautified ( now each tile is [to_display,terrain letter, masked] ) with no_scroll vertexes (+ signs):\n",
 			map{ join'',( map{ $_->[0] }
 							@$_ ),$/ 
 				} @{$ui->{map}};
@@ -755,7 +755,15 @@ sub set_no_scrolling_area{
 		}
 		else{die}
 	}
+	# FIX no_scroll_area inside map
 	map {$_ = 0 if $_< 0} $ui->{no_scroll_area}{min_x},$ui->{no_scroll_area}{min_y};
+	if ( $ui->{no_scroll_area}{max_y} > $#{$ui->{map}} ){
+		$ui->{no_scroll_area}{max_y}=$#{$ui->{map}};
+	}
+	if ( $ui->{no_scroll_area}{max_x} > $#{$ui->{map}->[0]} ){
+		$ui->{no_scroll_area}{max_x}=$#{$ui->{map}->[0]};
+	}
+	
 	print "DEBUG: no_scroll area from $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
 			"to $ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n" if $debug;
 	
