@@ -313,84 +313,84 @@ sub get_user_command{
 
 
 
-sub show{
-		my $ui = shift;
-		# COMMAND MODE
-		if ( $ui->{mode} and $ui->{mode} eq 'command' ){
-			# $ui->draw_map();
-			# $ui->draw_menu(["command mode","use TAB to show available commands"]);
-			ReadMode 'normal';
-			my $line = $term->readline('>');
-			#$|++;
-			return unless $line;
-			chomp $line;
+# sub show{
+		# my $ui = shift;
+		# # COMMAND MODE
+		# if ( $ui->{mode} and $ui->{mode} eq 'command' ){
+			# # $ui->draw_map();
+			# # $ui->draw_menu(["command mode","use TAB to show available commands"]);
+			# ReadMode 'normal';
+			# my $line = $term->readline('>');
+			# #$|++;
+			# return unless $line;
+			# chomp $line;
 			
-			$line=~s/\s+$//g;
+			# $line=~s/\s+$//g;
 			
-			#return $line;
+			# #return $line;
 			
-			my ($cmd,@args)= split /\s+/,$line;
-			if ($commands{$cmd}){
-				# me NO
-				# $ui->$commands{$cmd}->();
-				# ME OK
-			#$commands{$cmd}->($ui,@args);
-				# Corion
-				# my $method = $ui->can( $commands{$cmd} );
-				# $ui->$method();
-				# choroba
-				#$ui->${\$commands{$cmd}}->();
-				#return; RETURN TO GAME->PLAY
-				return $commands{$cmd}->($ui,@args);
-			}
-			else{return}
-		}	
-		# MAP MODE
-		ReadMode 'cbreak';
-		my $key = ReadKey(0);
+			# my ($cmd,@args)= split /\s+/,$line;
+			# if ($commands{$cmd}){
+				# # me NO
+				# # $ui->$commands{$cmd}->();
+				# # ME OK
+			# #$commands{$cmd}->($ui,@args);
+				# # Corion
+				# # my $method = $ui->can( $commands{$cmd} );
+				# # $ui->$method();
+				# # choroba
+				# #$ui->${\$commands{$cmd}}->();
+				# #return; RETURN TO GAME->PLAY
+				# return $commands{$cmd}->($ui,@args);
+			# }
+			# else{return}
+		# }	
+		# # MAP MODE
+		# ReadMode 'cbreak';
+		# my $key = ReadKey(0);
 			
-		sleep(	
-				$ui->{hero_slowness} + 
-				# the slowness #4 of the terrain original letter #1 where
-				# the hero currently is on th emap
-				$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]
-		);
-		print "DEBUG: slowness for terrain ".
-			$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
-			"\n" if $debug;
+		# sleep(	
+				# $ui->{hero_slowness} + 
+				# # the slowness #4 of the terrain original letter #1 where
+				# # the hero currently is on th emap
+				# $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]
+		# );
+		# print "DEBUG: slowness for terrain ".
+			# $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
+			# "\n" if $debug;
 		
-		if( $ui->move( $key ) ){
-			local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
-			local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
-			local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'wood';
+		# if( $ui->move( $key ) ){
+			# local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
+			# local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
+			# local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'wood';
 			
-			# CHECK EVENT??????
+			# # CHECK EVENT??????
 	
-			$ui->draw_map();
+			# $ui->draw_map();
 			
-			if ($noscroll_debug){
-				 $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+','+',1];
-				 $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+','+',1];
+			# if ($noscroll_debug){
+				 # $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+','+',1];
+				 # $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+','+',1];
 				 
-				 print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
-						"NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
-						"$ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n";
-				 print "OFF_Y used in print: $ui->{map_off_y} .. $ui->{map_off_y} + $ui->{map_area_h}\n";
-				 print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
-			}
+				 # print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
+						# "NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
+						# "$ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n";
+				 # print "OFF_Y used in print: $ui->{map_off_y} .. $ui->{map_off_y} + $ui->{map_area_h}\n";
+				 # print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
+			# }
 		
-			$ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
-							"( $ui->{hero_terrain} ) sight: $ui->{hero_sight} ".
-							"slowness: ".
-							($ui->{hero_slowness} + 
-							$terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]),
-								"key $key was pressed:"] );	
+			# $ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
+							# "( $ui->{hero_terrain} ) sight: $ui->{hero_sight} ".
+							# "slowness: ".
+							# ($ui->{hero_slowness} + 
+							# $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]),
+								# "key $key was pressed:"] );	
 
-		}
+		# }
 		
 		
-		print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;		
-}
+		# print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;		
+# }
 
 
 sub set_map_offsets{
