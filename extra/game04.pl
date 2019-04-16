@@ -14,13 +14,13 @@ use Game::Term::Actor::Hero;
 # $scenario->set_hero_position( $ARGV[0] // 'south11' );
 
 # OR scenario with custom fake map
-# my $scenario = Game::Term::Scenario->new( map=> Game::Term::Map->new(fake_map=>'one')->{data} );
-# $scenario->{name} ='Test Scenario 1';
-# $scenario->set_hero_position( $ARGV[0] // 'south38' );
-
-my $scenario = Game::Term::Scenario->new( map=> Game::Term::Map->new(fake_map=>'small')->{data} );
+my $scenario = Game::Term::Scenario->new( map=> Game::Term::Map->new(fake_map=>'one')->{data} );
 $scenario->{name} ='Test Scenario 1';
-$scenario->set_hero_position( $ARGV[0] // 'west-10' );
+$scenario->set_hero_position( $ARGV[0] // 'south38' );
+
+# my $scenario = Game::Term::Scenario->new( map=> Game::Term::Map->new(fake_map=>'small')->{data} );
+# $scenario->{name} ='Test Scenario 1';
+# $scenario->set_hero_position( $ARGV[0] // 'south5' );
 
 
 my $conf = Game::Term::Configuration->new();
