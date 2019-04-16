@@ -196,9 +196,72 @@ sub commands{
 						
 			){
         
-				$game->{hero}->{y}--;
+				$game->{hero}->{y}++;
 				$game->{ui}->{hero_y}++;
 				$game->{ui}->{map_off_y}++ if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{ui}->{hero_terrain} = 
+				$game->{hero}->{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}->{y} ]
+													[ $game->{hero}->{x} ]->[1]  
+												}->[0];
+				$game->{ui}->draw_map();
+				print __PACKAGE__, 
+					" HERO on $game->{hero}->{on_tile} ",
+					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
+				
+				return 1;
+			}
+		},
+		
+		# MOVE WEST
+		a => sub{
+			if ( 
+				# we are inside the real map
+				$game->{ui}->{hero_x} > 0 	and
+				$game->is_walkable(
+					$game->{ui}->{map}->[ $game->{ui}->{hero_y} ]
+										[ $game->{ui}->{hero_x} - 1 ]
+				)
+						
+			){
+        
+				$game->{hero}->{x}--;
+				$game->{ui}->{hero_x}--;
+				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{ui}->{hero_terrain} = 
+				$game->{hero}->{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}->{y} ]
+													[ $game->{hero}->{x} ]->[1]  
+												}->[0];
+				$game->{ui}->draw_map();
+				print __PACKAGE__, 
+					" HERO on $game->{hero}->{on_tile} ",
+					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
+				
+				return 1;
+			}
+		},
+		# MOVE EAST
+		d => sub{
+			if ( 
+				# we are inside the real map
+				$game->{ui}->{hero_x}  < $#{$game->{ui}->{map}[0]} 	and
+				$game->is_walkable(
+					$game->{ui}->{map}->[ $game->{ui}->{hero_y} ]
+										[ $game->{ui}->{hero_x} + 1 ]
+				)
+						
+			){
+        
+				$game->{hero}->{x}++;
+				$game->{ui}->{hero_x}++;
+				$game->{ui}->{map_off_x}++ if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
 				$game->{ui}->{hero_terrain} = 
 				$game->{hero}->{on_tile} 	= 
