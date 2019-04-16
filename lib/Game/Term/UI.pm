@@ -755,6 +755,7 @@ sub set_no_scrolling_area{
 		}
 		else{die}
 	}
+	map {$_ = 0 if $_< 0} $ui->{no_scroll_area}{min_x},$ui->{no_scroll_area}{min_y};
 	print "DEBUG: no_scroll area from $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
 			"to $ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n" if $debug;
 	
