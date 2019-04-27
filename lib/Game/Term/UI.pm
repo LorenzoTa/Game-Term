@@ -616,12 +616,12 @@ sub illuminate{
 	}
 	   return %ret;
 }
-sub is_walkable{
-	my $tile = shift; 
+# sub is_walkable{
+	# my $tile = shift; 
 	
-	if ( $terrain{ $tile->[1]}->[4] < 5 ){ return 1}
-	else{return 0}
-}
+	# if ( $terrain{ $tile->[1]}->[4] < 5 ){ return 1}
+	# else{return 0}
+# }
 		
 sub draw_menu{
 	my $ui = shift;
