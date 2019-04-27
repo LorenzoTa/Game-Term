@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use YAML qw(Dump DumpFile LoadFile);
-
+use Time::HiRes qw ( sleep );
 
 use Game::Term::Configuration;
 use Game::Term::UI;
@@ -15,9 +15,12 @@ use Game::Term::Actor::Hero;
 
 our $VERSION = '0.01';
 
+my $debug = 0;
+
 sub new{
 	my $class = shift;
 	my %param = @_;
+	$debug = $param{debug};
 	# GET hero..
 	# if $param{hero} or ..	
 	$param{configuration} //= Game::Term::Configuration->new();
@@ -34,18 +37,102 @@ sub new{
 	$param{scenario}->{map} = undef;
 	return bless {
 				is_running => 1,
-				current_scenario => '',
+				
+				configuration => $param{configuration} ,
+				
+				scenario => $param{scenario},
+				current_scenario => $param{scenario}->{name},
+				
+				ui	=> $param{ui},
+				
 				hero => $param{hero},
 				actors	=> [ 
-							Game::Term::Actor->new(name=>'UNO',energy_gain=>4),
-							Game::Term::Actor->new(name=>'DUE',energy_gain=>6) 
+							Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
+							#Game::Term::Actor->new(name=>'DUE',energy_gain=>6) 
 							],
-				configuration => $param{configuration} ,
-				ui	=> $param{ui},
+				
+				
 	}, $class;
 }
 
 sub play{
+	my $game = shift;
+	#INIT
+	$game->{hero}->{y} = $game->{ui}->{hero_y};
+	$game->{hero}->{x} = $game->{ui}->{hero_x};
+	# ?? opposite: hero->on_tile = map
+	# $game->{ui}->{map}[$game->{hero}->{y}][$game->{hero}->{x}] = [ " \e[0m",' ',0];
+	$game->{ui}->draw_map();
+	$game->{ui}->draw_menu( ["hero HP: 42","walk with WASD or : to enter command mode"] );	
+
+	while($game->{is_running}){
+		# COMMAND
+		if ($game->{ui}->{mode} and $game->{ui}->{mode} eq 'command' ){
+			my @usr_cmd = $game->{ui}->get_user_command();
+			next unless @usr_cmd;
+			print "in Game.pm 'command' received: [@usr_cmd]\n";
+			$game->commands(@usr_cmd);
+			next;
+		}
+		# MAP
+		else{
+			# FOREACH HERO,ACTORS
+			foreach my $actor ( $game->{hero}, @{$game->{actors}} ){ 			
+				# ACTOR CAN MOVE
+				if ( $actor->{energy} >= 10 and $actor->isa('Game::Term::Actor::Hero') ){
+					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n";
+					# PLAYER: GET USER COMMAND	
+						
+					my @usr_cmd = $game->{ui}->get_user_command();
+					next unless @usr_cmd; # ??? last ???
+					print "in Game.pm 'map' received: [@usr_cmd]\n";
+					
+					if ($usr_cmd[0] eq ':'){
+						$game->{ui}->{mode} = 'command';
+						last;
+					}
+					# movement OK
+					if ( $game->commands(@usr_cmd) ){
+						sleep(	
+							$game->{ui}->{hero_slowness} + 
+							# the slowness #4 of the terrain original letter #1 where
+							# the hero currently is on the map
+							$game->{configuration}->{terrains}->{$game->{ui}->{map}->[ $game->{hero}->{y} ][ $game->{hero}->{x} ]->[1]}->[4]
+						);
+					
+						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} + 2 
+							if $game->{ui}->{hero_terrain} eq 'hill';
+						local $game->{ui}->{hero_sight}  = $game->{ui}->{hero_sight} + 4 
+							if $game->{ui}->{hero_terrain} eq 'mountain';
+						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} - 2 
+							if $game->{ui}->{hero_terrain} eq 'wood';
+						$game->{ui}->draw_map();
+						$actor->{energy} -= 10;
+					}
+					
+				}	
+				# NPC: AUTOMOVE
+				elsif( $actor->{energy} >= 10 ){
+						print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n";
+					
+						# $actor->automove() if $actor->can('automove');
+						# $game->{ui}->draw_map(); ??
+						$actor->{energy} -= 10;					
+										
+				}
+				# CANNOT MOVE
+				else{
+					$actor->{energy} += $actor->{energy_gain};
+					print __PACKAGE__," DEBUG '$actor->{name}' ends with energy $actor->{energy}\n";
+				}
+			
+			}
+		}
+	
+	}
+}
+
+sub playORIGINAL{
 	my $game = shift;
 	
 		$game->{ui}->draw_map();
@@ -78,12 +165,142 @@ sub play{
 		# $game->commands(@ret);
 	}
 }
-
+sub is_walkable{
+	my $game = shift;
+	# ~ copied from UI
+	my $tile = shift; 
+	if ( $game->{configuration}->{terrains}{ $tile->[1] }->[4] < 5 ){ return 1}
+	else{return 0}
+}
 sub commands{
 	my $game = shift;
 	my ($cmd,@args) = @_;
 	my %table = (
-	
+		# MOVE NORTH
+		w => sub{
+			if ( 
+				# we are inside the real map
+				$game->{ui}->{hero_y} > 0 	and
+				$game->is_walkable(
+					$game->{ui}->{map}->[ $game->{ui}->{hero_y} - 1 ]
+										[ $game->{ui}->{hero_x} ]
+				)
+						
+			){
+        
+				$game->{hero}->{y}--;
+				$game->{ui}->{hero_y}--;
+				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{ui}->{hero_terrain} = 
+				$game->{hero}->{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}->{y} ]
+													[ $game->{hero}->{x} ]->[1]  
+												}->[0];
+				# $game->{ui}->draw_map();
+				print __PACKAGE__, 
+					" HERO on $game->{hero}->{on_tile} ",
+					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
+				
+				return 1;
+			}
+		},
+		# MOVE SOUTH
+		s => sub{
+			if ( 
+				# we are inside the real map
+				$game->{ui}->{hero_y} < $#{$game->{ui}->{map}} 	and
+				$game->is_walkable(
+					$game->{ui}->{map}->[ $game->{ui}->{hero_y} + 1 ]
+										[ $game->{ui}->{hero_x} ]
+				)
+						
+			){
+        
+				$game->{hero}->{y}++;
+				$game->{ui}->{hero_y}++;
+				$game->{ui}->{map_off_y}++ if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{ui}->{hero_terrain} = 
+				$game->{hero}->{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}->{y} ]
+													[ $game->{hero}->{x} ]->[1]  
+												}->[0];
+				# $game->{ui}->draw_map();
+				print __PACKAGE__, 
+					" HERO on $game->{hero}->{on_tile} ",
+					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
+				
+				return 1;
+			}
+		},
+		
+		# MOVE WEST
+		a => sub{
+			if ( 
+				# we are inside the real map
+				$game->{ui}->{hero_x} > 0 	and
+				$game->is_walkable(
+					$game->{ui}->{map}->[ $game->{ui}->{hero_y} ]
+										[ $game->{ui}->{hero_x} - 1 ]
+				)
+						
+			){
+        
+				$game->{hero}->{x}--;
+				$game->{ui}->{hero_x}--;
+				$game->{ui}->{map_off_x}-- if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{ui}->{hero_terrain} = 
+				$game->{hero}->{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}->{y} ]
+													[ $game->{hero}->{x} ]->[1]  
+												}->[0];
+				# $game->{ui}->draw_map();
+				print __PACKAGE__, 
+					" HERO on $game->{hero}->{on_tile} ",
+					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
+				
+				return 1;
+			}
+		},
+		# MOVE EAST
+		d => sub{
+			if ( 
+				# we are inside the real map
+				$game->{ui}->{hero_x}  < $#{$game->{ui}->{map}[0]} 	and
+				$game->is_walkable(
+					$game->{ui}->{map}->[ $game->{ui}->{hero_y} ]
+										[ $game->{ui}->{hero_x} + 1 ]
+				)
+						
+			){
+        
+				$game->{hero}->{x}++;
+				$game->{ui}->{hero_x}++;
+				$game->{ui}->{map_off_x}++ if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{ui}->{hero_terrain} = 
+				$game->{hero}->{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}->{y} ]
+													[ $game->{hero}->{x} ]->[1]  
+												}->[0];
+				# $game->{ui}->draw_map();
+				print __PACKAGE__, 
+					" HERO on $game->{hero}->{on_tile} ",
+					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
+				
+				return 1;
+			}
+		},
 		save=>sub{
 			#print "save sub command received: @_\n";
 			DumpFile( $_[0], $game );
@@ -97,10 +314,10 @@ sub commands{
 			print "succesfully loaded game from a save file\n";
 			# local $game->{ui}->{map} = [['fake', 'data']];
 			# use Data::Dump; dd $game;#
-	$game->{ui}->{mode} = 'map';
-	# the below line prevent:Use of freed value in iteration
-	# infact we are iterating over actors when reloading $game containing them
-	$game->play();
+			$game->{ui}->{mode} = 'map';
+			# the below line prevent:Use of freed value in iteration
+			# infact we are iterating over actors when reloading $game containing them
+			$game->play();
 		},
 	);
 	if( $table{$cmd} and exists $table{$cmd} ){ $table{$cmd}->(@args) }
@@ -108,4 +325,4 @@ sub commands{
 
 
 
-
+1;

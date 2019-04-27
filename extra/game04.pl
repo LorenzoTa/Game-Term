@@ -18,6 +18,10 @@ my $scenario = Game::Term::Scenario->new( map=> Game::Term::Map->new(fake_map=>'
 $scenario->{name} ='Test Scenario 1';
 $scenario->set_hero_position( $ARGV[0] // 'south38' );
 
+# my $scenario = Game::Term::Scenario->new( map=> Game::Term::Map->new(fake_map=>'small')->{data} );
+# $scenario->{name} ='Test Scenario 1';
+# $scenario->set_hero_position( $ARGV[0] // 'south5' );
+
 
 my $conf = Game::Term::Configuration->new();
 # OR
@@ -28,7 +32,7 @@ my $conf = Game::Term::Configuration->new();
 my $hero = Game::Term::Actor::Hero->new( name => 'My New Hero' );
 #use Data::Dump; dd $hero; exit;
 my $game=Game::Term::Game->new( 
-								debug=>1, 
+								debug=>0, 
 								configuration => $conf, 
 								#map => $scenario->{map},
 								scenario => $scenario,

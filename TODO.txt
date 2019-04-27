@@ -1,8 +1,5 @@
-
-
-resolved: BUG: Use of uninitialized value in print at... sub draw_map appears
-ONLY in N and W maps IF exiting no_scroll are from the same side of entrance
-AND going then in 90 direction til end
-
+hero_sight and hero_terrain are STILL used in Game.pm play
+they must be based on $hero properties.
+But hero_sight is used in illuminate sub of UI.pm 
 
 

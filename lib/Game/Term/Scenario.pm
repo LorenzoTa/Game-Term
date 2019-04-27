@@ -3,7 +3,7 @@ package Game::Term::Scenario;
 use 5.014;
 use strict;
 use warnings;
-
+use Carp;
 use Game::Term::Map;
 
 our $VERSION = '0.01';
@@ -49,26 +49,34 @@ sub set_hero_position{
 		$side = $1;
 		$position = $2;
 	}
-	else{ die "unable to parse hero position from string [$input] (expecting somethig like south13 or west25)"}
+	else{ croak "Unable to parse hero position from string [$input] (expecting something like south13 or west25)"}
 	
 	if ( $side =~ /north/i ){
+		croak "Hero outside map! ". 
+				"Valid positions: 0-$#{$scn->{map}[0]} and $position was given"
+				if $position > $#{$scn->{map}[0]};
 		$scn->{map}[0][$position] = 'X';
-		#use Data::Dump; dd $scn; exit;
 		return;
 	}
 	elsif ( $side =~ /south/i ){
+		croak "Hero outside map! ". 
+				"Valid positions: 0-$#{$scn->{map}[0]} and $position was given"
+				if $position > $#{$scn->{map}[0]};
 		$scn->{map}[ $#{$scn->{map}}  ][$position] = 'X';
-		# use Data::Dump; dd $scn; exit;
 		return;
 	}
 	elsif ( $side =~ /east/i ){
+		croak "Hero outside map! ". 
+				"Valid positions: 0-$#{$scn->{map}} and $position was given"
+				if $position > $#{$scn->{map}};
 		$scn->{map}[ $position ][ $#{$scn->{map}[0]} ] = 'X';
-		# use Data::Dump; dd $scn; exit;
 		return;
 	}
 	elsif ( $side =~ /west/i ){
+		croak "Hero outside map! ". 
+				"Valid positions: 0-$#{$scn->{map}} and $position was given"
+				if $position > $#{$scn->{map}};
 		$scn->{map}[ $position ][ 0 ] = 'X';
-		# use Data::Dump; dd $scn; exit;
 		return;
 	}
 	else{die "something wrong in hero's position!"}
