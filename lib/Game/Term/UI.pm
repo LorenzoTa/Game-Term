@@ -149,6 +149,7 @@ sub new{
 	my $ui = bless {
 				#%interface_conf
 	}, $class;
+	$ui->{title} = $params{title} // 'TITLE';
 	$ui->{map} = $params{map} // Game::Term::Map->new(  )->{data}; 
 	$ui->load_configuration( $params{configuration} );
 	$ui->init();	
@@ -429,6 +430,19 @@ sub draw_map{
 	# draw hero
 	# this must set $hero->{on_terrain}
 	local $ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
+	
+	# TITLE AREA:
+	# print decoration first row
+	print 	$ui->{dec_color},' o',
+			$ui->{ dec_hor } x ( $ui->{ map_area_w } ),
+			$ui->{dec_color},'o',RESET,"\n";
+			print ' ',$ui->{ dec_ver };
+			print ' ' x 1,
+			      $ui->{ title },
+				  ' ' x ($ui->{ map_area_w } - 
+						 length ($ui->{ title }) - 1 ),
+				  $ui->{ dec_ver },"\n";	
+				
 	
 	# MAP AREA:
 	# print decoration first row

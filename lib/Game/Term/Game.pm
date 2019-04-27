@@ -29,7 +29,7 @@ sub new{
 	
 	$param{ui} //= Game::Term::UI->new( 
 										configuration => $param{configuration}, 
-										# map => $param{map},
+										title => $param{scenario}->{name},
 										map => $param{scenario}->{map},
 										debug => $param{debug},
 										
