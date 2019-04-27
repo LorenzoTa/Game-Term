@@ -497,88 +497,88 @@ sub draw_map{
 	
 }
 
-sub move{
-	my $ui = shift;
-	my $key = shift;
+# sub move{
+	# my $ui = shift;
+	# my $key = shift;
 	
-	# move with WASD
-	# NORTH
-	if ( 	$key eq 'w' 		and	
-			# we are inside the real map
-			$ui->{hero_y} > 0 	and
-			is_walkable(
-				# map coord as hero X - 1, hero Y
-				$ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
-			)
+	# # move with WASD
+	# # NORTH
+	# if ( 	$key eq 'w' 		and	
+			# # we are inside the real map
+			# $ui->{hero_y} > 0 	and
+			# is_walkable(
+				# # map coord as hero X - 1, hero Y
+				# $ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
+			# )
 					
-		){
-        #									THIS must be set to $hero->{on_terrain}
-		$ui->{hero_y}--;
-		$ui->{map_off_y}-- if $ui->must_scroll();
-        #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
-		return 1;
-    }
-	# SOUTH
-	elsif (	$key eq 's' 					and 
-			# we are inside the real map
-			$ui->{hero_y} < $#{$ui->{map}} 	and
-			is_walkable(
-						# map coord as hero X + 1, hero Y
-						$ui->{map}->[ $ui->{hero_y} + 1 ][	$ui->{hero_x} ]
-						)
-		){
-        #									THIS must be set to $hero->{on_terrain}
-		$ui->{hero_y}++;
-		$ui->{map_off_y}++ if $ui->must_scroll();		
-        #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
-		return 1;
-    }
-	# WEST
-	elsif ( $key eq 'a' 		and
-			# we are inside the real map
-			$ui->{hero_x} > 0 	and
-			is_walkable(
-							# map coord as hero X, hero Y - 1
-							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} - 1 ]
-							)
-		){
-        #									THIS must be set to $hero->{on_terrain}
-		$ui->{hero_x}--;
-		$ui->{map_off_x}-- if $ui->must_scroll();		
-        #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
-		return 1;
-    }
-	# EAST
-	elsif ( $key eq 'd' 						and
-			# we are inside the real map
-			$ui->{hero_x} < $#{$ui->{map}[0]} 	and
-			is_walkable(
-							# map coord as hero X, hero Y + 1
-							$ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} + 1 ]
-							)
-		){
-        #									THIS must be set to $hero->{on_terrain}
-		$ui->{hero_x}++;
-		$ui->{map_off_x}++ if $ui->must_scroll();				
-        #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-		$ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
-		return 1;
-    }
-	elsif( $key eq ':' ){ 
-			$ui->{mode} = 'command'; 
-			# $ui->draw_map();
-			# $ui->draw_menu(["command mode","use TAB to show available commands"]);
-			return 1;
-	}
-	else{
-		print "DEBUG: no movement possible ([$key] was pressed)\n" if $debug;
-		return 0;
-	}
+		# ){
+        # #									THIS must be set to $hero->{on_terrain}
+		# $ui->{hero_y}--;
+		# $ui->{map_off_y}-- if $ui->must_scroll();
+        # #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+		# $ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
+		# return 1;
+    # }
+	# # SOUTH
+	# elsif (	$key eq 's' 					and 
+			# # we are inside the real map
+			# $ui->{hero_y} < $#{$ui->{map}} 	and
+			# is_walkable(
+						# # map coord as hero X + 1, hero Y
+						# $ui->{map}->[ $ui->{hero_y} + 1 ][	$ui->{hero_x} ]
+						# )
+		# ){
+        # #									THIS must be set to $hero->{on_terrain}
+		# $ui->{hero_y}++;
+		# $ui->{map_off_y}++ if $ui->must_scroll();		
+        # #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+		# $ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
+		# return 1;
+    # }
+	# # WEST
+	# elsif ( $key eq 'a' 		and
+			# # we are inside the real map
+			# $ui->{hero_x} > 0 	and
+			# is_walkable(
+							# # map coord as hero X, hero Y - 1
+							# $ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} - 1 ]
+							# )
+		# ){
+        # #									THIS must be set to $hero->{on_terrain}
+		# $ui->{hero_x}--;
+		# $ui->{map_off_x}-- if $ui->must_scroll();		
+        # #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+		# $ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
+		# return 1;
+    # }
+	# # EAST
+	# elsif ( $key eq 'd' 						and
+			# # we are inside the real map
+			# $ui->{hero_x} < $#{$ui->{map}[0]} 	and
+			# is_walkable(
+							# # map coord as hero X, hero Y + 1
+							# $ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} + 1 ]
+							# )
+		# ){
+        # #									THIS must be set to $hero->{on_terrain}
+		# $ui->{hero_x}++;
+		# $ui->{map_off_x}++ if $ui->must_scroll();				
+        # #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+		# $ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
+		# return 1;
+    # }
+	# elsif( $key eq ':' ){ 
+			# $ui->{mode} = 'command'; 
+			# # $ui->draw_map();
+			# # $ui->draw_menu(["command mode","use TAB to show available commands"]);
+			# return 1;
+	# }
+	# else{
+		# print "DEBUG: no movement possible ([$key] was pressed)\n" if $debug;
+		# return 0;
+	# }
 	
-}
+# }
 
 sub must_scroll{
 	my $ui = shift;
