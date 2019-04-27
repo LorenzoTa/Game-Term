@@ -37,14 +37,21 @@ sub new{
 	$param{scenario}->{map} = undef;
 	return bless {
 				is_running => 1,
-				current_scenario => '',
+				
+				configuration => $param{configuration} ,
+				
+				scenario => $param{scenario},
+				current_scenario => $param{scenario}->{name},
+				
+				ui	=> $param{ui},
+				
 				hero => $param{hero},
 				actors	=> [ 
 							Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
 							#Game::Term::Actor->new(name=>'DUE',energy_gain=>6) 
 							],
-				configuration => $param{configuration} ,
-				ui	=> $param{ui},
+				
+				
 	}, $class;
 }
 
