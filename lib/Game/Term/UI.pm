@@ -100,7 +100,7 @@ my %commands =(
 	
 	
 );
-my $term = Term::ReadLine->new('Simple Perl calc');
+my $term = Term::ReadLine->new('Game Term');
 $term->Attribs->{completion_function} = sub {
             my ($text, $line, $start) = @_;
             # uncomment next line to see debug stuff while you stress autocomplete
