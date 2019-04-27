@@ -216,7 +216,7 @@ sub init{
 	print map{ join'',@$_,$/ } @{$ui->{map}} if $debug > 1;
 		
 	$ui->set_map_and_hero();
-	print "DEBUG: NEW MAP: rows 0 - $#{$ui->{map}} columns 0 - $#{$ui->{ map }[0]}\n" if $debug;
+	print "DEBUG: NEW MAP: rows: 0..$#{$ui->{map}} cols: 0..$#{$ui->{ map }[0]}\n" if $debug;
 	
 	$ui->set_map_offsets();
 }
@@ -640,7 +640,7 @@ sub set_map_and_hero{
 
 	my $original_map_w = $#{$ui->{map}->[0]} + 1;
 	my $original_map_h = $#{$ui->{map}} + 1;
-	print "DEBUG: ???? original map was $original_map_w x $original_map_h\n" if $debug;
+	#print "DEBUG: ???? original map was $original_map_w x $original_map_h\n" if $debug;
 	
 	# get hero position and side 
 	$ui->set_hero_pos();
