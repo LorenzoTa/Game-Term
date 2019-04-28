@@ -35,6 +35,12 @@ sub new{
 										
 										);
 	$param{scenario}->{map} = undef;
+	
+	# check saved scenario data (creatures and map)!!
+	my @actors = @{$param{scenario}->{creatures}};
+	#use Data::Dump; dd $param{scenario};
+	$param{scenario}->{creatures} = undef;
+	
 	return bless {
 				is_running => 1,
 				
@@ -46,8 +52,9 @@ sub new{
 				ui	=> $param{ui},
 				
 				hero => $param{hero},
-				actors	=> [ 
-							Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
+				actors	=> [
+							@actors
+							#Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
 							#Game::Term::Actor->new(name=>'DUE',energy_gain=>6) 
 							],
 				
@@ -100,14 +107,24 @@ sub play{
 							# the hero currently is on the map
 							$game->{configuration}->{terrains}->{$game->{ui}->{map}->[ $game->{hero}->{y} ][ $game->{hero}->{x} ]->[1]}->[4]
 						);
-					
+						# sigth modifications
 						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} + 2 
 							if $game->{ui}->{hero_terrain} eq 'hill';
 						local $game->{ui}->{hero_sight}  = $game->{ui}->{hero_sight} + 4 
 							if $game->{ui}->{hero_terrain} eq 'mountain';
 						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} - 2 
 							if $game->{ui}->{hero_terrain} eq 'wood';
-						$game->{ui}->draw_map();
+						
+						# place creatures
+						# foreach my $creature (@{$game->{actors}}){
+							# print "DEBUG: creature $creature->{name} at ".
+									# "$creature->{y} $creature->{x}\n" if $debug;
+							# $game->{ui}->{map}->[ $creature->{y} ][ $creature->{x} ][0]
+									# =
+								  # "\e[38;5;9mo\e[0m",'o',0;
+						# }
+						# draw screen
+						$game->{ui}->draw_map(  @{$game->{actors}}  );
 						$game->{ui}->draw_menu( 
 							[	"walk with WASD or : to enter command mode",
 								"$game->{hero}{name} at y: $game->{hero}{y} ".

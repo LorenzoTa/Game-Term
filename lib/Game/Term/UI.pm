@@ -422,15 +422,26 @@ sub set_map_offsets{
 }
 sub draw_map{
 	my $ui = shift;
+	my @creatures = @_;
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
 	
 	# get area of currently seen tiles (by coords)
 	my %seen = $ui->illuminate();
 	
+	# goto LOOP needed to have multiple locals to work (thanks mst from irc)
+	my $index = 0;
+	LOOP:
+	local $ui->{map}[ $creatures[$index]->{y} ][ $creatures[$index]->{x} ][0] 
+		= 
+	color_names_to_ANSI($creatures[$index]->{color}).$creatures[$index]->{icon}.RESET;
+	$index++; 
+	goto LOOP if $index < $#creatures;
+ 	
 	# draw hero
 	# this must set $hero->{on_terrain}
 	local $ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
+	
 	
 	# TITLE AREA:
 	# print decoration first row
