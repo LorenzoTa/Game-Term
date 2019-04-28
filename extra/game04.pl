@@ -14,8 +14,13 @@ use Game::Term::Actor::Hero;
 # $scenario->set_hero_position( $ARGV[0] // 'south11' );
 
 # OR scenario with custom fake map
-my $scenario = Game::Term::Scenario->new( map=> Game::Term::Map->new(fake_map=>'one')->{data} );
-$scenario->{name} ='Test Scenario 1';
+my $scenario = Game::Term::Scenario->new( 
+				map=> Game::Term::Map->new(fake_map=>'one')->{data},
+				name => 'Test Scenario 1',
+				creatures => [
+					Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
+				]);
+
 $scenario->set_hero_position( $ARGV[0] // 'south38' );
 
 # my $scenario = Game::Term::Scenario->new( map=> Game::Term::Map->new(fake_map=>'small')->{data} );
@@ -37,7 +42,7 @@ my $game=Game::Term::Game->new(
 								#map => $scenario->{map},
 								scenario => $scenario,
 								hero	=> $hero,
-								actors	=> [],
+								#actors	=> [],
 							);
 # use YAML qw(Dump DumpFile LoadFile);
 # DumpFile('game.yaml',$game);							
