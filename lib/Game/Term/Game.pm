@@ -115,15 +115,8 @@ sub play{
 						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} - 2 
 							if $game->{ui}->{hero_terrain} eq 'wood';
 						
-						# place creatures
-						# foreach my $creature (@{$game->{actors}}){
-							# print "DEBUG: creature $creature->{name} at ".
-									# "$creature->{y} $creature->{x}\n" if $debug;
-							# $game->{ui}->{map}->[ $creature->{y} ][ $creature->{x} ][0]
-									# =
-								  # "\e[38;5;9mo\e[0m",'o',0;
-						# }
-						# draw screen
+						
+						# draw screen (passing creatures)
 						$game->{ui}->draw_map(  @{$game->{actors}}  );
 						$game->{ui}->draw_menu( 
 							[	"walk with WASD or : to enter command mode",
@@ -138,9 +131,20 @@ sub play{
 				elsif( $actor->{energy} >= 10 ){
 						print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n" if $debug;
 					
-						# $actor->automove() if $actor->can('automove');
-						# $game->{ui}->draw_map(); ??
-						$actor->{energy} -= 10;					
+						my $newpos = $actor->automove() if $actor->can('automove');
+						if(	
+							$newpos and 
+							$$newpos[0] >= 0 and 
+							$$newpos[0] <= $#{$game->{ui}->{map}} and
+							$$newpos[1] >= 0 and
+							$$newpos[1] <= $#{$game->{ui}->{map}[0]}
+						){
+							$actor->{y} = $$newpos[0];
+							$actor->{x} = $$newpos[1];
+							$game->{ui}->draw_map(  @{$game->{actors}}  );
+							$actor->{energy} -= 10;	
+						}
+										
 										
 				}
 				# CANNOT MOVE

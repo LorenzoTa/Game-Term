@@ -35,6 +35,16 @@ sub validate_conf{
 	return %params;
 }
 
+sub automove{
+	my $self = shift;
+	
+	return(
+					[$self->{y}+1,$self->{x}],
+					[$self->{y}-1,$self->{x}],
+					[$self->{y},$self->{x}+1],
+					[$self->{y},$self->{x}-1])[int( rand(3) )];
+
+}
 
 1;
 __DATA__
