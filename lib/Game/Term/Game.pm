@@ -70,7 +70,7 @@ sub play{
 		if ($game->{ui}->{mode} and $game->{ui}->{mode} eq 'command' ){
 			my @usr_cmd = $game->{ui}->get_user_command();
 			next unless @usr_cmd;
-			print "in Game.pm 'command' received: [@usr_cmd]\n";
+			print "in Game.pm 'command' received: [@usr_cmd]\n" if $debug;
 			$game->commands(@usr_cmd);
 			next;
 		}
@@ -80,12 +80,13 @@ sub play{
 			foreach my $actor ( $game->{hero}, @{$game->{actors}} ){ 			
 				# ACTOR CAN MOVE
 				if ( $actor->{energy} >= 10 and $actor->isa('Game::Term::Actor::Hero') ){
-					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n";
+					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n"
+						 if $debug;
 					# PLAYER: GET USER COMMAND	
 						
 					my @usr_cmd = $game->{ui}->get_user_command();
 					next unless @usr_cmd; # ??? last ???
-					print "in Game.pm 'map' received: [@usr_cmd]\n";
+					print "in Game.pm 'map' received: [@usr_cmd]\n" if $debug;
 					
 					if ($usr_cmd[0] eq ':'){
 						$game->{ui}->{mode} = 'command';
@@ -107,13 +108,18 @@ sub play{
 						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} - 2 
 							if $game->{ui}->{hero_terrain} eq 'wood';
 						$game->{ui}->draw_map();
+						$game->{ui}->draw_menu( 
+							[	"walk with WASD or : to enter command mode",
+								"$game->{hero}{name} at y: $game->{hero}{y} ".
+								"x: $game->{hero}{x} ($game->{hero}{on_tile})",] 
+						);	
 						$actor->{energy} -= 10;
 					}
 					
 				}	
 				# NPC: AUTOMOVE
 				elsif( $actor->{energy} >= 10 ){
-						print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n";
+						print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n" if $debug;
 					
 						# $actor->automove() if $actor->can('automove');
 						# $game->{ui}->draw_map(); ??
@@ -123,7 +129,7 @@ sub play{
 				# CANNOT MOVE
 				else{
 					$actor->{energy} += $actor->{energy_gain};
-					print __PACKAGE__," DEBUG '$actor->{name}' ends with energy $actor->{energy}\n";
+					print __PACKAGE__," DEBUG '$actor->{name}' ends with energy $actor->{energy}\n" if $debug;
 				}
 			
 			}

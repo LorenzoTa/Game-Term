@@ -30,7 +30,8 @@ my %commands =(
 					#$obj->show();
 					# $obj->draw_map();
 					# $obj->draw_menu(["hero HP: 42","walk with WASD or : to enter command mode"]);
-					return;
+					$obj->draw_map();
+					return ;
 	},
 	show_legenda => sub{ my $obj = shift; 
 					print "to be implemented\n";
