@@ -37,12 +37,12 @@ sub validate_conf{
 
 sub automove{
 	my $self = shift;
-	
+	srand(time);#$self->{y}+$self->{x}
 	return(
 					[$self->{y}+1,$self->{x}],
 					[$self->{y}-1,$self->{x}],
 					[$self->{y},$self->{x}+1],
-					[$self->{y},$self->{x}-1])[int( rand(3) )];
+					[$self->{y},$self->{x}-1])[int( rand(4) )];
 
 }
 

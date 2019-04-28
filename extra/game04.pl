@@ -15,14 +15,16 @@ use Game::Term::Actor::Hero;
 
 # OR scenario with custom fake map
 my $scenario = Game::Term::Scenario->new( 
-				map=> Game::Term::Map->new(fake_map=>'one')->{data},
+				map=> Game::Term::Map->new(fake_map=>'render')->{data},
 				name => 'Test Scenario 2',
 				creatures => [
 					Game::Term::Actor->new(	
 											name=>'UNO',
-											y=>26,
-											x=>31,
-											energy_gain=>2),
+											#y=>26,
+											#x=>31,
+											y=>5,
+											x=>11,
+											energy_gain=>40),
 
 					#Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
 					
