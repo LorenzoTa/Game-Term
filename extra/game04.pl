@@ -23,8 +23,8 @@ my $scenario = Game::Term::Scenario->new(
 											#y=>26,
 											#x=>31,
 											y=>5,
-											x=>11,
-											energy_gain=>40),
+											x=>5,
+											energy_gain=>400),
 
 					#Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
 					
@@ -42,7 +42,7 @@ my $conf = Game::Term::Configuration->new();
 my $hero = Game::Term::Actor::Hero->new( name => 'My New Hero' );
 
 my $game=Game::Term::Game->new( 
-								debug=>0, 
+								debug=>1, 
 								configuration => $conf, 
 								#map => $scenario->{map},
 								scenario => $scenario,

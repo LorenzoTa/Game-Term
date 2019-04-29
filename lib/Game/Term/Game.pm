@@ -142,7 +142,8 @@ sub play{
 							$actor->{y} = $$newpos[0];
 							$actor->{x} = $$newpos[1];
 							$game->{ui}->draw_map(  @{$game->{actors}}  );
-							$actor->{energy} -= 10;	
+							$actor->{energy} -= 10;
+							print "$actor->{name} at y: $actor->{y} / 0-$#{$game->{ui}->{map}} x: $actor->{x} / $#{$game->{ui}->{map}[0]}\n";
 						}
 										
 										
