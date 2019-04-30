@@ -125,7 +125,8 @@ sub play{
 						);	
 						$actor->{energy} -= 10;
 					}
-					
+					# NO movement 
+					else{print "DEBUG: no hero move\n"; redo}
 				}	
 				# NPC: AUTOMOVE
 				elsif( $actor->{energy} >= 10 ){
@@ -348,6 +349,7 @@ sub commands{
 		},
 	);
 	if( $table{$cmd} and exists $table{$cmd} ){ $table{$cmd}->(@args) }
+	else{return 0};
 }
 
 
