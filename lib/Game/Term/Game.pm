@@ -138,14 +138,22 @@ sub play{
 							$$newpos[0] >= 0 and 
 							$$newpos[0] <= $#{$game->{ui}->{map}} and
 							$$newpos[1] >= 0 and
-							$$newpos[1] <= $#{$game->{ui}->{map}[0]}
+							$$newpos[1] <= $#{$game->{ui}->{map}[0]} and
+							$game->is_walkable(
+								$game->{ui}->{map}->[ $$newpos[0] ]
+													[ $$newpos[1] ]
+							)
 						){
 							$actor->{y} = $$newpos[0];
 							$actor->{x} = $$newpos[1];
-							$game->{ui}->draw_map(  @{$game->{actors}}  );
-							$actor->{energy} -= 10;	
+							#$game->{ui}->draw_map(  @{$game->{actors}}  );
+							$actor->{energy} -= 10;
+							print "$actor->{name} at y: $actor->{y} / 0-$#{$game->{ui}->{map}} x: $actor->{x} / $#{$game->{ui}->{map}[0]}\n";
 						}
-										
+						# NO ACTOR movement 
+						else{	#print "DEBUG: no actor movement\n"; 
+								redo;
+						}				
 										
 				}
 				# CANNOT MOVE
