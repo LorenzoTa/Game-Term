@@ -131,10 +131,11 @@ sub play{
 				# NPC: AUTOMOVE
 				elsif( $actor->{energy} >= 10 ){
 						print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n" if $debug;
-					
-						#my $newpos = $actor->automove() if $actor->can('automove');
+						# MOVE receives:
 						my $newpos = $actor->move(
+							# 1) hero position
 							[$game->{hero}{y} , $game->{hero}{x}],
+							# 2) and only valid tiles
 							[
 								grep {
 										$$_[0] >= 0 and 
@@ -151,28 +152,18 @@ sub play{
 									[ $actor->{y} ,$actor->{x} + 1]
 							]
 						) if $actor->can('move');
-						# if(	
-							# $newpos and 
-							# $$newpos[0] >= 0 and 
-							# $$newpos[0] <= $#{$game->{ui}->{map}} and
-							# $$newpos[1] >= 0 and
-							# $$newpos[1] <= $#{$game->{ui}->{map}[0]} and
-							# $game->is_walkable(
-								# $game->{ui}->{map}->[ $$newpos[0] ]
-													# [ $$newpos[1] ]
-							# )
-						# ){
-							$actor->{y} = $$newpos[0];
-							$actor->{x} = $$newpos[1];
-							#$game->{ui}->draw_map(  @{$game->{actors}}  );
-							$actor->{energy} -= 10;
-							print "$actor->{name} at y: $actor->{y} / 0-$#{$game->{ui}->{map}} x: $actor->{x} / 0-$#{$game->{ui}->{map}[0]}\n";
-						# }
-						# # NO ACTOR movement 
-						# else{	#print "DEBUG: no actor movement\n"; 
-								# redo;
-						# }				
-										
+						
+						$actor->{y} = $$newpos[0];
+						$actor->{x} = $$newpos[1];
+						# DRAW MAP only if actor is in sight range
+						my %visible = $game->{ui}->illuminate();
+						if ( exists $visible{ $actor->{y}.'_'.$actor->{x} } ){
+							print "$actor->{name} in SIGHT!!\n" if $debug;
+							$game->{ui}->draw_map(  @{$game->{actors}}  );
+						}
+						$actor->{energy} -= 10;
+						print "$actor->{name} at y: $actor->{y} / 0-$#{$game->{ui}->{map}} x: $actor->{x} / 0-$#{$game->{ui}->{map}[0]}\n" if $debug;
+									
 				}
 				# CANNOT MOVE
 				else{
@@ -222,7 +213,7 @@ sub playORIGINAL{
 sub is_walkable{
 	my $game = shift;
 	# ~ copied from UI
-	my $tile = shift; use Data::Dump; dd 'TILE',$tile;
+	my $tile = shift; #use Data::Dump; dd 'TILE',$tile;
 	if ( $game->{configuration}->{terrains}{ $tile->[1] }->[4] < 5 ){ return 1}
 	else{return 0}
 }
