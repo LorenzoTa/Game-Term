@@ -132,28 +132,46 @@ sub play{
 				elsif( $actor->{energy} >= 10 ){
 						print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n" if $debug;
 					
-						my $newpos = $actor->automove() if $actor->can('automove');
-						if(	
-							$newpos and 
-							$$newpos[0] >= 0 and 
-							$$newpos[0] <= $#{$game->{ui}->{map}} and
-							$$newpos[1] >= 0 and
-							$$newpos[1] <= $#{$game->{ui}->{map}[0]} and
-							$game->is_walkable(
-								$game->{ui}->{map}->[ $$newpos[0] ]
-													[ $$newpos[1] ]
-							)
-						){
+						#my $newpos = $actor->automove() if $actor->can('automove');
+						my $newpos = $actor->move(
+							[$game->{hero}{y} , $game->{hero}{x}],
+							[
+								grep {
+										$$_[0] >= 0 and 
+										$$_[0] <= $#{$game->{ui}->{map}} and
+										$$_[1] >= 0 and
+										$$_[1] <= $#{$game->{ui}->{map}[0]} and
+										$game->is_walkable($game->{ui}->{map}->[ $$_[0] ]
+													 [ $$_[1] ]) 
+										
+									} 
+									[ $actor->{y} - 1, $actor->{x} ],
+									[ $actor->{y} + 1, $actor->{x} ],
+									[ $actor->{y} , $actor->{x} - 1],
+									[ $actor->{y} ,$actor->{x} + 1]
+							]
+						) if $actor->can('move');
+						# if(	
+							# $newpos and 
+							# $$newpos[0] >= 0 and 
+							# $$newpos[0] <= $#{$game->{ui}->{map}} and
+							# $$newpos[1] >= 0 and
+							# $$newpos[1] <= $#{$game->{ui}->{map}[0]} and
+							# $game->is_walkable(
+								# $game->{ui}->{map}->[ $$newpos[0] ]
+													# [ $$newpos[1] ]
+							# )
+						# ){
 							$actor->{y} = $$newpos[0];
 							$actor->{x} = $$newpos[1];
 							#$game->{ui}->draw_map(  @{$game->{actors}}  );
 							$actor->{energy} -= 10;
-							print "$actor->{name} at y: $actor->{y} / 0-$#{$game->{ui}->{map}} x: $actor->{x} / $#{$game->{ui}->{map}[0]}\n";
-						}
-						# NO ACTOR movement 
-						else{	#print "DEBUG: no actor movement\n"; 
-								redo;
-						}				
+							print "$actor->{name} at y: $actor->{y} / 0-$#{$game->{ui}->{map}} x: $actor->{x} / 0-$#{$game->{ui}->{map}[0]}\n";
+						# }
+						# # NO ACTOR movement 
+						# else{	#print "DEBUG: no actor movement\n"; 
+								# redo;
+						# }				
 										
 				}
 				# CANNOT MOVE
@@ -204,7 +222,7 @@ sub playORIGINAL{
 sub is_walkable{
 	my $game = shift;
 	# ~ copied from UI
-	my $tile = shift; 
+	my $tile = shift; use Data::Dump; dd 'TILE',$tile;
 	if ( $game->{configuration}->{terrains}{ $tile->[1] }->[4] < 5 ){ return 1}
 	else{return 0}
 }

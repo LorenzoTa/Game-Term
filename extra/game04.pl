@@ -15,7 +15,7 @@ use Game::Term::Actor::Hero;
 
 # OR scenario with custom fake map
 my $scenario = Game::Term::Scenario->new( 
-				map=> Game::Term::Map->new(fake_map=>'one')->{data},
+				map=> Game::Term::Map->new(fake_map=>'render')->{data},
 				name => 'Test Scenario 2',
 				creatures => [
 					Game::Term::Actor->new(	

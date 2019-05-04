@@ -35,6 +35,17 @@ sub validate_conf{
 	return %params;
 }
 
+sub move{
+	my $self = shift;
+	my $hero_pos = shift; 			# [y,x] of hero
+	my $available_moves = shift; 	# [[y0,x0],[y1,x1]...]
+	use Data::Dump; dd $available_moves;
+	print "DEBUG: actor move received: hero at $$hero_pos[0]-$$hero_pos[1]\n".
+			"available tiles: ", (join' ',map{ join'-',$$_[0],$$_[1] }@{$available_moves}),"\n";
+	return $available_moves->[ int(rand($#{$available_moves}))];
+}
+
+
 sub automove{
 	my $self = shift;
 	srand( time + $self->{y} * $self->{x} );#$self->{y}+$self->{x}
