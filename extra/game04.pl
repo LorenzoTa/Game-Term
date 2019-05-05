@@ -48,7 +48,7 @@ my $conf = Game::Term::Configuration->new();
 my $hero = Game::Term::Actor::Hero->new( name => 'My New Hero' );
 
 my $game=Game::Term::Game->new( 
-								debug=>0, 
+								debug=>0,  # NO bug
 								configuration => $conf, 
 								#map => $scenario->{map},
 								scenario => $scenario,
