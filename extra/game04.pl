@@ -31,7 +31,7 @@ my $scenario = Game::Term::Scenario->new(
 											energy_gain=>4),
 
 					Game::Term::Actor->new(name=>'DUE',y=>28, x=>41,energy_gain=>2),
-					#Game::Term::Actor->new(name=>'TRE',x=>26, y=>32,energy_gain=>2),
+					Game::Term::Actor->new(name=>'TRE',y=>28, x=>51,energy_gain=>2),
 					#Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
 					
 				]);

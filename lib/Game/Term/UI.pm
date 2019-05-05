@@ -435,7 +435,7 @@ sub draw_map{
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
 	
-	# get area of currently seen tiles (by coords)
+	# get area of currently hero's seen tiles (by coords)
 	my %seen = $ui->illuminate();
 	
 	# goto LOOP needed to have multiple locals to work (thanks mst from irc)
@@ -446,7 +446,7 @@ sub draw_map{
 	color_names_to_ANSI($creatures[$index]->{color}).$creatures[$index]->{icon}.RESET
 	if @creatures;
 	$index++; 
-	goto LOOP if $index < $#creatures;
+	goto LOOP if $index <= $#creatures;
  	
 	# draw hero
 	# this must set $hero->{on_terrain}
