@@ -244,7 +244,7 @@ sub get_user_command{
 				# me NO
 				# $ui->$commands{$cmd}->();
 				# ME OK
-			#$commands{$cmd}->($ui,@args);
+				#$commands{$cmd}->($ui,@args);
 				# Corion NO
 				# my $method = $ui->can( $commands{$cmd} );
 				# return $ui->$method();

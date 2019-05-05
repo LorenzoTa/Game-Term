@@ -28,7 +28,7 @@ sub validate_conf{
 		y => 0.5, # wood 0.5 
 	};
 	$params{icon} = 'X';
-	$params{color} = 'Blue';
+	$params{color} = 'Fuchsia';
 	$params{on_tile} = ' ';
 	$params{x} //= undef;
 	$params{y} //= undef;
