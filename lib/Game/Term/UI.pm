@@ -245,13 +245,22 @@ sub get_user_command{
 				# $ui->$commands{$cmd}->();
 				# ME OK
 			#$commands{$cmd}->($ui,@args);
-				# Corion
+				# Corion NO
 				# my $method = $ui->can( $commands{$cmd} );
-				# $ui->$method();
-				# choroba
+				# return $ui->$method();
+				# <mst> because ->can only looks up methods by name
+				# <mst> my $method = $commands{$cmd}; $ui->$method() would work
+				# <mst> which is the long form version of $ui->${\$commands{$cmd}}()
+				# choroba # NO
 				#$ui->${\$commands{$cmd}}->();
-			#return;
-			return $commands{$cmd}->($ui,@args);
+				# <mst>the last -> is the error
+				# <mst>that's not how method calls in perl look
+				# <mst>that's calling the method, then trying to use the return value of the method as a subref
+				#
+				# integral and mst on irc
+				return  $ui->${\$commands{$cmd}}(@args)  #OK
+				# also OK 
+				#return $commands{$cmd}->($ui,@args);
 			}
 			else{return}
 		}	
