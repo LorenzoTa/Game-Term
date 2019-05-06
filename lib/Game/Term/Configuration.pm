@@ -90,13 +90,25 @@ sub new{
 		}
 		croak "loaded object is not a Game::Term::Configuration one!"
 					unless $conf->isa('Game::Term::Configuration');
+		
+		# DO what is said in the configuration loaded, but..
 		if ( $conf->{interface}{map_colors} == 2 ){
 			%{$conf->{terrains}} = terrains_2_colors();
 		}
 		elsif ( $conf->{interface}{map_colors} == 256 ){
 			%{$conf->{terrains}} = terrains_256_colors();
 		}
-		else{%{$conf->{terrains}} = terrains_16_colors()}		
+		else{%{$conf->{terrains}} = terrains_16_colors()}
+		
+		# OVEWRITE if specified during the intialization of the object
+		if ( $opts{map_colors} == 256 ){
+			%{$conf->{terrains}} = terrains_256_colors();
+		}
+		if ( $opts{map_colors} == 2 ){
+			%{$conf->{terrains}} = terrains_2_colors();
+			# also clear colors for interface colored elements
+			$opts{dec_color}=$opts{hero_color}='';
+		}
 		return $conf;
 	}
 	
