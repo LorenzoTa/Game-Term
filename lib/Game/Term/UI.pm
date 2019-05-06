@@ -444,7 +444,7 @@ sub draw_map{
 	local $ui->{map}[ $creatures[$index]->{y} ][ $creatures[$index]->{x} ][0] 
 		= 
 	color_names_to_ANSI($creatures[$index]->{color}).$creatures[$index]->{icon}.RESET
-	if @creatures;
+	if exists $seen{ $creatures[$index]->{y}.'_'.$creatures[$index]->{x} };
 	$index++; 
 	goto LOOP if $index <= $#creatures;
  	
