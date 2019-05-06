@@ -73,20 +73,20 @@ use Term::ANSIColor qw(RESET :constants :constants256);
 sub new{
 	my $class = shift;
 	
-	my %conf = validate_conf( @_ );
+	my %opts = validate_conf( @_ );
 	
-	$conf{from} //= './GameTermConfDefault.conf'; #use Data::Dump; dd %conf;exit;
+	$opts{from} //= './GameTermConfDefault.conf'; #use Data::Dump; dd %conf;exit;
 	# GameTermConf.conf or given file have precedence
-	if ( $conf{from} and -e -s -f -r $conf{from} ){
-		print "found '$conf{from}' loading this one\n";
+	if ( $opts{from} and -e -s -f -r $opts{from} ){
+		print "found '$opts{from}' loading this one\n";
 		my $conf;
 		{
 			local $@;
-			eval { $conf = LoadFile( $conf{from} ) };
+			eval { $conf = LoadFile( $opts{from} ) };
 			if ( $@ ){
 				croak "ERROR loading configuration!\n $@ $! $^E\n";
 			}
-			else{ print "configuration loaded from '$conf{from}'\n" }
+			else{ print "configuration loaded from '$opts{from}'\n" }
 		}
 		croak "loaded object is not a Game::Term::Configuration one!"
 					unless $conf->isa('Game::Term::Configuration');
@@ -105,24 +105,24 @@ sub new{
 	# import.. 
 	# manage palette
 	my %terrains;
-	if ( ! exists $conf{map_colors}  ){
+	if ( ! exists $opts{map_colors}  ){
 		%terrains = terrains_16_colors();
 	}
-	elsif ( $conf{map_colors} == 256 ){
+	elsif ( $opts{map_colors} == 256 ){
 		%terrains = terrains_256_colors();
 	}
-	elsif ( $conf{map_colors} == 16 ){
+	elsif ( $opts{map_colors} == 16 ){
 		%terrains = terrains_16_colors();
 	}
-	elsif ( $conf{map_colors} == 2 ){
+	elsif ( $opts{map_colors} == 2 ){
 		%terrains = terrains_2_colors();
 		# also clear colors for interface colored elements
-		$conf{dec_color}=$conf{hero_color}='';
+		$opts{dec_color}=$opts{hero_color}='';
 	}
 	else{ %terrains = terrains_16_colors(); }
 	
 	my $conf = bless {
-				interface => \%conf,
+				interface => \%opts,
 				terrains =>  \%terrains,
 	}, $class;
 	
