@@ -93,7 +93,7 @@ sub new{
 		if ( $conf->{interface}{map_colors} == 2 ){
 			%{$conf->{terrains}} = terrains_2_colors();
 		}
-		elsif ( $conf->{interface}{map_colors} == 252 ){
+		elsif ( $conf->{interface}{map_colors} == 256 ){
 			%{$conf->{terrains}} = terrains_256_colors();
 		}
 		else{%{$conf->{terrains}} = terrains_16_colors()}		
