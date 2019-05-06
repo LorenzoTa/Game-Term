@@ -4,7 +4,7 @@ use 5.014;
 use strict;
 use warnings;
 
-use YAML qw(Dump DumpFile LoadFile);
+use  YAML::XS qw(Dump DumpFile LoadFile);
 use Time::HiRes qw ( sleep );
 
 use Game::Term::Configuration;
@@ -39,7 +39,7 @@ sub new{
 	# check saved scenario data (creatures and map)!!
 	my @actors = @{$param{scenario}->{creatures}};
 	#use Data::Dump; dd $param{scenario};
-	$param{scenario}->{creatures} = undef;
+	#$param{scenario}->{creatures} = undef;
 	
 	return bless {
 				is_running => 1,
@@ -84,7 +84,9 @@ sub play{
 		# MAP
 		else{
 			# FOREACH HERO,ACTORS
-			foreach my $actor ( $game->{hero}, @{$game->{actors}} ){ 			
+			foreach my $actor ( $game->{hero}, @{$game->{actors}} ){
+				# undef actors were eliminated
+				next unless defined $actor;
 				# ACTOR CAN MOVE
 				if ( $actor->{energy} >= 10 and $actor->isa('Game::Term::Actor::Hero') ){
 					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n"
@@ -170,7 +172,15 @@ sub play{
 					$actor->{energy} += $actor->{energy_gain};
 					print __PACKAGE__," DEBUG '$actor->{name}' ends with energy $actor->{energy}\n" if $debug;
 				}
-			
+				# ENCOUNTER
+				if ( 
+						!$actor->isa('Game::Term::Actor::Hero') and 
+						$actor->{y} == $game->{hero}{y} and 
+						$actor->{x} == $game->{hero}{x}  
+				){
+					print "KABOOOOM\n";
+					undef $actor;
+				}
 			}
 		}
 	
