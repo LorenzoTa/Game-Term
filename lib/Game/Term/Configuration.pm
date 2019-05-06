@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-use YAML qw(Dump DumpFile LoadFile);
+use YAML::XS qw(Dump DumpFile LoadFile);
 use Term::ANSIColor qw(RESET :constants :constants256);
 
 # CLEAR           RESET             BOLD            DARK
