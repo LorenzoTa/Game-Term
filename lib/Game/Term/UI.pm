@@ -9,7 +9,7 @@ use List::Util qw( max min );
 use Term::ANSIColor qw(RESET :constants :constants256);
 use Time::HiRes qw ( sleep );
 use Carp;
-use YAML qw(Dump DumpFile LoadFile);
+use YAML::XS qw(Dump DumpFile LoadFile);
 
 use Game::Term::Configuration;
 use Game::Term::Map;
