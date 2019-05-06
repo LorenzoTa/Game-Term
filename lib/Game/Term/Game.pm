@@ -39,7 +39,7 @@ sub new{
 	# check saved scenario data (creatures and map)!!
 	my @actors = @{$param{scenario}->{creatures}};
 	#use Data::Dump; dd $param{scenario};
-	#$param{scenario}->{creatures} = undef;
+	$param{scenario}->{creatures} = undef;
 	
 	return bless {
 				is_running => 1,
