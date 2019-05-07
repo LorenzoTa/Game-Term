@@ -4,7 +4,7 @@ use 5.014;
 use strict;
 use warnings;
 
-use YAML qw(Dump DumpFile LoadFile);
+use  YAML::XS qw(Dump DumpFile LoadFile);
 use Time::HiRes qw ( sleep );
 
 use Game::Term::Configuration;
@@ -35,6 +35,12 @@ sub new{
 										
 										);
 	$param{scenario}->{map} = undef;
+	
+	# check saved scenario data (creatures and map)!!
+	my @actors = @{$param{scenario}->{creatures}};
+	#use Data::Dump; dd $param{scenario};
+	$param{scenario}->{creatures} = undef;
+	
 	return bless {
 				is_running => 1,
 				
@@ -46,8 +52,9 @@ sub new{
 				ui	=> $param{ui},
 				
 				hero => $param{hero},
-				actors	=> [ 
-							Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
+				actors	=> [
+							@actors
+							#Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
 							#Game::Term::Actor->new(name=>'DUE',energy_gain=>6) 
 							],
 				
@@ -70,22 +77,25 @@ sub play{
 		if ($game->{ui}->{mode} and $game->{ui}->{mode} eq 'command' ){
 			my @usr_cmd = $game->{ui}->get_user_command();
 			next unless @usr_cmd;
-			print "in Game.pm 'command' received: [@usr_cmd]\n";
+			print "in Game.pm 'command' received: [@usr_cmd]\n" if $debug;
 			$game->commands(@usr_cmd);
 			next;
 		}
 		# MAP
 		else{
 			# FOREACH HERO,ACTORS
-			foreach my $actor ( $game->{hero}, @{$game->{actors}} ){ 			
+			foreach my $actor ( $game->{hero}, @{$game->{actors}} ){
+				# undef actors were eliminated
+				next unless defined $actor;
 				# ACTOR CAN MOVE
 				if ( $actor->{energy} >= 10 and $actor->isa('Game::Term::Actor::Hero') ){
-					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n";
+					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n"
+						 if $debug;
 					# PLAYER: GET USER COMMAND	
 						
 					my @usr_cmd = $game->{ui}->get_user_command();
 					next unless @usr_cmd; # ??? last ???
-					print "in Game.pm 'map' received: [@usr_cmd]\n";
+					print "in Game.pm 'map' received: [@usr_cmd]\n" if $debug;
 					
 					if ($usr_cmd[0] eq ':'){
 						$game->{ui}->{mode} = 'command';
@@ -99,33 +109,78 @@ sub play{
 							# the hero currently is on the map
 							$game->{configuration}->{terrains}->{$game->{ui}->{map}->[ $game->{hero}->{y} ][ $game->{hero}->{x} ]->[1]}->[4]
 						);
-					
+						# sigth modifications
 						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} + 2 
 							if $game->{ui}->{hero_terrain} eq 'hill';
 						local $game->{ui}->{hero_sight}  = $game->{ui}->{hero_sight} + 4 
 							if $game->{ui}->{hero_terrain} eq 'mountain';
 						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} - 2 
 							if $game->{ui}->{hero_terrain} eq 'wood';
-						$game->{ui}->draw_map();
+						
+						
+						# draw screen (passing creatures)
+						$game->{ui}->draw_map(  @{$game->{actors}}  );
+						$game->{ui}->draw_menu( 
+							[	"walk with WASD or : to enter command mode",
+								"$game->{hero}{name} at y: $game->{hero}{y} ".
+								"x: $game->{hero}{x} ($game->{hero}{on_tile})",] 
+						);	
 						$actor->{energy} -= 10;
 					}
-					
+					# NO movement 
+					else{print "DEBUG: no hero move\n"; redo}
 				}	
 				# NPC: AUTOMOVE
 				elsif( $actor->{energy} >= 10 ){
-						print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n";
-					
-						# $actor->automove() if $actor->can('automove');
-						# $game->{ui}->draw_map(); ??
-						$actor->{energy} -= 10;					
+						print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n" if $debug;
+						# MOVE receives:
+						my $newpos = $actor->move(
+							# 1) hero position
+							[$game->{hero}{y} , $game->{hero}{x}],
+							# 2) and only valid tiles
+							[
+								grep {
+										$$_[0] >= 0 and 
+										$$_[0] <= $#{$game->{ui}->{map}} and
+										$$_[1] >= 0 and
+										$$_[1] <= $#{$game->{ui}->{map}[0]} and
+										$game->is_walkable($game->{ui}->{map}->[ $$_[0] ]
+													 [ $$_[1] ]) 
 										
+									} 
+									[ $actor->{y} - 1, $actor->{x} ],
+									[ $actor->{y} + 1, $actor->{x} ],
+									[ $actor->{y} , $actor->{x} - 1],
+									[ $actor->{y} ,$actor->{x} + 1]
+							]
+						) if $actor->can('move');
+						
+						$actor->{y} = $$newpos[0];
+						$actor->{x} = $$newpos[1];
+						# DRAW MAP only if actor is in sight range
+						my %visible = $game->{ui}->illuminate();
+						if ( exists $visible{ $actor->{y}.'_'.$actor->{x} } ){
+							print "$actor->{name} in SIGHT!!\n" if $debug;
+							$game->{ui}->draw_map(  @{$game->{actors}}  );
+						}
+						$actor->{energy} -= 10;
+						print "$actor->{name} at y: $actor->{y} / 0-$#{$game->{ui}->{map}} x: $actor->{x} / 0-$#{$game->{ui}->{map}[0]}\n" if $debug;
+									
 				}
 				# CANNOT MOVE
 				else{
 					$actor->{energy} += $actor->{energy_gain};
-					print __PACKAGE__," DEBUG '$actor->{name}' ends with energy $actor->{energy}\n";
+					print __PACKAGE__," DEBUG '$actor->{name}' ends with energy $actor->{energy}\n" if $debug;
 				}
-			
+				# ENCOUNTER
+				if ( 
+						!$actor->isa('Game::Term::Actor::Hero') and 
+						$actor->{y} == $game->{hero}{y} and 
+						$actor->{x} == $game->{hero}{x}  
+				){
+					print "KABOOOOM\n";
+					undef $actor;
+				}
 			}
 		}
 	
@@ -168,7 +223,7 @@ sub playORIGINAL{
 sub is_walkable{
 	my $game = shift;
 	# ~ copied from UI
-	my $tile = shift; 
+	my $tile = shift; #use Data::Dump; dd 'TILE',$tile;
 	if ( $game->{configuration}->{terrains}{ $tile->[1] }->[4] < 5 ){ return 1}
 	else{return 0}
 }
@@ -321,6 +376,7 @@ sub commands{
 		},
 	);
 	if( $table{$cmd} and exists $table{$cmd} ){ $table{$cmd}->(@args) }
+	else{return 0};
 }
 
 

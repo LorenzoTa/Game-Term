@@ -9,7 +9,7 @@ use List::Util qw( max min );
 use Term::ANSIColor qw(RESET :constants :constants256);
 use Time::HiRes qw ( sleep );
 use Carp;
-use YAML qw(Dump DumpFile LoadFile);
+use YAML::XS qw(Dump DumpFile LoadFile);
 
 use Game::Term::Configuration;
 use Game::Term::Map;
@@ -30,7 +30,8 @@ my %commands =(
 					#$obj->show();
 					# $obj->draw_map();
 					# $obj->draw_menu(["hero HP: 42","walk with WASD or : to enter command mode"]);
-					return;
+					$obj->draw_map();
+					return ;
 	},
 	show_legenda => sub{ my $obj = shift; 
 					print "to be implemented\n";
@@ -243,14 +244,23 @@ sub get_user_command{
 				# me NO
 				# $ui->$commands{$cmd}->();
 				# ME OK
-			#$commands{$cmd}->($ui,@args);
-				# Corion
+				#$commands{$cmd}->($ui,@args);
+				# Corion NO
 				# my $method = $ui->can( $commands{$cmd} );
-				# $ui->$method();
-				# choroba
+				# return $ui->$method();
+				# <mst> because ->can only looks up methods by name
+				# <mst> my $method = $commands{$cmd}; $ui->$method() would work
+				# <mst> which is the long form version of $ui->${\$commands{$cmd}}()
+				# choroba # NO
 				#$ui->${\$commands{$cmd}}->();
-			#return;
-			return $commands{$cmd}->($ui,@args);
+				# <mst>the last -> is the error
+				# <mst>that's not how method calls in perl look
+				# <mst>that's calling the method, then trying to use the return value of the method as a subref
+				#
+				# integral and mst on irc
+				return  $ui->${\$commands{$cmd}}(@args)  #OK
+				# also OK 
+				#return $commands{$cmd}->($ui,@args);
 			}
 			else{return}
 		}	
@@ -421,15 +431,27 @@ sub set_map_offsets{
 }
 sub draw_map{
 	my $ui = shift;
+	my @creatures = @_;
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
 	
-	# get area of currently seen tiles (by coords)
+	# get area of currently hero's seen tiles (by coords)
 	my %seen = $ui->illuminate();
 	
+	# goto LOOP needed to have multiple locals to work (thanks mst from irc)
+	my $index = 0;
+	LOOP:
+	local $ui->{map}[ $creatures[$index]->{y} ][ $creatures[$index]->{x} ][0] 
+		= 
+	color_names_to_ANSI($creatures[$index]->{color}).$creatures[$index]->{icon}.RESET
+	if $creatures[$index] and exists $seen{ $creatures[$index]->{y}.'_'.$creatures[$index]->{x} };
+	$index++; 
+	goto LOOP if $index <= $#creatures;
+ 	
 	# draw hero
 	# this must set $hero->{on_terrain}
 	local $ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
+	
 	
 	# TITLE AREA:
 	# print decoration first row
