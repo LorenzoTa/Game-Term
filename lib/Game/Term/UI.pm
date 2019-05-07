@@ -38,29 +38,7 @@ my %commands =(
 					# $obj->draw_map();
 					# $obj->draw_menu(["hero HP: 42","walk with WASD"]);
 	},
-	# dump_configuration => sub{ my $obj = shift; 
-					# #print STDERR Dump %terrain;
-					# #use Data::Dump; dd $obj->{configuration};
-					# my $conf = Game::Term::Configuration->new();
-					# print Dump $conf;
-					
-	# },
-	# save_configuration => sub{ my $obj = shift;
-					# my $filepath = shift;
-					# unless ($filepath){
-						# print "provide a file path to save the configuration\n";
-						# return;
-					# }
-					# my $conf = Game::Term::Configuration->new();
-					# {
-						# local $@;
-						# eval { DumpFile($filepath, $conf) };
-						# if ( $@ ){
-							# print "ERROR saving configuration!\n $@ $! $^E\n";
-						# }
-						# else{ print "configuration saved to $filepath\n" }
-					# }					
-	# },
+	
 	load_configuration => sub{ my $obj = shift;
 					my $filepath = shift;
 					unless ($filepath){
@@ -76,12 +54,7 @@ my %commands =(
 					# local $obj->{map} = [$obj->{map}[0][0]];
 					# use Data::Dump; dd $obj;#exit;
 	},
-	# dump_ui => sub{
-		# my $obj = shift;
-		# local $obj->{map} = [$obj->{map}[0][0]];
-		# use Data::Dump; dd $obj;#exit;
-	# },
-	
+		
 	# COMMAND EXECUTED BY GAME (returned to game as strings)
 	save => sub {
 			my ($ui, @args) = @_;
@@ -274,134 +247,8 @@ sub get_user_command{
 			#else{return}
 		}
 		
-		########################################
-		# NO MORE..
-		# ReadMode 'cbreak';
-		# my $key = ReadKey(0);
-			
-		# sleep(	
-				# $ui->{hero_slowness} + 
-				# # the slowness #4 of the terrain original letter #1 where
-				# # the hero currently is on th emap
-				# $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]
-		# );
-		# print "DEBUG: slowness for terrain ".
-			# $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
-			# "\n" if $debug;
 		
-		# if( $ui->move( $key ) ){
-			# local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
-			# local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
-			# local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'wood';
-			
-			# # CHECK EVENT??????
-	
-			# $ui->draw_map();
-			
-			# if ($noscroll_debug){
-				 # $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+','+',1];
-				 # $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+','+',1];
-				 
-				 # print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
-						# "NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
-						# "$ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n";
-				 # print "OFF_Y used in print: $ui->{map_off_y} .. $ui->{map_off_y} + $ui->{map_area_h}\n";
-				 # print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
-			# }
-		
-			# $ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
-							# "( $ui->{hero_terrain} ) sight: $ui->{hero_sight} ".
-							# "slowness: ".
-							# ($ui->{hero_slowness} + 
-							# $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]),
-								# "key $key was pressed:"] );	
-
-		# }
-		
-		
-		# print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;		
 }
-
-
-
-# sub show{
-		# my $ui = shift;
-		# # COMMAND MODE
-		# if ( $ui->{mode} and $ui->{mode} eq 'command' ){
-			# # $ui->draw_map();
-			# # $ui->draw_menu(["command mode","use TAB to show available commands"]);
-			# ReadMode 'normal';
-			# my $line = $term->readline('>');
-			# #$|++;
-			# return unless $line;
-			# chomp $line;
-			
-			# $line=~s/\s+$//g;
-			
-			# #return $line;
-			
-			# my ($cmd,@args)= split /\s+/,$line;
-			# if ($commands{$cmd}){
-				# # me NO
-				# # $ui->$commands{$cmd}->();
-				# # ME OK
-			# #$commands{$cmd}->($ui,@args);
-				# # Corion
-				# # my $method = $ui->can( $commands{$cmd} );
-				# # $ui->$method();
-				# # choroba
-				# #$ui->${\$commands{$cmd}}->();
-				# #return; RETURN TO GAME->PLAY
-				# return $commands{$cmd}->($ui,@args);
-			# }
-			# else{return}
-		# }	
-		# # MAP MODE
-		# ReadMode 'cbreak';
-		# my $key = ReadKey(0);
-			
-		# sleep(	
-				# $ui->{hero_slowness} + 
-				# # the slowness #4 of the terrain original letter #1 where
-				# # the hero currently is on th emap
-				# $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]
-		# );
-		# print "DEBUG: slowness for terrain ".
-			# $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4].
-			# "\n" if $debug;
-		
-		# if( $ui->move( $key ) ){
-			# local $ui->{hero_sight} = $ui->{hero_sight} + 2 if $ui->{hero_terrain} eq 'hill';
-			# local $ui->{hero_sight} = $ui->{hero_sight} + 4 if $ui->{hero_terrain} eq 'mountain';
-			# local $ui->{hero_sight} = $ui->{hero_sight} - 2 if $ui->{hero_terrain} eq 'wood';
-			
-			# # CHECK EVENT??????
-	
-			# $ui->draw_map();
-			
-			# if ($noscroll_debug){
-				 # $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+','+',1];
-				 # $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+','+',1];
-				 
-				 # print 	"MAP SIZE: rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n",
-						# "NOSCROLL corners: $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
-						# "$ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n";
-				 # print "OFF_Y used in print: $ui->{map_off_y} .. $ui->{map_off_y} + $ui->{map_area_h}\n";
-				 # print "OFF_X used in print: ($ui->{map_off_x} + 1) .. ($ui->{map_off_x} + $ui->{map_area_w})\n";
-			# }
-		
-			# $ui->draw_menu( ["hero at: $ui->{hero_y}-$ui->{hero_x} ".
-							# "( $ui->{hero_terrain} ) sight: $ui->{hero_sight} ".
-							# "slowness: ".
-							# ($ui->{hero_slowness} + 
-							# $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]}->[4]),
-								# "key $key was pressed:"] );	
-
-		# }
-		
-		
-		# print "DEBUG: hero_x => $ui->{hero_x} hero_y $ui->{hero_y}\n" if $debug;		
-# }
 
 
 sub set_map_offsets{
@@ -533,88 +380,6 @@ sub draw_map{
 	
 }
 
-# sub move{
-	# my $ui = shift;
-	# my $key = shift;
-	
-	# # move with WASD
-	# # NORTH
-	# if ( 	$key eq 'w' 		and	
-			# # we are inside the real map
-			# $ui->{hero_y} > 0 	and
-			# is_walkable(
-				# # map coord as hero X - 1, hero Y
-				# $ui->{map}->[ $ui->{hero_y} - 1 ][	$ui->{hero_x} ]
-			# )
-					
-		# ){
-        # #									THIS must be set to $hero->{on_terrain}
-		# $ui->{hero_y}--;
-		# $ui->{map_off_y}-- if $ui->must_scroll();
-        # #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-		# $ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
-		# return 1;
-    # }
-	# # SOUTH
-	# elsif (	$key eq 's' 					and 
-			# # we are inside the real map
-			# $ui->{hero_y} < $#{$ui->{map}} 	and
-			# is_walkable(
-						# # map coord as hero X + 1, hero Y
-						# $ui->{map}->[ $ui->{hero_y} + 1 ][	$ui->{hero_x} ]
-						# )
-		# ){
-        # #									THIS must be set to $hero->{on_terrain}
-		# $ui->{hero_y}++;
-		# $ui->{map_off_y}++ if $ui->must_scroll();		
-        # #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-		# $ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
-		# return 1;
-    # }
-	# # WEST
-	# elsif ( $key eq 'a' 		and
-			# # we are inside the real map
-			# $ui->{hero_x} > 0 	and
-			# is_walkable(
-							# # map coord as hero X, hero Y - 1
-							# $ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} - 1 ]
-							# )
-		# ){
-        # #									THIS must be set to $hero->{on_terrain}
-		# $ui->{hero_x}--;
-		# $ui->{map_off_x}-- if $ui->must_scroll();		
-        # #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-		# $ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
-		# return 1;
-    # }
-	# # EAST
-	# elsif ( $key eq 'd' 						and
-			# # we are inside the real map
-			# $ui->{hero_x} < $#{$ui->{map}[0]} 	and
-			# is_walkable(
-							# # map coord as hero X, hero Y + 1
-							# $ui->{map}->[ $ui->{hero_y} ][	$ui->{hero_x} + 1 ]
-							# )
-		# ){
-        # #									THIS must be set to $hero->{on_terrain}
-		# $ui->{hero_x}++;
-		# $ui->{map_off_x}++ if $ui->must_scroll();				
-        # #                     el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-		# $ui->{hero_terrain} = $terrain{$ui->{map}->[ $ui->{hero_y} ][ $ui->{hero_x} ]->[1]  }->[0];
-		# return 1;
-    # }
-	# elsif( $key eq ':' ){ 
-			# $ui->{mode} = 'command'; 
-			# # $ui->draw_map();
-			# # $ui->draw_menu(["command mode","use TAB to show available commands"]);
-			# return 1;
-	# }
-	# else{
-		# print "DEBUG: no movement possible ([$key] was pressed)\n" if $debug;
-		# return 0;
-	# }
-	
-# }
 
 sub must_scroll{
 	my $ui = shift;
