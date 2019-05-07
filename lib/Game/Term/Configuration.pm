@@ -4,7 +4,7 @@ use 5.014;
 use strict;
 use warnings;
 use Carp;
-
+use File::Spec;
 use YAML::XS qw(Dump DumpFile LoadFile);
 use Term::ANSIColor qw(RESET :constants :constants256);
 
@@ -293,6 +293,8 @@ sub validate_conf{
 		croak "configuration 'colors' accepts 2, 16 or 256" 
 			unless $conf{map_colors} =~/^(2|16|256)$/;
 	}
+	$conf{game_dir} //= File::Spec->rel2abs('.');
+	$conf{game_dir} = File::Spec->rel2abs($conf{game_dir});
 	
 	$conf{mode} //= 'map';
 	
