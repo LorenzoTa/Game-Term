@@ -41,12 +41,12 @@ sub new{
 	#use Data::Dump; dd $param{scenario};
 	$param{scenario}->{creatures} = undef;
 	
-	return bless {
+	my $game = bless {
 				is_running => 1,
 				
 				configuration => $param{configuration} ,
 				
-				scenario => $param{scenario},
+				# scenario => $param{scenario}, ### ??????
 				current_scenario => $param{scenario}->{name},
 				
 				ui	=> $param{ui},
@@ -56,7 +56,17 @@ sub new{
 				
 				
 	}, $class;
+	# load and overwrite info about hero and current scenario(map,creatures,..)from gamestate.sto
+	$game->get_game_state();
+	
+	return $game;
 }
+
+
+sub get_game_state{
+	my $game = shift;
+}
+
 
 sub play{
 	my $game = shift;
