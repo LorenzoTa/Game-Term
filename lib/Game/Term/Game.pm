@@ -71,10 +71,28 @@ sub get_game_state{
 						$game->{configuration}{interface}{game_dir},
 						'GameState.sto' 
 	);
-	print "DEBUG: game state file expected at $state_file\n" if $debug;
-	
-	unless ( -e -r -s -f $state_file ){
+	print "DEBUG: assuming game state file at $state_file\n" if $debug;
+	# global state of the game with hero and seen scenario informations:
+	# %game_state = ( hero=> x, scn1=>(map,creature..), scn2=> ...
+	my $game_state;
+	# check for its content
+	if ( -e -r -s -f $state_file ){
+		$game_state = retrieve( $state_file );
+		#LOAD hero
+		$game->{hero} = $$game_state->{hero};
+		# reset hero's unneeded fields
+		$game->{hero}{y} = undef;
+		$game->{hero}{x} = undef;
+		$game->{hero}{on_tile} = undef;
+		$game->{hero}{energy} = 0;
+		use Data::Dump; dd $game->{hero};
+	}
+	# GameState.sto does not exists
+	else {
 		print "DEBUG: $state_file not found\n" if $debug;
+		# create with just hero inside
+		$game_state = { hero => $game->{hero} };
+		die unless store ( \$game_state, $state_file );
 	}
 	
 	
