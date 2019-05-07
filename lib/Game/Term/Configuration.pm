@@ -75,7 +75,7 @@ sub new{
 	
 	my %opts = validate_conf( @_ );
 	
-	$opts{from} //= './GameTermConfDefault.conf'; #use Data::Dump; dd %conf;exit;
+	$opts{from} //= File::Spec->rel2abs('./GameTermConfDefault.conf'); #use Data::Dump; dd %conf;exit;
 	# GameTermConf.conf or given file have precedence
 	if ( $opts{from} and -e -s -f -r $opts{from} ){
 		print "found '$opts{from}' loading this one\n";
