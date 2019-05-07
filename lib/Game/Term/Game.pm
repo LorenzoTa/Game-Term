@@ -4,7 +4,9 @@ use 5.014;
 use strict;
 use warnings;
 
-use  YAML::XS qw(Dump DumpFile LoadFile);
+use File::Spec;
+use YAML::XS qw(Dump DumpFile LoadFile);
+use Storable qw(store retrieve);
 use Time::HiRes qw ( sleep );
 
 use Game::Term::Configuration;
@@ -65,6 +67,18 @@ sub new{
 
 sub get_game_state{
 	my $game = shift;
+	my $state_file = File::Spec->catfile( 
+						$game->{configuration}{interface}{game_dir},
+						'GameState.sto' 
+	);
+	print "DEBUG: game state file expected at $state_file\n" if $debug;
+	
+	unless ( -e -r -s -f $state_file ){
+		print "DEBUG: $state_file not found\n" if $debug;
+	}
+	
+	
+	
 }
 
 
