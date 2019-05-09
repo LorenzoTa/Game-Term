@@ -95,9 +95,7 @@ sub get_game_state{
 		}
 		else{
 			print "DEBUG: no data of '$game->{current_scenario}' in $state_file\n" if $debug;
-		}
-		
-		
+		}		
 	}
 	# GameState.sto does not exists
 	else {
@@ -111,7 +109,33 @@ sub get_game_state{
 	
 }
 
-
+sub save_game_state{
+	my $game = shift;
+	my $game_state;
+	# check for its content
+	if ( -e -r -s -f $state_file ){
+		$game_state = retrieve( $state_file ) 
+			or die "Unable to retrieve previous game state from $state_file";
+		print "DEBUG: succesfully retrieved previous game state from $state_file\n" if $debug;	
+	}
+	# GameState.sto does not exists
+	else {
+		print "DEBUG: $state_file not found: a new one will be created\n" if $debug;
+	}
+	# populate GameState.sto with the structure
+	$game_state = { 
+					hero => $game->{hero},
+					$game->{current_scenario} => {
+						map 		=> $game->{ui}->{map},
+						creatures 	=> $game->{actors},
+					},
+	};
+	
+	die unless store ( \$game_state, $state_file );
+	
+	DumpFile( $state_file.'.yaml', $game_state ) if $debug;
+	
+}
 sub play{
 	my $game = shift;
 	#INIT
