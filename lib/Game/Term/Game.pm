@@ -79,6 +79,7 @@ sub get_game_state{
 	if ( -e -r -s -f $state_file ){
 		$game_state = retrieve( $state_file ) 
 			or die "Unable to retrieve game state from $state_file";
+		# use Data::Dump; dd $game_state if $debug;
 		# LOAD hero
 		$game->{hero} = $$game_state->{hero};
 		# reset hero's unneeded fields
@@ -87,11 +88,16 @@ sub get_game_state{
 		$game->{hero}{on_tile} = undef;
 		$game->{hero}{energy} = 0;
 		print "DEBUG: loaded HERO from $state_file\n" if $debug;
-		use Data::Dump; dd $game->{hero} if $debug;
+		#use Data::Dump; dd $game_state if $debug;
 		
 		# eventually LOAD data of the current scenario
 		if(	$$game_state->{ $game->{current_scenario} } ){
-			print "DEBUG: loaded data of '$game->{current_scenario}' from $state_file\n" if $debug;
+			print "DEBUG: loaded data of '$game->{current_scenario}' from $state_file\n" 
+				if $debug;
+			# LOAD actors
+			$game->{actors} = $$game_state->{ $game->{current_scenario} }{actors};
+			# LOAD map
+			$game->{ui}->{map} = $$game_state->{ $game->{current_scenario} }{map};
 		}
 		else{
 			print "DEBUG: no data of '$game->{current_scenario}' in $state_file\n" if $debug;
@@ -111,27 +117,32 @@ sub get_game_state{
 
 sub save_game_state{
 	my $game = shift;
+	my $state_file = File::Spec->catfile( 
+						$game->{configuration}{interface}{game_dir},
+						'GameState.sto' 
+	);
 	my $game_state;
 	# check for its content
 	if ( -e -r -s -f $state_file ){
 		$game_state = retrieve( $state_file ) 
 			or die "Unable to retrieve previous game state from $state_file";
-		print "DEBUG: succesfully retrieved previous game state from $state_file\n" if $debug;	
+		print "DEBUG: succesfully retrieved previous game state from $state_file\n" if $debug;
+		# dd $game_state if $debug;
+		print "DEBUG: \$game_state ref: ",ref($$game_state),"\n";
 	}
 	# GameState.sto does not exists
 	else {
 		print "DEBUG: $state_file not found: a new one will be created\n" if $debug;
+		$game_state = {};
 	}
 	# populate GameState.sto with the structure
-	$game_state = { 
-					hero => $game->{hero},
-					$game->{current_scenario} => {
+	$$game_state->{ hero } = $game->{hero};
+	$$game_state->{ $game->{current_scenario} } = {
 						map 		=> $game->{ui}->{map},
-						creatures 	=> $game->{actors},
-					},
+						actors 	=> $game->{actors},
 	};
 	
-	die unless store ( \$game_state, $state_file );
+	die unless store ( $game_state, $state_file );
 	
 	DumpFile( $state_file.'.yaml', $game_state ) if $debug;
 	

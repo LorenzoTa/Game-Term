@@ -70,7 +70,7 @@ my %commands =(
 			}
 			return ('load', $filepath );
 	},
-	
+	exit => sub { return 'exit'},
 	
 	
 );
