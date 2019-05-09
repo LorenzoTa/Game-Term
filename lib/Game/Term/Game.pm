@@ -416,6 +416,10 @@ sub commands{
 			# infact we are iterating over actors when reloading $game containing them
 			$game->play();
 		},
+		exit => sub{
+			$game->save_game_state();
+			exit 0;
+		}
 	);
 	if( $table{$cmd} and exists $table{$cmd} ){ $table{$cmd}->(@args) }
 	else{return 0};
