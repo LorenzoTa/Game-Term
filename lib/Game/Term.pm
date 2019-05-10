@@ -189,9 +189,9 @@ Walking on different kinds of terrain will result in faster or slower mevements 
  
 =head2 commands
 
-User's command can be of two distinct kinds: map commands are essentially movements and are issued by the user with the C<wasd> keys. Each keypress will be a separate command. Pressing the C<:> key the user enters in C<command mode> where commands available are issued as longer strings possibly with more terms (like in C<save my_first_save.sav> or C<load ./MyCustomConf.yaml>). Hitting C<TAB> will expand command names. The command C<return_to_game> is used to return back to the map mode.
+User's command can be of two distinct kinds: map commands are essentially movements and are issued by the user with the C<wasd> keys. Each keypress will be a separate command. Pressing the C<:> key the user enters in C<command mode> where commands available are issued as longer strings possibly with more terms (like in C<save my_first_save.sav> or C<load ./MyCustomConf.yaml>). Hitting C<TAB> will expand command names. The command C<return_to_game> is used to return back to the C<map mode>.
 
-Generally every command issued while in map mode will result in a screen redraw but the same is not true for all commands issued while in command mode where a pseudo prompt is present.
+Generally every command issued while in C<map mode> will result in a screen redraw but the same is not true for all commands issued while in C<command mode> where a pseudo prompt is present.
  
 
 =head1 AUTHOR
