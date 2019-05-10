@@ -92,19 +92,19 @@ The engine let you to reload the configuration during the game.
 
 =head2 about maps
 
-The map is rendered on the console screen as a scrollable quadrilater serie of ASCII characters.
+The map is rendered on the console screen as a scrollable rectangle of ASCII characters.
 It is displayed inside a box with the title of the current scenario at the top and a user's menu at the bottom.
 
-Basically a redraw of the screen is accomplished clearing the buffer wih the system call appropriate for the OS in use.
+Basically a redraw of the screen is accomplished clearing the buffer with the system call appropriate for the OS in use.
 
 The map is handled by L<Game::Term::Map> module.
 
-A valid map is an Array of Arrays each one of the same length containing empty spaces or special characters for various terrains.
-A map can be contained in a separate file or inside the scenario perl program under the C<__DATA__> token.
+A valid map is an Array of Arrays each one of the same length containing empty spaces or other characters for various terrains.
+A map can be contained in a separate file or inside the scenario program under the C<__DATA__> token.
 
-The render engine will transform the map before drawing it to the screen to add colors and other attributes to each tile.
+The render engine will transform the map before drawing it to the screen adding colors and other attributes to each tile.
 
-Each tille will hold an anonymous array with 3 elements:
+Each tile of the map inside the UI will hold an anonymous array with 3 elements:
 
 =over
 
@@ -118,11 +118,11 @@ Each tille will hold an anonymous array with 3 elements:
 
 =item
 
-[2] - 0 if the tile is masked 1 if it is already discovered (unmasked) and has to be displayed.
+[2] - 0 if the tile is masked and 1 if it is already discovered (unmasked) and has to be displayed.
 
 =back
 
-The map only contains terrain informations, no the creatures nor the hero.
+The map only contains terrain informations, no creatures nor the hero.
 
 
 

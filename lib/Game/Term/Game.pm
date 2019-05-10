@@ -128,7 +128,7 @@ sub save_game_state{
 			or die "Unable to retrieve previous game state from $state_file";
 		print "DEBUG: succesfully retrieved previous game state from $state_file\n" if $debug;
 		# dd $game_state if $debug;
-		print "DEBUG: \$game_state ref: ",ref($$game_state),"\n";
+		# print "DEBUG: \$game_state ref: ",ref($$game_state),"\n";
 	}
 	# GameState.sto does not exists
 	else {
