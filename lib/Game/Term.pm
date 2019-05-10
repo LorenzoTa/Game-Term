@@ -56,7 +56,7 @@ The present document describes Game::Term version 0.01
     );
 
 
-    $game->play()
+    $game->play();
 
     __DATA__
     WWWWWWwwwwwwwwWWWWWW
@@ -69,7 +69,7 @@ The present document describes Game::Term version 0.01
                   ww    
                  wWwW   
     TTTTTTTTT           
-    S                  S
+    M                 mm
 
 =head1 DESCRIPTION
 
@@ -77,7 +77,7 @@ Game::Term aims to be a fully usable game engine to produce console games.
 The engine is at the moment usable but still not complete and only few things are implemented.
 
 
-=head2 about configuration
+=head2 configuration
 
 The configuration of the game engine, handled by the L<Game::Term::Configuration> module, stores two kind of informations.
 The first group is C<interface> and is about the appearence and default directories and files.
@@ -86,11 +86,11 @@ The second group is C<terrains> and holds various infos about every possible ter
 
 Once generated the configuration is saved into the C<GameTermConfDefault.conf> under the game directory and will be loaded from this file.
 
-The engine let you to reload the configuration during the game.
+The engine lets you to reload the configuration during the game.
 
 
 
-=head2 about maps
+=head2 maps
 
 The map is rendered on the console screen as a scrollable rectangle of ASCII characters.
 It is displayed inside a box with the title of the current scenario at the top and a user's menu at the bottom.
@@ -125,9 +125,67 @@ Each tile of the map inside the UI will hold an anonymous array with 3 elements:
 The map only contains terrain informations, no creatures nor the hero.
 
 
+=head2 UI
+
+The User Interface is governed by the L<Game::Term::UI> module. It loads and applies a configuration, draws pixels on the console screen and grabs user's input.
+
+UI will create a frame where a scrolllable map is displayed. Scroll is ruled by hero's position.
+
+All fancy color effects provided by L<Term::ANSIColor> are applied in the UI. 
+
+Generally the UI will mask parts of the map not yet explored and will put "fog of war" in empty spaces ( plains ) outside hero's sight.
+
+user inputs can be normal ones (moving on the map) or command ones (save/load or exit the game)
+
+=head2 scenarios
+
+The scenario concept cover two distinct things. Firstly a C<scenario> is a regular Perl program as shown in the synopis: a C<.pl> program that uses the current suit of modules, mainly building up a L<Game::Term::Game> object, to start a new game by calling C<$game-E<gt>play()> 
+
+To make this funnier the above perl program will inject into the game object a scenario constitued by a map, some creature lurking on the map an possibly *** to be implemented *** events, enigmas and more.
+
+The scenario is handled using the L<Game::Term::Scenario> module and its few methods.
+
+If an argument is passed to the program setting up the scenario this will be used as hero's starting position. This argument is passed in like: C<south5> meaning on the south side of the map at tile 5 (starting from 0) or C<west22> or similar. 
+
+The scenario will also sets all default intial values for: the hero position, number and kind of present creatures and every other entities  a scenario can hold.
 
 
+=head2 game state and user's saves
 
+The game object created using L<Game::Term::Game> will take track of the game state in a file (normally C<GameState.sto> stored in the main game diretory as stated in the configuration). This file will hold the hero's state and the information about progress achieved in each scenario.
+
+If the hero come back to an already visited scenario, parts of the map already explored will be visible e and creatures already defeated (or enigmas already resolved) will be not present.
+
+This beahviour and the above descripted scenario ability (to receive as argument the hero's starting position), make a scenario reusable during game different phases.
+
+Eaxample: hero explores part of C<scenario one> (which defaults are stored in C<scenario_one.pl> file) and exits the map entering into C<scenario two> (stored in C<scenario_two.pl>). When they come back to C<scenario one> not the defaults contained in C<scenario_one.pl> file are used but the data about C<scenario one> contained in the C<GameState.sto> file.   
+
+By other hand user can save the game every moment: this action will save a precise snapshot of the game at the current time, in the current scenario. All objects stored in the save file (the game one using the scenario one, the configuration, the hero and all) can be saved and reloaded by the user at any moment. This does not affect the game state file that is modified only exiting a scenario.
+
+
+=head2 game object
+
+The game object created using L<Game::Term::Game> module rules them all. 
+
+It holds the main game loop triggered by the C<$game-E<gt>play()> call. 
+
+It needs to be feed with a scenario and a UI and (if not retrieved looking into the C<GameState.sto> file) with an hero. If present, scenario data will be modified according to C<GameState.sto> informations. The UI, if nothing is specified, will be loaded using values provided by C<GameTermConfDefault.conf> file.
+
+The game object receives user's command from the UI, performs it's own operations and instruct the UI on how the screen has to be drawn.
+
+
+=head2 hero and creatures
+
+Hero (impersoned by the user) and creatures belong to the C<Game::Term::Actor> class. Hero in particular is an object of the derived class C<Game::Term::Actor::Hero>
+
+The C<Game::Term::Actor> class defines few common attributes and has information used by the movement system. Each actor in the game loop receives an amount of energy as specified by its C<energy_gain> properties. When energy reaches a given treshold the actor can move.
+
+This will results in creatures moving at different speed while in reality they just receive less or more moves in respect to the hero.
+
+Hero in addition has a sight that modifies the area of the map currently without the "fog of war" and the amplitude of the explored map. This sight range will be shorter while the hero is inside a wood and greater when hero is on elevated places like hills or mountains.
+
+Walking on different kinds of terrain will result in faster or slower mevements of the hero, simulated timing the speed used to refresh the screen. 
+ 
 
 =head1 AUTHOR
 
