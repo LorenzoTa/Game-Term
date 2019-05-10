@@ -135,7 +135,6 @@ All fancy color effects provided by L<Term::ANSIColor> are applied in the UI.
 
 Generally the UI will mask parts of the map not yet explored and will put "fog of war" in empty spaces ( plains ) outside hero's sight.
 
-user inputs can be normal ones (moving on the map) or command ones (save/load or exit the game)
 
 =head2 scenarios
 
@@ -185,6 +184,14 @@ This will results in creatures moving at different speed while in reality they j
 Hero in addition has a sight that modifies the area of the map currently without the "fog of war" and the amplitude of the explored map. This sight range will be shorter while the hero is inside a wood and greater when hero is on elevated places like hills or mountains.
 
 Walking on different kinds of terrain will result in faster or slower mevements of the hero, simulated timing the speed used to refresh the screen. 
+ 
+
+ 
+=head2 commands
+
+User's command can be of two distinct kinds: map commands are essentially movements and are issued by the user with the C<wasd> keys. Each keypress will be a separate command. Pressing the C<:> key the user enters in C<command mode> where commands available are issued as longer strings possibly with more terms (like in C<save my_first_save.sav> or C<load ./MyCustomConf.yaml>). Hitting C<TAB> will expand command names. The command C<return_to_game> is used to return back to the map mode.
+
+Generally every command issued while in map mode will result in a screen redraw but the same is not true for all commands issued while in command mode where a pseudo prompt is present.
  
 
 =head1 AUTHOR
