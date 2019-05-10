@@ -4,50 +4,130 @@ use 5.014;
 use strict;
 use warnings;
 
+our $VERSION = '0.01';
+
+__DATA__
+
 =head1 NAME
 
-Game::Term - The great new Game::Term!
+Game::Term - An ASCII game engine
 
 =head1 VERSION
 
-Version 0.01
+The present document describes Game::Term version 0.01
 
-=cut
-
-our $VERSION = '0.01';
 
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
 
-Perhaps a little code snippet.
 
-    use Game::Term;
+    use strict;
+    use warnings;
+    use Game::Term::Game;
 
-    my $foo = Game::Term->new();
-    ...
+    use Game::Term::Scenario;
+    use Game::Term::Actor;
+    use Game::Term::Actor::Hero;
 
-=head1 EXPORT
+    # bare minimum scenario with map in DATA
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+    my $scenario = Game::Term::Scenario->new(
+        name => 'Test Scenario 1',
+        creatures => [
+                        Game::Term::Actor->new( name => 'ONE', y => 5, x => 5 ),
+                        Game::Term::Actor->new( name => 'TWO', y => 5, x => 7, energy_gain => 2 ),					
+                     ]
+    );
+    $scenario->get_map_from_DATA();
+    $scenario->set_hero_position( $ARGV[0] // 'south11' );
 
-=head1 SUBROUTINES/METHODS
 
-=head2 function1
+    my $conf = Game::Term::Configuration->new();
+	
+    my $hero = Game::Term::Actor::Hero->new( name => 'My New Hero' );
 
-=cut
+    my $game = Game::Term::Game->new( 
+                                      debug         => 0,  
+                                      configuration => $conf, 
+                                      scenario      => $scenario,
+                                      hero          => $hero,
 
-sub function1 {
-}
+    );
 
-=head2 function2
 
-=cut
+    $game->play()
 
-sub function2 {
-}
+    __DATA__
+    WWWWWWwwwwwwwwWWWWWW
+    	 tttt           
+     ttt    tTT t       
+    	tt    tT        
+    wwwwwwwwww          
+      ttt           mM  
+    	wW              
+                  ww    
+                 wWwW   
+    TTTTTTTTT           
+    S                  S
+
+=head1 DESCRIPTION
+
+Game::Term aims to be a fully usable game engine to produce console games. 
+The engine is at the moment usable but still not complete and only few things are implemented.
+
+
+=head2 about configuration
+
+The configuration of the game engine, handled by the L<Game::Term::Configuration> module, stores two kind of informations.
+The first group is C<interface> and is about the appearence and default directories and files.
+
+The second group is C<terrains> and holds various infos about every possible terrain based on how many colors the engine will use (2, 16 or 256 as specified in the C<interface> section).
+
+Once generated the configuration is saved into the C<GameTermConfDefault.conf> under the game directory and will be loaded from this file.
+
+The engine let you to reload the configuration during the game.
+
+
+
+=head2 about maps
+
+The map is rendered on the console screen as a scrollable quadrilater serie of ASCII characters.
+It is displayed inside a box with the title of the current scenario at the top and a user's menu at the bottom.
+
+Basically a redraw of the screen is accomplished clearing the buffer wih the system call appropriate for the OS in use.
+
+The map is handled by L<Game::Term::Map> module.
+
+A valid map is an Array of Arrays each one of the same length containing empty spaces or special characters for various terrains.
+A map can be contained in a separate file or inside the scenario perl program under the C<__DATA__> token.
+
+The render engine will transform the map before drawing it to the screen to add colors and other attributes to each tile.
+
+Each tille will hold an anonymous array with 3 elements:
+
+=over
+
+=item
+
+[0] - the colored character to display ( for the same terrain type one or more characters and colors can be used )
+
+=item
+
+[1] - the original character ( used as terrain identifier )
+
+=item
+
+[2] - 0 if the tile is masked 1 if it is already discovered (unmasked) and has to be displayed.
+
+=back
+
+The map only contains terrain informations, no the creatures nor the hero.
+
+
+
+
+
 
 =head1 AUTHOR
 
