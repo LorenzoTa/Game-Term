@@ -70,7 +70,7 @@ my %commands =(
 			}
 			return ('load', $filepath );
 	},
-	
+	exit => sub { return 'exit'},
 	
 	
 );
@@ -83,8 +83,7 @@ $term->Attribs->{completion_function} = sub {
     };
 # SOME NOTES ABOUT MAP:
 # The map is initially loaded from the data field of the Game::Term::Map object.
-# It is the AoA containing one character per tile (terrains) and containing the hero's
-# starting position marked by 'X' ( sticked on one side ).
+# It is the AoA containing one character per tile (terrains).
 
 # This original AoA is passed to set_map_and_hero() where it will be enlarged depending
 # on the map_area settings (the display window). Here the offsets used in print will be calculated.

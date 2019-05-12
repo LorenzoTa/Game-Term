@@ -4,7 +4,9 @@ use 5.014;
 use strict;
 use warnings;
 
-use  YAML::XS qw(Dump DumpFile LoadFile);
+use File::Spec;
+use YAML::XS qw(Dump DumpFile LoadFile);
+use Storable qw(store retrieve);
 use Time::HiRes qw ( sleep );
 
 use Game::Term::Configuration;
@@ -41,12 +43,12 @@ sub new{
 	#use Data::Dump; dd $param{scenario};
 	$param{scenario}->{creatures} = undef;
 	
-	return bless {
+	my $game = bless {
 				is_running => 1,
 				
 				configuration => $param{configuration} ,
 				
-				scenario => $param{scenario},
+				# scenario => $param{scenario}, ### ??????
 				current_scenario => $param{scenario}->{name},
 				
 				ui	=> $param{ui},
@@ -56,8 +58,95 @@ sub new{
 				
 				
 	}, $class;
+	# load and overwrite info about hero and current scenario(map,creatures,..)from gamestate.sto
+	$game->get_game_state();
+	
+	return $game;
 }
 
+
+sub get_game_state{
+	my $game = shift;
+	my $state_file = File::Spec->catfile( 
+						$game->{configuration}{interface}{game_dir},
+						'GameState.sto' 
+	);
+	print "DEBUG: assuming game state file at $state_file\n" if $debug;
+	# global state of the game with hero and seen scenario informations:
+	# %game_state = ( hero=> x, scn1=>(map,creature..), scn2=> ...
+	my $game_state;
+	# check for its content
+	if ( -e -r -s -f $state_file ){
+		$game_state = retrieve( $state_file ) 
+			or die "Unable to retrieve game state from $state_file";
+		# use Data::Dump; dd $game_state if $debug;
+		# LOAD hero
+		$game->{hero} = $$game_state->{hero};
+		# reset hero's unneeded fields
+		$game->{hero}{y} = undef;
+		$game->{hero}{x} = undef;
+		$game->{hero}{on_tile} = undef;
+		$game->{hero}{energy} = 0;
+		print "DEBUG: loaded HERO from $state_file\n" if $debug;
+		#use Data::Dump; dd $game_state if $debug;
+		
+		# eventually LOAD data of the current scenario
+		if(	$$game_state->{ $game->{current_scenario} } ){
+			print "DEBUG: loaded data of '$game->{current_scenario}' from $state_file\n" 
+				if $debug;
+			# LOAD actors
+			$game->{actors} = $$game_state->{ $game->{current_scenario} }{actors};
+			# LOAD map
+			$game->{ui}->{map} = $$game_state->{ $game->{current_scenario} }{map};
+		}
+		else{
+			print "DEBUG: no data of '$game->{current_scenario}' in $state_file\n" if $debug;
+		}		
+	}
+	# GameState.sto does not exists
+	else {
+		print "DEBUG: $state_file not found\n" if $debug;
+		# create with just hero inside
+		$game_state = { hero => $game->{hero} };
+		die unless store ( \$game_state, $state_file );
+	}
+	
+	
+	
+}
+
+sub save_game_state{
+	my $game = shift;
+	my $state_file = File::Spec->catfile( 
+						$game->{configuration}{interface}{game_dir},
+						'GameState.sto' 
+	);
+	my $game_state;
+	# check for its content
+	if ( -e -r -s -f $state_file ){
+		$game_state = retrieve( $state_file ) 
+			or die "Unable to retrieve previous game state from $state_file";
+		print "DEBUG: succesfully retrieved previous game state from $state_file\n" if $debug;
+		# dd $game_state if $debug;
+		# print "DEBUG: \$game_state ref: ",ref($$game_state),"\n";
+	}
+	# GameState.sto does not exists
+	else {
+		print "DEBUG: $state_file not found: a new one will be created\n" if $debug;
+		$game_state = {};
+	}
+	# populate GameState.sto with the structure
+	$$game_state->{ hero } = $game->{hero};
+	$$game_state->{ $game->{current_scenario} } = {
+						map 		=> $game->{ui}->{map},
+						actors 	=> $game->{actors},
+	};
+	
+	die unless store ( $game_state, $state_file );
+	
+	DumpFile( $state_file.'.yaml', $game_state ) if $debug;
+	
+}
 sub play{
 	my $game = shift;
 	#INIT
@@ -338,6 +427,10 @@ sub commands{
 			# infact we are iterating over actors when reloading $game containing them
 			$game->play();
 		},
+		exit => sub{
+			$game->save_game_state();
+			exit 0;
+		}
 	);
 	if( $table{$cmd} and exists $table{$cmd} ){ $table{$cmd}->(@args) }
 	else{return 0};

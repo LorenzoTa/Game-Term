@@ -1,3 +1,6 @@
+
+-remove commands from UI.pm 
+
 -turn count based on hero moves
 -event queue based on turn count
 

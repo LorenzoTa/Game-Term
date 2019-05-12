@@ -4,50 +4,195 @@ use 5.014;
 use strict;
 use warnings;
 
+our $VERSION = '0.01';
+
+__DATA__
+
 =head1 NAME
 
-Game::Term - The great new Game::Term!
+Game::Term - An ASCII game engine
 
 =head1 VERSION
 
-Version 0.01
+The present document describes Game::Term version 0.01
 
-=cut
-
-our $VERSION = '0.01';
 
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
 
-Perhaps a little code snippet.
 
-    use Game::Term;
+    use strict;
+    use warnings;
+    use Game::Term::Game;
 
-    my $foo = Game::Term->new();
-    ...
+    use Game::Term::Scenario;
+    use Game::Term::Actor;
+    use Game::Term::Actor::Hero;
 
-=head1 EXPORT
+    # bare minimum scenario with map in DATA
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+    my $scenario = Game::Term::Scenario->new(
+        name => 'Test Scenario 1',
+        creatures => [
+                        Game::Term::Actor->new( name => 'ONE', y => 5, x => 5 ),
+                        Game::Term::Actor->new( name => 'TWO', y => 5, x => 7, energy_gain => 2 ),					
+                     ]
+    );
+    $scenario->get_map_from_DATA();
+    $scenario->set_hero_position( $ARGV[0] // 'south11' );
 
-=head1 SUBROUTINES/METHODS
 
-=head2 function1
+    my $conf = Game::Term::Configuration->new();
+	
+    my $hero = Game::Term::Actor::Hero->new( name => 'My New Hero' );
 
-=cut
+    my $game = Game::Term::Game->new( 
+                                      debug         => 0,  
+                                      configuration => $conf, 
+                                      scenario      => $scenario,
+                                      hero          => $hero,
 
-sub function1 {
-}
+    );
 
-=head2 function2
 
-=cut
+    $game->play();
 
-sub function2 {
-}
+    __DATA__
+    WWWWWWwwwwwwwwWWWWWW
+    	 tttt           
+     ttt    tTT t       
+    	tt    tT        
+    wwwwwwwwww          
+      ttt           mM  
+    	wW              
+                  ww    
+                 wWwW   
+    TTTTTTTTT           
+    M                 mm
+
+=head1 DESCRIPTION
+
+Game::Term aims to be a fully usable game engine to produce console games. 
+The engine is at the moment usable but still not complete and only few things are implemented.
+
+
+=head2 configuration
+
+The configuration of the game engine, handled by the L<Game::Term::Configuration> module, stores two kind of informations.
+The first group is C<interface> and is about the appearence and default directories and files.
+
+The second group is C<terrains> and holds various infos about every possible terrain based on how many colors the engine will use (2, 16 or 256 as specified in the C<interface> section).
+
+Once generated the configuration is saved into the C<GameTermConfDefault.conf> under the game directory and will be loaded from this file.
+
+The engine lets you to reload the configuration during the game.
+
+
+
+=head2 maps
+
+The map is rendered on the console screen as a scrollable rectangle of ASCII characters.
+It is displayed inside a box with the title of the current scenario at the top and a user's menu at the bottom.
+
+Basically a redraw of the screen is accomplished clearing the buffer with the system call appropriate for the OS in use.
+
+The map is handled by L<Game::Term::Map> module.
+
+A valid map is an Array of Arrays each one of the same length containing empty spaces or other characters for various terrains.
+A map can be contained in a separate file or inside the scenario program under the C<__DATA__> token.
+
+The render engine will transform the map before drawing it to the screen adding colors and other attributes to each tile.
+
+Each tile of the map inside the UI will hold an anonymous array with 3 elements:
+
+=over
+
+=item
+
+[0] - the colored character to display ( for the same terrain type one or more characters and colors can be used )
+
+=item
+
+[1] - the original character ( used as terrain identifier )
+
+=item
+
+[2] - 0 if the tile is masked and 1 if it is already discovered (unmasked) and has to be displayed.
+
+=back
+
+The map only contains terrain informations, no creatures nor the hero.
+
+
+=head2 UI
+
+The User Interface is governed by the L<Game::Term::UI> module. It loads and applies a configuration, draws pixels on the console screen and grabs user's input.
+
+UI will create a frame where a scrolllable map is displayed. Scroll is ruled by hero's position.
+
+All fancy color effects provided by L<Term::ANSIColor> are applied in the UI. 
+
+Generally the UI will mask parts of the map not yet explored and will put "fog of war" in empty spaces ( plains ) outside hero's sight.
+
+
+=head2 scenarios
+
+The scenario concept cover two distinct things. Firstly a C<scenario> is a regular Perl program as shown in the synopis: a C<.pl> program that uses the current suit of modules, mainly building up a L<Game::Term::Game> object, to start a new game by calling C<$game-E<gt>play()> 
+
+To make this funnier the above perl program will inject into the game object a scenario constitued by a map, some creature lurking on the map an possibly *** to be implemented *** events, enigmas and more.
+
+The scenario is handled using the L<Game::Term::Scenario> module and its few methods.
+
+If an argument is passed to the program setting up the scenario this will be used as hero's starting position. This argument is passed in like: C<south5> meaning on the south side of the map at tile 5 (starting from 0) or C<west22> or similar. 
+
+The scenario will also sets all default intial values for: the hero position, number and kind of present creatures and every other entities  a scenario can hold.
+
+
+=head2 game state and user's saves
+
+The game object created using L<Game::Term::Game> will take track of the game state in a file (normally C<GameState.sto> stored in the main game diretory as stated in the configuration). This file will hold the hero's state and the information about progress achieved in each scenario.
+
+If the hero come back to an already visited scenario, parts of the map already explored will be visible e and creatures already defeated (or enigmas already resolved) will be not present.
+
+This beahviour and the above descripted scenario ability (to receive as argument the hero's starting position), make a scenario reusable during game different phases.
+
+Eaxample: hero explores part of C<scenario one> (which defaults are stored in C<scenario_one.pl> file) and exits the map entering into C<scenario two> (stored in C<scenario_two.pl>). When they come back to C<scenario one> not the defaults contained in C<scenario_one.pl> file are used but the data about C<scenario one> contained in the C<GameState.sto> file.   
+
+By other hand user can save the game every moment: this action will save a precise snapshot of the game at the current time, in the current scenario. All objects stored in the save file (the game one using the scenario one, the configuration, the hero and all) can be saved and reloaded by the user at any moment. This does not affect the game state file that is modified only exiting a scenario.
+
+
+=head2 game object
+
+The game object created using L<Game::Term::Game> module rules them all. 
+
+It holds the main game loop triggered by the C<$game-E<gt>play()> call. 
+
+It needs to be feed with a scenario and a UI and (if not retrieved looking into the C<GameState.sto> file) with an hero. If present, scenario data will be modified according to C<GameState.sto> informations. The UI, if nothing is specified, will be loaded using values provided by C<GameTermConfDefault.conf> file.
+
+The game object receives user's command from the UI, performs it's own operations and instruct the UI on how the screen has to be drawn.
+
+
+=head2 hero and creatures
+
+Hero (impersoned by the user) and creatures belong to the C<Game::Term::Actor> class. Hero in particular is an object of the derived class C<Game::Term::Actor::Hero>
+
+The C<Game::Term::Actor> class defines few common attributes and has information used by the movement system. Each actor in the game loop receives an amount of energy as specified by its C<energy_gain> properties. When energy reaches a given treshold the actor can move.
+
+This will results in creatures moving at different speed while in reality they just receive less or more moves in respect to the hero.
+
+Hero in addition has a sight that modifies the area of the map currently without the "fog of war" and the amplitude of the explored map. This sight range will be shorter while the hero is inside a wood and greater when hero is on elevated places like hills or mountains.
+
+Walking on different kinds of terrain will result in faster or slower mevements of the hero, simulated timing the speed used to refresh the screen. 
+ 
+
+ 
+=head2 commands
+
+User's command can be of two distinct kinds: map commands are essentially movements and are issued by the user with the C<wasd> keys. Each keypress will be a separate command. Pressing the C<:> key the user enters in C<command mode> where commands available are issued as longer strings possibly with more terms (like in C<save my_first_save.sav> or C<load ./MyCustomConf.yaml>). Hitting C<TAB> will expand command names. The command C<return_to_game> is used to return back to the C<map mode>.
+
+Generally every command issued while in C<map mode> will result in a screen redraw but the same is not true for all commands issued while in C<command mode> where a pseudo prompt is present.
+ 
 
 =head1 AUTHOR
 

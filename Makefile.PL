@@ -20,6 +20,8 @@ WriteMakefile(
     PREREQ_PM => {
         'Term::ANSIColor'              => '4.00', # https://metacpan.org/changes/distribution/Term-ANSIColor#L70
 		'YAML::XS'	=> '0',
+		'Storable' => '0',
+		'File::Spec' => '0',
 		'Time::HiRes' => '0',
 		'Carp' => '0',
 		'Term::ReadKey' => '0',
