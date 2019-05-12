@@ -163,7 +163,7 @@ sub play{
 			my @usr_cmd = $game->{ui}->get_user_command();
 			next unless @usr_cmd;
 			print "in Game.pm 'command' received: [@usr_cmd]\n" if $debug;
-			$game->commands(@usr_cmd);
+			$game->execute(@usr_cmd);
 			next;
 		}
 		# MAP
@@ -187,7 +187,7 @@ sub play{
 						last;
 					}
 					# movement OK
-					if ( $game->commands(@usr_cmd) ){
+					if ( $game->execute(@usr_cmd) ){
 						sleep(	
 							$game->{ui}->{hero_slowness} + 
 							# the slowness #4 of the terrain original letter #1 where
@@ -280,7 +280,7 @@ sub is_walkable{
 	if ( $game->{configuration}->{terrains}{ $tile->[1] }->[4] < 5 ){ return 1}
 	else{return 0}
 }
-sub commands{
+sub execute{
 	my $game = shift;
 	my ($cmd,@args) = @_;
 	my %table = (
