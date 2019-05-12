@@ -56,6 +56,8 @@ sub new{
 				hero => $param{hero},
 				actors	=> [ @actors ],
 				
+				turn => 0,
+				
 				
 	}, $class;
 	# load and overwrite info about hero and current scenario(map,creatures,..)from gamestate.sto
@@ -147,6 +149,7 @@ sub save_game_state{
 	DumpFile( $state_file.'.yaml', $game_state ) if $debug;
 	
 }
+
 sub play{
 	my $game = shift;
 	#INIT
@@ -176,8 +179,8 @@ sub play{
 				if ( $actor->{energy} >= 10 and $actor->isa('Game::Term::Actor::Hero') ){
 					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n"
 						 if $debug;
+					
 					# PLAYER: GET USER COMMAND	
-						
 					my @usr_cmd = $game->{ui}->get_user_command();
 					next unless @usr_cmd; # ??? last ???
 					print "in Game.pm 'map' received: [@usr_cmd]\n" if $debug;
@@ -188,6 +191,8 @@ sub play{
 					}
 					# movement OK
 					if ( $game->execute(@usr_cmd) ){
+						# TIME:
+						$game->{turn}++;
 						sleep(	
 							$game->{ui}->{hero_slowness} + 
 							# the slowness #4 of the terrain original letter #1 where
@@ -207,13 +212,16 @@ sub play{
 						$game->{ui}->draw_map(  @{$game->{actors}}  );
 						$game->{ui}->draw_menu( 
 							[	"walk with WASD or : to enter command mode",
-								"$game->{hero}{name} at y: $game->{hero}{y} ".
+								"(turn: $game->{turn}) $game->{hero}{name} at y: $game->{hero}{y} ".
 								"x: $game->{hero}{x} ($game->{hero}{on_tile})",] 
 						);	
 						$actor->{energy} -= 10;
 					}
 					# NO movement 
-					else{print "DEBUG: no hero move\n"; redo}
+					else{
+							print "DEBUG: no hero move\n"; 
+							redo;
+					}
 				}	
 				# NPC: AUTOMOVE
 				elsif( $actor->{energy} >= 10 ){
