@@ -191,8 +191,11 @@ sub play{
 					}
 					# movement OK
 					if ( $game->execute(@usr_cmd) ){
-						# TIME:
+						# TIME
 						$game->{turn}++;
+						# EVENTS
+						$game->check_events();
+						# RENDER
 						sleep(	
 							$game->{ui}->{hero_slowness} + 
 							# the slowness #4 of the terrain original letter #1 where
@@ -280,6 +283,14 @@ sub play{
 	}
 }
 
+sub check_events{
+	my $game = shift;
+	print "DEBUG: checking events at turn $game->{turn}..\n";
+	
+	
+	return;
+
+}
 
 sub is_walkable{
 	my $game = shift;
