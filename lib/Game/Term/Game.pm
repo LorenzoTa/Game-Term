@@ -28,7 +28,7 @@ sub new{
 	$param{configuration} //= Game::Term::Configuration->new();
 	
 	$param{scenario} //= Game::Term::Scenario->new( );
-	
+
 	$param{ui} //= Game::Term::UI->new( 
 										configuration => $param{configuration}, 
 										title => $param{scenario}->{name},
@@ -43,6 +43,9 @@ sub new{
 	#use Data::Dump; dd $param{scenario};
 	$param{scenario}->{creatures} = undef;
 	
+	my @events = @{$param{scenario}->{events}};
+	$param{scenario}->{events} = undef;
+	
 	my $game = bless {
 				is_running => 1,
 				
@@ -55,6 +58,8 @@ sub new{
 				
 				hero => $param{hero},
 				actors	=> [ @actors ],
+				
+				events => [ @events ],
 				
 				turn => 0,
 				
@@ -285,8 +290,32 @@ sub play{
 
 sub check_events{
 	my $game = shift;
-	print "DEBUG: checking events at turn $game->{turn}..\n";
-	
+	print "DEBUG: checking events at turn $game->{turn}..\n" if $debug;
+	#use Data::Dump; dd $game->{events};
+	foreach my $ev( @{$game->{events}} ){
+		next unless $ev;
+		print "DEBUG: analyzing event of type: $ev->{type}..\n" if $debug;
+		# GAME TURN
+		if ( $ev->{type} eq 'game turn' ){
+			next unless $ev->{check} == $game->{turn};
+			print "EVENT game turn: $ev->{action}\n";
+			next;			
+		}
+		elsif ( $ev->{type} eq 'hero at' ){
+			# use Data::Dump; dd $ev; dd $game->{hero};
+			next unless $ev->{check}->[0] == $game->{hero}{y};
+			next unless $ev->{check}->[1] == $game->{hero}{x};
+			print "EVENT hero at: $ev->{action}\n";
+			
+			if ( $ev->{first_time_only} ){
+				undef $ev;
+			}
+			next;
+			
+		}
+		else{die "Unknown event type in Game.pm"}
+		
+	}
 	
 	return;
 

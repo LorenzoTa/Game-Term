@@ -1,11 +1,11 @@
 use strict;
 use warnings;
+
 use Game::Term::Game;
-
 use Game::Term::Scenario;
-
 use Game::Term::Actor;
 use Game::Term::Actor::Hero;
+use Game::Term::Event;
 
 # # bare minimum scenario with map in DATA
 # my $scenario = Game::Term::Scenario->new();
@@ -34,8 +34,22 @@ my $scenario = Game::Term::Scenario->new(
 					Game::Term::Actor->new(name=>'TRE',y=>28, x=>51,energy_gain=>2),
 					#Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
 					
-				]);
-#use Data::Dump; dd $scenario;
+				],
+				
+				events => [
+					Game::Term::Event->new( 
+											type => 'game turn', 
+											check => 3, 
+											action=> 'BLAHH' ),#
+											
+					Game::Term::Event->new( 
+											type => 'hero at', 
+											check => [29,38],
+											first_time_only => 1,								
+											action=> 'XXXXXXXXXXXXXXXXX', ),#
+				],
+);
+# use Data::Dump; $scenario->{map}=[]; dd $scenario;
 $scenario->set_hero_position( $ARGV[0] // 'south38' );
 
 
