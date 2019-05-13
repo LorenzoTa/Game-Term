@@ -18,6 +18,12 @@ sub new{
 	if( $param{map} and -e -f -s $param{map} ){ # from_file ????
 		$param{map} = Game::Term::Map->new( from => $param{map} )->{data};
 	}
+	elsif( $param{map} and $param{map}->isa('Game::Term::Map') ){
+		$param{map} = $param{map}->{data}
+	}
+	else{
+		print "No map passed in scenario creation: hoping get_map_from_DATA will be called soon\n";
+	}
 	
 	my $scn = bless {
 	
