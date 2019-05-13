@@ -19,7 +19,7 @@ sub new{
 		$param{map} = Game::Term::Map->new( from => $param{map} )->{data};
 	}
 	elsif( $param{map} and ref $param{map} eq 'Game::Term::Map'  ){
-		$param{map} = $param{map}->{data}
+		$param{map} = $param{map}->{data};
 	}
 	else{
 		print "No map passed in scenario creation: hoping get_map_from_DATA will be called soon\n";
@@ -34,7 +34,7 @@ sub new{
 				
 	}, $class; 
 
-	$scn->get_map_from_DATA() unless ref $scn->{map} eq 'ARRAY';
+	# $scn->get_map_from_DATA() unless ref $scn->{map} eq 'ARRAY';
 	
 	return $scn;
 }

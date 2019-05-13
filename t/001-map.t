@@ -65,7 +65,7 @@ ok ( $valid5->{data}[19][0] eq $valid5->{data}[19][19], "valid map from file: $t
 ok (!$valid5->{data}[20][0],"not too much rows" );
 ok (!$valid5->{data}[0][20],"not too much columns" );
 
-open my $fh, '>>', $tempfile or BAIL_OUT "unble to open [$tempfile] for appending!";
+open $fh, '>>', $tempfile or BAIL_OUT "unble to open [$tempfile] for appending!";
 print $fh "aaa\naa\na\naaaa\n";
 close $fh;
 dies_ok { Game::Term::Map->new( from => $tempfile ) } 
