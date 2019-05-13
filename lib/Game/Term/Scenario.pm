@@ -18,7 +18,7 @@ sub new{
 	if( $param{map} and -e -f -s $param{map} ){ # from_file ????
 		$param{map} = Game::Term::Map->new( from => $param{map} )->{data};
 	}
-	elsif( $param{map} and $param{map}->isa('Game::Term::Map') ){
+	elsif( $param{map} and ref $param{map} eq 'Game::Term::Map'  ){
 		$param{map} = $param{map}->{data}
 	}
 	else{
@@ -89,4 +89,5 @@ sub set_hero_position{
 	
 	
 }
+1;
 __DATA__

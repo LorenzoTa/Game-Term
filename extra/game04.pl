@@ -45,7 +45,7 @@ my $scenario = Game::Term::Scenario->new(
 					Game::Term::Event->new( 
 											type => 'hero at', 
 											check => [29,38],
-											first_time_only => 1,								
+											first_time_only => 0,								
 											action=> 'XXXXXXXXXXXXXXXXX', ),#
 				],
 );
