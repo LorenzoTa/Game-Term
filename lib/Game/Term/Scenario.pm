@@ -84,14 +84,3 @@ sub set_hero_position{
 	
 }
 __DATA__
-S                  S
-     tttt  T        
- ttt    tTT t       
-    tt    tT        
-tttttttttttttttt    
-  ttt   tt      mM  
-    wW              
-         mM   ww    
-             wWwW   
-TTTTTTTTT           
-S        X         S

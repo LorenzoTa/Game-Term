@@ -82,5 +82,5 @@ wwwwwwwwww
     wW              
               ww    
              wWwW   
-TTTTTTTTT           
+tTtTtTtTt           
 S                  S
