@@ -367,7 +367,7 @@ sub check_events{
 	$game->{timeline}[ $game->{turn} ] = undef;
 	
 	
-	return;
+	#return;
 
 }
 
