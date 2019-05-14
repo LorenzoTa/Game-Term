@@ -32,6 +32,9 @@ sub validate_conf{
 	$params{on_tile} = ' ';
 	$params{x} //= undef;
 	$params{y} //= undef;
+	
+	# ADDED stuf removed from configuration
+	$param{sight} //= 5;
 	return %params;
 }
 
