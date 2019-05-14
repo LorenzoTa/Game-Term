@@ -11,6 +11,7 @@ sub new{
 	my %params = validate_conf(@_);
 	my $self  = $class->SUPER::new(@_);
 	$self->{bag}=[];
+	$self->{slowness} = 0;
 	return $self;	
 }
 
