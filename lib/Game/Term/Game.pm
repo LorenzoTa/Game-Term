@@ -315,7 +315,7 @@ sub check_events{
 		if ( $ev->{type} eq 'game turn' ){
 			next unless $ev->{check} == $game->{turn};
 			print "EVENT game turn: $ev->{note}\n";
-			#use Data::Dump; dd $game->{hero}; dd $game->{timeline};
+			use Data::Dump; dd "BEFORE",$game->{hero}; #dd $game->{timeline};
 			if ( $ev->{target} eq 'hero' ){
 			
 				if ( $ev->{target_attr} eq 'energy_gain' ){
@@ -324,10 +324,10 @@ sub check_events{
 					#use Data::Dump; dd $game->{hero};
 					
 					if( $ev->{duration} ){
-						push @{$game->{timeline}[ $game->{turn} + $ev->{duration} ]}, 
+						push @{$game->{timeline}[ $game->{turn} + $ev->{duration} + 1]}, 
 							Game::Term::Event->new( 
 											type 	=> 'game turn', 
-											check 	=> 3, 
+											check 	=> $game->{turn} + $ev->{duration} + 1, 
 											note	=> 'END of +5 energy gain buff',
 											target 	=> 'hero',
 											target_attr => 'energy_gain',
@@ -343,7 +343,7 @@ sub check_events{
 			
 			}
 			
-			use Data::Dump; dd $game->{hero}; dd $game->{timeline};
+			use Data::Dump; dd "AFTER",$game->{hero}; dd $game->{timeline};
 			
 			next;			
 		}
@@ -362,6 +362,10 @@ sub check_events{
 		else{die "Unknown event type in Game.pm"}
 		
 	}
+	
+	# CLEAN timeline
+	$game->{timeline}[ $game->{turn} ] = undef;
+	
 	
 	return;
 

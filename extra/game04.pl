@@ -47,16 +47,16 @@ my $scenario = Game::Term::Scenario->new(
 											duration => 3,
 											
 											),#
-					Game::Term::Event->new( 
-											type 	=> 'game turn', 
-											check 	=> 7, 
-											note	=> 'NOTHING',
-											target 	=> 'hero',
-											target_attr => 'energy_gain',
-											target_mod 	=> 5,
-											duration => 3,
+					# Game::Term::Event->new( 
+											# type 	=> 'game turn', 
+											# check 	=> 7, 
+											# note	=> 'NOTHING',
+											# target 	=> 'hero',
+											# target_attr => 'energy_gain',
+											# target_mod 	=> 5,
+											# duration => 3,
 											
-											),#
+											# ),#
 											
 					Game::Term::Event->new( 
 											type => 'hero at', 
