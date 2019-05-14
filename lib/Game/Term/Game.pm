@@ -74,6 +74,13 @@ sub new{
 	# load and overwrite info about hero and current scenario(map,creatures,..)from gamestate.sto
 	$game->get_game_state();
 	
+	# INJECT int UI parameters once defined in Configuration.pm
+	$game->{ui}->{ hero_icon } 		=	$game->{hero}->{icon};
+	$game->{ui}->{ hero_color } 	=	$game->{hero}->{color};
+	$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
+	$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
+	$game->{ui}->init();
+	#use Data::Dump; dd $game->{ui};
 	return $game;
 }
 

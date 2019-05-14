@@ -34,7 +34,7 @@ sub validate_conf{
 	$params{y} //= undef;
 	
 	# ADDED stuf removed from configuration
-	$param{sight} //= 5;
+	$params{sight} //= 5;
 	return %params;
 }
 

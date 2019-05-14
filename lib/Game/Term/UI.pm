@@ -125,7 +125,7 @@ sub new{
 	$ui->{title} = $params{title} // 'TITLE';
 	$ui->{map} = $params{map} // Game::Term::Map->new(  )->{data}; 
 	$ui->load_configuration( $params{configuration} );
-	$ui->init();	
+	# $ui->init();	
 	# local $ui->{map} = [$ui->{map}[0][0]];
 					# use Data::Dump; dd $ui;#exit;
 	
@@ -446,7 +446,7 @@ sub set_map_and_hero{
 	$ui->set_hero_pos();
 	
 	# change hero icon to []
-	$ui->{ hero_icon } = [ $ui->{ hero_color }.$ui->{ hero_icon }.RESET, $ui->{ hero_icon }, 1 ];
+	$ui->{ hero_icon } = [ color_names_to_ANSI($ui->{ hero_color }).$ui->{ hero_icon }.RESET, $ui->{ hero_icon }, 1 ];
 		
 	$ui->beautify_map();		
 	
