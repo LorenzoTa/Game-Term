@@ -38,15 +38,32 @@ my $scenario = Game::Term::Scenario->new(
 				
 				events => [
 					Game::Term::Event->new( 
-											type => 'game turn', 
-											check => 3, 
-											action=> 'BLAHH' ),#
+											type 	=> 'game turn', 
+											check 	=> 3, 
+											note	=> 'BUFF! energy gain +5 for 3 turns',
+											target 	=> 'hero',
+											target_attr => 'energy_gain',
+											target_mod 	=> 5,
+											duration => 3,
+											
+											),#
+					Game::Term::Event->new( 
+											type 	=> 'game turn', 
+											check 	=> 7, 
+											note	=> 'NOTHING',
+											target 	=> 'hero',
+											target_attr => 'energy_gain',
+											target_mod 	=> 5,
+											duration => 3,
+											
+											),#
 											
 					Game::Term::Event->new( 
 											type => 'hero at', 
 											check => [29,38],
 											first_time_only => 0,								
-											action=> 'XXXXXXXXXXXXXXXXX', ),#
+											note	=> 'HERO at 29-38',
+											),#
 				],
 );
 # use Data::Dump; $scenario->{map}=[]; dd $scenario;

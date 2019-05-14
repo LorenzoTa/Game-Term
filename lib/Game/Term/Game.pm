@@ -15,6 +15,8 @@ use Game::Term::UI;
 use Game::Term::Actor;
 use Game::Term::Actor::Hero;
 
+use Game::Term::Event;
+
 our $VERSION = '0.01';
 
 my $debug = 0;
@@ -312,7 +314,37 @@ sub check_events{
 		# GAME TURN
 		if ( $ev->{type} eq 'game turn' ){
 			next unless $ev->{check} == $game->{turn};
-			print "EVENT game turn: $ev->{action}\n";
+			print "EVENT game turn: $ev->{note}\n";
+			#use Data::Dump; dd $game->{hero}; dd $game->{timeline};
+			if ( $ev->{target} eq 'hero' ){
+			
+				if ( $ev->{target_attr} eq 'energy_gain' ){
+				
+					$game->{hero}->{energy_gain} += $ev->{target_mod};
+					#use Data::Dump; dd $game->{hero};
+					
+					if( $ev->{duration} ){
+						push @{$game->{timeline}[ $game->{turn} + $ev->{duration} ]}, 
+							Game::Term::Event->new( 
+											type 	=> 'game turn', 
+											check 	=> 3, 
+											note	=> 'END of +5 energy gain buff',
+											target 	=> 'hero',
+											target_attr => 'energy_gain',
+											target_mod 	=> -5,
+											#duration => 3,
+											
+											);
+						#use Data::Dump; dd $game->{hero}; dd $game->{timeline};
+					}
+					
+				
+				}
+			
+			}
+			
+			use Data::Dump; dd $game->{hero}; dd $game->{timeline};
+			
 			next;			
 		}
 		elsif ( $ev->{type} eq 'hero at' ){
