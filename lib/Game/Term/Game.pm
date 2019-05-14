@@ -61,16 +61,29 @@ sub new{
 				
 				events => [ @events ],
 				
+				timeline => [],
+				
 				turn => 0,
 				
 				
 	}, $class;
+	# push time events in the timeline (removing from events)
+	$game->init_timeline();
 	# load and overwrite info about hero and current scenario(map,creatures,..)from gamestate.sto
 	$game->get_game_state();
 	
 	return $game;
 }
 
+sub init_timeline{
+	my $game = shift;
+	foreach my $ev( @{$game->{events}} ){
+		next unless $ev->{type} eq 'game turn';
+		push @{$game->{timeline}[ $ev->{check} ]}, $ev;
+		undef $ev;	
+	}
+	#use Data::Dump; dd $game->{timeline};
+}
 
 sub get_game_state{
 	my $game = shift;
@@ -292,7 +305,8 @@ sub check_events{
 	my $game = shift;
 	print "DEBUG: checking events at turn $game->{turn}..\n" if $debug;
 	#use Data::Dump; dd $game->{events};
-	foreach my $ev( @{$game->{events}} ){
+	# PROCESS regular events(all) AND events in the timeline for the current turn
+	foreach my $ev( @{$game->{events}}, @{$game->{timeline}[ $game->{turn} ]} ){
 		next unless $ev;
 		print "DEBUG: analyzing event of type: $ev->{type}..\n" if $debug;
 		# GAME TURN
