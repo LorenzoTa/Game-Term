@@ -321,7 +321,7 @@ sub check_events{
 		# GAME TURN
 		if ( $ev->{type} eq 'game turn' ){
 			next unless $ev->{check} == $game->{turn};
-			print "EVENT game turn: $ev->{note}\n";
+			print "EVENT game turn: $ev->{message}\n";
 			use Data::Dump; dd "BEFORE",$game->{hero}; #dd $game->{timeline};
 			if ( $ev->{target} eq 'hero' ){
 			
@@ -335,7 +335,7 @@ sub check_events{
 							Game::Term::Event->new( 
 											type 	=> 'game turn', 
 											check 	=> $game->{turn} + $ev->{duration} + 1, 
-											note	=> 'END of +5 energy gain buff',
+											message	=> 'END of +5 energy gain buff',
 											target 	=> 'hero',
 											target_attr => 'energy_gain',
 											target_mod 	=> -5,

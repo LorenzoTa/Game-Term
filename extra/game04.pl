@@ -40,7 +40,7 @@ my $scenario = Game::Term::Scenario->new(
 					Game::Term::Event->new( 
 											type 	=> 'game turn', 
 											check 	=> 3, 
-											note	=> 'BUFF! energy gain +5 for 3 turns',
+											message	=> 'BUFF! energy gain +5 for 3 turns',
 											target 	=> 'hero',
 											target_attr => 'energy_gain',
 											target_mod 	=> 5,
@@ -50,7 +50,7 @@ my $scenario = Game::Term::Scenario->new(
 					# Game::Term::Event->new( 
 											# type 	=> 'game turn', 
 											# check 	=> 7, 
-											# note	=> 'NOTHING',
+											# message	=> 'NOTHING',
 											# target 	=> 'hero',
 											# target_attr => 'energy_gain',
 											# target_mod 	=> 5,
@@ -62,7 +62,7 @@ my $scenario = Game::Term::Scenario->new(
 											type => 'hero at', 
 											check => [29,38],
 											first_time_only => 0,								
-											note	=> 'HERO at 29-38',
+											message	=> 'HERO at 29-38',
 											),#
 				],
 );
