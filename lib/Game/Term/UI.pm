@@ -1120,8 +1120,9 @@ sub color_names_to_ANSI {
 				On_Grey89 => ON_ANSI254,
 				On_Grey93 => ON_ANSI255,
 	);
+	return '' unless $_[0] and exists $conv{$_[0]};
 	if(exists $conv{$_[0]}){ return $conv{$_[0]} }
-	elsif( $_[0] eq '' ){return ''}
+	# elsif( $_[0] eq '' ){return ''}
 	else{carp "'$conv{$_[0]}' is not a valid ANSI color name!"}
 }
 
