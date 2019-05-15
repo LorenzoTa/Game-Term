@@ -48,9 +48,10 @@ my %commands =(
 					#my $conf = Game::Term::Configuration->new($filepath);
 					$obj->load_configuration( $filepath );
 					# $obj->init();
-					$obj->{ hero_icon } = [ $obj->{ hero_color }.$obj->{ hero_icon }.RESET, $obj->{ hero_icon }, 1 ];
+					#$obj->{ hero_icon } = [ $obj->{ hero_color }.$obj->{ hero_icon }.RESET, $obj->{ hero_icon }, 1 ];
 	
-					$obj->beautify_map();
+					#$obj->beautify_map();
+					$obj->init();
 					# local $obj->{map} = [$obj->{map}[0][0]];
 					# use Data::Dump; dd $obj;#exit;
 	},
@@ -181,6 +182,7 @@ sub load_configuration{
 	foreach my $key ( keys %interface_conf ){
 		$ui->{ $key } = $interface_conf{ $key };	
 	}
+	#$ui->init();
 }
 
 sub init{
@@ -446,7 +448,15 @@ sub set_map_and_hero{
 	$ui->set_hero_pos();
 	
 	# change hero icon to []
-	$ui->{ hero_icon } = [ color_names_to_ANSI($ui->{ hero_color }).$ui->{ hero_icon }.RESET, $ui->{ hero_icon }, 1 ];
+	print "DEBUG hero icon before: $ui->{ hero_icon }\n";
+	# if ( ref $ui->{ hero_icon } eq 'ARRAY' ){
+		# $ui->{ hero_icon } = ${$ui->{ hero_icon }}[1];
+	# }
+	unless ( ref $ui->{ hero_icon } eq 'ARRAY' ){
+		print "DEBUG: I make it an array..\n";
+		$ui->{ hero_icon } = [ (join '',(color_names_to_ANSI($ui->{ hero_color }),$ui->{ hero_icon },RESET)), $ui->{ hero_icon }, 1 ];
+	}
+	print "DEBUG hero icon after:\n"; use Data::Dump; dd $ui->{ hero_icon };
 		
 	$ui->beautify_map();		
 	
