@@ -448,15 +448,16 @@ sub set_map_and_hero{
 	$ui->set_hero_pos();
 	
 	# change hero icon to []
-	print "DEBUG hero icon before: $ui->{ hero_icon }\n";
+	#print "DEBUG hero icon before: $ui->{ hero_icon }\n";
 	# if ( ref $ui->{ hero_icon } eq 'ARRAY' ){
 		# $ui->{ hero_icon } = ${$ui->{ hero_icon }}[1];
 	# }
 	unless ( ref $ui->{ hero_icon } eq 'ARRAY' ){
-		print "DEBUG: I make it an array..\n";
-		$ui->{ hero_icon } = [ (join '',(color_names_to_ANSI($ui->{ hero_color }),$ui->{ hero_icon },RESET)), $ui->{ hero_icon }, 1 ];
+		# print "DEBUG: I make it an array..\n";
+		# $ui->{ hero_icon } = [ (join '',(color_names_to_ANSI($ui->{ hero_color }),$ui->{ hero_icon },RESET)), $ui->{ hero_icon }, 1 ];
+		$ui->{ hero_icon } = [ color_names_to_ANSI($ui->{ hero_color }).$ui->{ hero_icon }.RESET , $ui->{ hero_icon }, 1 ];
 	}
-	print "DEBUG hero icon after:\n"; use Data::Dump; dd $ui->{ hero_icon };
+	#print "DEBUG hero icon after:\n"; use Data::Dump; dd $ui->{ hero_icon };
 		
 	$ui->beautify_map();		
 	
