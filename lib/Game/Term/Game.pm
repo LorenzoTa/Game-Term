@@ -323,6 +323,7 @@ sub check_events{
 			next unless $ev->{check} == $game->{turn};
 			print "EVENT game turn: $ev->{message}\n";
 			use Data::Dump; dd "BEFORE",$game->{hero}; #dd $game->{timeline};
+			# HERO target
 			if ( $ev->{target} eq 'hero' ){
 			
 				if ( $ev->{target_attr} eq 'energy_gain' ){
