@@ -39,11 +39,12 @@ my %commands =(
 					# $obj->draw_menu(["hero HP: 42","walk with WASD"]);
 	},
 	
-	load_configuration => sub{ my $obj = shift;
+	configuration => sub{ my $obj = shift;
 					my $filepath = shift;
 					unless ($filepath){
-						print "provide a file path to load the configuration from\n";
-						return;
+						print "No file was passed: loading the default one from $obj->{from}\n";
+						$filepath = $obj->{from};
+						#return;
 					}
 					#my $conf = Game::Term::Configuration->new($filepath);
 					$obj->load_configuration( $filepath );
@@ -54,6 +55,7 @@ my %commands =(
 					$obj->init();
 					# local $obj->{map} = [$obj->{map}[0][0]];
 					# use Data::Dump; dd $obj;#exit;
+					return 1;
 	},
 		
 	# COMMAND EXECUTED BY GAME (returned to game as strings)
@@ -180,7 +182,7 @@ sub load_configuration{
 	$interface_conf{dec_color} = color_names_to_ANSI($interface_conf{dec_color});
 	# apply
 	foreach my $key ( keys %interface_conf ){
-		$ui->{ $key } = $interface_conf{ $key };	
+		$ui->{ $key } = $interface_conf{ $key };	#?????????????????????????????????????????????????
 	}
 	#$ui->init();
 }
