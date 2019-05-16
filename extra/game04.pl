@@ -59,6 +59,17 @@ my $scenario = Game::Term::Scenario->new(
 											
 											
 											),#
+					Game::Term::Event->new( 
+											type 	=> 'game turn', 
+											check 	=> 10, 
+											target 	=> 'hero', 
+											target_attr => 'sight',
+											target_mod 	=> 5,
+											duration => 3,
+											message	=> 'BUFF! sight radius +5 for 3 turns',
+											
+											
+											),#
 											
 					Game::Term::Event->new( 
 											type => 'actor at',

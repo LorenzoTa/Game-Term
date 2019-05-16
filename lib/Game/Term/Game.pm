@@ -336,24 +336,39 @@ sub check_events{
 		# GAME TURN EVENT
 		if ( $target and $ev->{type} eq 'game turn' ){
 			next unless $ev->{check} == $game->{turn};
-			# print "EVENT game turn: $ev->{message}\n" if $game->{is_runnig};
-			use Data::Dump; dd "BEFORE",$$target if $target;		
+			
+			use Data::Dump; dd "BEFORE",$$target if $target;
+			# ENERGY GAIN
 			if ( $ev->{target_attr} eq 'energy_gain' ){
 			
 				$$target->{energy_gain} += $ev->{target_mod};
-				dd "AFTER",$$target;
-				if( $ev->{duration} ){
-					push @{$game->{timeline}[ $game->{turn} + $ev->{duration} + 1]}, 
-						Game::Term::Event->new( 
-								type 	=> 'game turn', 
-								check 	=> $game->{turn} + $ev->{duration} + 1, 
-								message	=> "END of + $ev->{target_mod} energy gain buff",
-								target 	=> $ev->{target} eq 'hero' ? 'hero' : $ev->{target},
-								target_attr => 'energy_gain',
-								target_mod 	=> - $ev->{target_mod},										
-						);
-				}			
-			}		
+						
+			}
+			# SIGHT (only for the hero)
+			elsif( $ev->{target_attr} eq 'sight' ){
+				next unless ref $$target eq 'Game::Term::Actor::Hero';
+				$$target->{sight} += $ev->{target_mod};
+				# but sight is implemented in UI..
+				$game->{ui}{hero_sight} += $ev->{target_mod};
+			}
+			else{die "Unknown target_attr!"}
+			
+			dd "AFTER",$$target;
+			
+			# DURATION ( a negative effect after some turn )
+			if( $ev->{duration} ){
+				push @{$game->{timeline}[ $game->{turn} + $ev->{duration} + 1]}, 
+					Game::Term::Event->new( 
+							type 	=> 'game turn', 
+							check 	=> $game->{turn} + $ev->{duration} + 1, 
+							message	=> "END of + $ev->{target_mod} energy gain buff",
+							target 	=> $ev->{target} eq 'hero' ? 'hero' : $ev->{target},
+							target_attr => $ev->{target_attr},
+							target_mod 	=> - $ev->{target_mod},										
+					);
+			}	
+			
+			
 			use Data::Dump;  dd $game->{timeline};			
 			next;			
 		}
