@@ -369,7 +369,7 @@ sub check_events{
 			}	
 			
 			
-			use Data::Dump;  dd $game->{timeline};			
+			dd $game->{timeline} if $debug;			
 			next;			
 		}
 		# ACTOR AT EVENT
@@ -391,9 +391,6 @@ sub check_events{
 	
 	# CLEAN timeline
 	$game->{timeline}[ $game->{turn} ] = undef;
-	
-	
-	#return;
 
 }
 
