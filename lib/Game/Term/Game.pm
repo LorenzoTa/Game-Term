@@ -8,6 +8,7 @@ use File::Spec;
 use YAML::XS qw(Dump DumpFile LoadFile);
 use Storable qw(store retrieve);
 use Time::HiRes qw ( sleep );
+use Carp;
 
 use Game::Term::Configuration;
 use Game::Term::UI;
@@ -313,53 +314,55 @@ sub play{
 sub check_events{
 	my $game = shift;
 	print "DEBUG: checking events at turn $game->{turn}..\n" if $debug;
-	#use Data::Dump; dd $game->{events};
+	
 	# PROCESS regular events(all) AND events in the timeline for the current turn
 	foreach my $ev( @{$game->{events}}, @{$game->{timeline}[ $game->{turn} ]} ){
 		next unless $ev;
 		print "DEBUG: analyzing event of type: $ev->{type}..\n" if $debug;
-		# GAME TURN
-		if ( $ev->{type} eq 'game turn' ){
+		
+		# SELECT target
+		my $target;
+		if( $ev->{target} eq 'hero' ){
+			$target = \$game->{hero};
+		}
+		elsif ( my @byname = grep{$_->{name} =~ /$ev->{target}/ }@{$game->{actors}}  ){
+			$target = \$byname[0];		
+		}
+		else{ $target = undef; } # map events?
+		
+		#use Data::Dump; dd "BEFORE",$$target if $target;
+		print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_runnig};
+			
+		# GAME TURN EVENT
+		if ( $target and $ev->{type} eq 'game turn' ){
 			next unless $ev->{check} == $game->{turn};
-			print "EVENT game turn: $ev->{message}\n";
-			use Data::Dump; dd "BEFORE",$game->{hero}; #dd $game->{timeline};
-			# HERO target
-			if ( $ev->{target} eq 'hero' ){
+			# print "EVENT game turn: $ev->{message}\n" if $game->{is_runnig};
+			use Data::Dump; dd "BEFORE",$$target if $target;		
+			if ( $ev->{target_attr} eq 'energy_gain' ){
 			
-				if ( $ev->{target_attr} eq 'energy_gain' ){
-				
-					$game->{hero}->{energy_gain} += $ev->{target_mod};
-					#use Data::Dump; dd $game->{hero};
-					
-					if( $ev->{duration} ){
-						push @{$game->{timeline}[ $game->{turn} + $ev->{duration} + 1]}, 
-							Game::Term::Event->new( 
-											type 	=> 'game turn', 
-											check 	=> $game->{turn} + $ev->{duration} + 1, 
-											message	=> 'END of +5 energy gain buff',
-											target 	=> 'hero',
-											target_attr => 'energy_gain',
-											target_mod 	=> -5,
-											#duration => 3,
-											
-											);
-						#use Data::Dump; dd $game->{hero}; dd $game->{timeline};
-					}
-					
-				
-				}
-			
-			}
-			
-			use Data::Dump; dd "AFTER",$game->{hero}; dd $game->{timeline};
-			
+				$$target->{energy_gain} += $ev->{target_mod};
+				dd "AFTER",$$target;
+				if( $ev->{duration} ){
+					push @{$game->{timeline}[ $game->{turn} + $ev->{duration} + 1]}, 
+						Game::Term::Event->new( 
+								type 	=> 'game turn', 
+								check 	=> $game->{turn} + $ev->{duration} + 1, 
+								message	=> "END of + $ev->{target_mod} energy gain buff",
+								target 	=> $ev->{target} eq 'hero' ? 'hero' : $ev->{target},
+								target_attr => 'energy_gain',
+								target_mod 	=> - $ev->{target_mod},										
+						);
+				}			
+			}		
+			use Data::Dump;  dd $game->{timeline};			
 			next;			
 		}
-		elsif ( $ev->{type} eq 'hero at' ){
+		# ACTOR AT EVENT
+		elsif ( $target and $ev->{type} eq 'actor at' ){
 			# use Data::Dump; dd $ev; dd $game->{hero};
-			next unless $ev->{check}->[0] == $game->{hero}{y};
-			next unless $ev->{check}->[1] == $game->{hero}{x};
-			print "EVENT hero at: $ev->{action}\n";
+			next unless $ev->{check}->[0] == $$target->{y};
+			next unless $ev->{check}->[1] == $$target->{x};
+			# print "EVENT hero at: $ev->{action}\n";
 			
 			if ( $ev->{first_time_only} ){
 				undef $ev;

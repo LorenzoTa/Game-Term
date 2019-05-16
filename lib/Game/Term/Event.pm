@@ -19,7 +19,7 @@ sub validate_conf{
 	my %params = @_;
 	$params{type} //= 'UNKNOWN EVENT TYPE';
 	my %valid = (
-		'hero at' 	=> 1,
+		'actor at' 	=> 1,
 		'game turn' => 1,
 	);
 	croak "Unknown event type [$params{type}]!" unless exists $valid{ $params{type} };

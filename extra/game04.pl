@@ -39,30 +39,33 @@ my $scenario = Game::Term::Scenario->new(
 				events => [
 					Game::Term::Event->new( 
 											type 	=> 'game turn', 
-											check 	=> 3, 
-											message	=> 'BUFF! energy gain +5 for 3 turns',
-											target 	=> 'hero',
+											check 	=> 3, # turn 3
+											target 	=> 'hero', # special string for hero
 											target_attr => 'energy_gain',
 											target_mod 	=> 5,
 											duration => 3,
+											message	=> 'BUFF! energy gain +5 for 3 turns',
+											
 											
 											),#
-					# Game::Term::Event->new( 
-											# type 	=> 'game turn', 
-											# check 	=> 7, 
-											# message	=> 'NOTHING',
-											# target 	=> 'hero',
-											# target_attr => 'energy_gain',
-											# target_mod 	=> 5,
-											# duration => 3,
+					Game::Term::Event->new( 
+											type 	=> 'game turn', 
+											check 	=> 5, # turn 5
+											target 	=> 'DUE', # the name of the actor
+											target_attr => 'energy_gain',
+											target_mod 	=> 5,
+											duration => 3,
+											message	=> 'BUFF! energy gain +5 for 3 turns',
 											
-											# ),#
+											
+											),#
 											
 					Game::Term::Event->new( 
-											type => 'hero at', 
-											check => [29,38],
+											type => 'actor at',
+											target => 'hero',
+											check => [29,38], # [y,x]
 											first_time_only => 0,								
-											message	=> 'HERO at 29-38',
+											message	=> 'creature at 29-38',
 											),#
 				],
 );

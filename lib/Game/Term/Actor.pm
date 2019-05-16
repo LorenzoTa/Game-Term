@@ -16,6 +16,7 @@ sub new{
 sub validate_conf{
 	my %params = @_;
 	$params{name} //= 'unnamed';
+	$params{race} //= 'unknown';
 	$params{hitpoints} //= 1;
 	$params{energy} //= 0;
 	$params{energy_gain} //= 5;
