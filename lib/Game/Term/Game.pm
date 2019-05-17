@@ -331,7 +331,7 @@ sub check_events{
 		else{ $target = undef; } # map events?
 		
 		#use Data::Dump; dd "BEFORE",$$target if $target;
-		print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_runnig};
+		print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
 			
 		# GAME TURN EVENT
 		if ( $target and $ev->{type} eq 'game turn' ){
