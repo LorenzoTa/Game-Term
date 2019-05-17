@@ -34,7 +34,7 @@ The present document describes Game::Term version 0.01
 
     my $scenario = Game::Term::Scenario->new(
         name => 'Test Scenario 1',
-        creatures => [
+        actors => [
                         Game::Term::Actor->new( name => 'ONE', y => 5, x => 5 ),
                         Game::Term::Actor->new( name => 'TWO', y => 5, x => 7, energy_gain => 2 ),					
                      ]
@@ -122,7 +122,7 @@ Each tile of the map inside the UI will hold an anonymous array with 3 elements:
 
 =back
 
-The map only contains terrain informations, no creatures nor the hero.
+The map only contains terrain informations, no actors nor the hero.
 
 
 =head2 UI
@@ -146,14 +146,14 @@ The scenario is handled using the L<Game::Term::Scenario> module and its few met
 
 If an argument is passed to the program setting up the scenario this will be used as hero's starting position. This argument is passed in like: C<south5> meaning on the south side of the map at tile 5 (starting from 0) or C<west22> or similar. 
 
-The scenario will also sets all default intial values for: the hero position, number and kind of present creatures and every other entities  a scenario can hold.
+The scenario will also sets all default intial values for: the hero position, number and kind of present actors and every other entities  a scenario can hold.
 
 
 =head2 game state and user's saves
 
 The game object created using L<Game::Term::Game> will take track of the game state in a file (normally C<GameState.sto> stored in the main game diretory as stated in the configuration). This file will hold the hero's state and the information about progress achieved in each scenario.
 
-If the hero come back to an already visited scenario, parts of the map already explored will be visible e and creatures already defeated (or enigmas already resolved) will be not present.
+If the hero come back to an already visited scenario, parts of the map already explored will be visible e and actors already defeated (or enigmas already resolved) will be not present.
 
 This beahviour and the above descripted scenario ability (to receive as argument the hero's starting position), make a scenario reusable during game different phases.
 
@@ -173,13 +173,13 @@ It needs to be feed with a scenario and a UI and (if not retrieved looking into 
 The game object receives user's command from the UI, performs it's own operations and instruct the UI on how the screen has to be drawn.
 
 
-=head2 hero and creatures
+=head2 hero and actors
 
-Hero (impersoned by the user) and creatures belong to the C<Game::Term::Actor> class. Hero in particular is an object of the derived class C<Game::Term::Actor::Hero>
+Hero (impersoned by the user) and actors belong to the C<Game::Term::Actor> class. Hero in particular is an object of the derived class C<Game::Term::Actor::Hero>
 
 The C<Game::Term::Actor> class defines few common attributes and has information used by the movement system. Each actor in the game loop receives an amount of energy as specified by its C<energy_gain> properties. When energy reaches a given treshold the actor can move.
 
-This will results in creatures moving at different speed while in reality they just receive less or more moves in respect to the hero.
+This will results in actors moving at different speed while in reality they just receive less or more moves in respect to the hero.
 
 Hero in addition has a sight that modifies the area of the map currently without the "fog of war" and the amplitude of the explored map. This sight range will be shorter while the hero is inside a wood and greater when hero is on elevated places like hills or mountains.
 
