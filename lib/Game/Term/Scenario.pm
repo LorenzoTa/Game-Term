@@ -29,7 +29,7 @@ sub new{
 	
 		name => $param{name} // 'scenario name',
 		map	=> $param{map},
-		creatures => $param{creatures}//[],
+		actors => $param{actors}//[],
 		events	=> $param{events}//[],
 				
 	}, $class; 

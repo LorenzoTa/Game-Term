@@ -281,7 +281,7 @@ sub set_map_offsets{
 }
 sub draw_map{
 	my $ui = shift;
-	my @creatures = @_;
+	my @actors = @_;
 	# clear screen
 	system $ui->{ cls_cmd } unless $debug;
 	
@@ -291,12 +291,12 @@ sub draw_map{
 	# goto LOOP needed to have multiple locals to work (thanks mst from irc)
 	my $index = 0;
 	LOOP:
-	local $ui->{map}[ $creatures[$index]->{y} ][ $creatures[$index]->{x} ][0] 
+	local $ui->{map}[ $actors[$index]->{y} ][ $actors[$index]->{x} ][0] 
 		= 
-	color_names_to_ANSI($creatures[$index]->{color}).$creatures[$index]->{icon}.RESET
-	if $creatures[$index] and exists $seen{ $creatures[$index]->{y}.'_'.$creatures[$index]->{x} };
+	color_names_to_ANSI($actors[$index]->{color}).$actors[$index]->{icon}.RESET
+	if $actors[$index] and exists $seen{ $actors[$index]->{y}.'_'.$actors[$index]->{x} };
 	$index++; 
-	goto LOOP if $index <= $#creatures;
+	goto LOOP if $index <= $#actors;
  	
 	# draw hero
 	# this must set $hero->{on_terrain}

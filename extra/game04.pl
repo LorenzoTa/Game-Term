@@ -17,7 +17,7 @@ use Game::Term::Event;
 my $scenario = Game::Term::Scenario->new( 
 				map=> Game::Term::Map->new(fake_map=>'one')->{data},
 				name => 'Test Scenario 2',
-				creatures => [
+				actors => [
 					Game::Term::Actor->new(	
 											name=>'UNO',
 											y=>26,

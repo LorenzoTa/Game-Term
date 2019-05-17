@@ -41,10 +41,10 @@ sub new{
 										);
 	$param{scenario}->{map} = undef;
 	
-	# check saved scenario data (creatures and map)!!
-	my @actors = @{$param{scenario}->{creatures}};
+	# check saved scenario data (actors and map)!!
+	my @actors = @{$param{scenario}->{actors}};
 	#use Data::Dump; dd $param{scenario};
-	$param{scenario}->{creatures} = undef;
+	$param{scenario}->{actors} = undef;
 	
 	my @events = @{$param{scenario}->{events}};
 	$param{scenario}->{events} = undef;
@@ -72,7 +72,7 @@ sub new{
 	}, $class;
 	# push time events in the timeline (removing from events)
 	$game->init_timeline();
-	# load and overwrite info about hero and current scenario(map,creatures,..)from gamestate.sto
+	# load and overwrite info about hero and current scenario(map,actors,..)from gamestate.sto
 	$game->get_game_state();
 	
 	# INJECT into UI parameters (once defined in Configuration.pm)
@@ -239,7 +239,7 @@ sub play{
 							if $game->{ui}->{hero_terrain} eq 'wood';
 						
 						
-						# draw screen (passing creatures)
+						# draw screen (passing actors)
 						$game->{ui}->draw_map(  @{$game->{actors}}  );
 						$game->{ui}->draw_menu( 
 							[	"walk with WASD or : to enter command mode",
