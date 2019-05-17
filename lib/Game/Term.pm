@@ -194,6 +194,55 @@ User's command can be of two distinct kinds: map commands are essentially moveme
 Generally every command issued while in C<map mode> will result in a screen redraw but the same is not true for all commands issued while in C<command mode> where a pseudo prompt is present.
  
 
+
+=head2 events and timeline
+
+Events are the salt and spices of a sceanrio. They are created from the L<Game::Term::Event> class. They can specify different things happening at some time or under certain condition. For the moment is important to know how they happen and how they modify the game.
+
+Events are created in the scenario perl program and passed to the game object in the C<events =E<gt> [...]> parameter.
+
+Events not triggered at a given turn are left in the game oject and are checcked every game turn to see if they have to be rendered.
+
+Time events are treated differently: once the game object receives them it builds up a B<timeline> structure, a queue of game turns containing one, zero or more events each turn.
+
+This  B<timeline> will be an array of array, like:
+
+ [
+    undef,              # turn 0 no events
+    [ event1 ],         # turn 1 will trigger event1
+    undef,              # turn 2 no events
+    [ event2, event3 ]  # turn will trigger event2 and then event3
+ ]
+
+Once time events are pushed into the B<timeline> they are removed from the game main events list.
+
+When turn 1 will happen ( turns are count based on hero's perspective ) the game object will check its own list of event and events contained in the B<timeline> at the given position. In the above example C<event1> is scheduled to run at turn 1 and it is rendered.
+
+If C<event1> has a C<duration> specified another event is spawned automatically, let's say C<event1-end>, to mark the end of C<event1>.
+
+Let's continue the above example saying that C<event1> will increase hero's sight for 3 turns, the following will happen during the event rendering:
+
+ [
+    undef,              # turn 0 no events
+    [ event1 ],         # turn 1 will trigger event1
+    undef,              # turn 2 no events
+    [ event2, event3 ]  # turn will trigger event2 and then event3
+    [ event1-end ]      # created automatically by event1
+ ]
+
+Time events and events marked to run only once are then removed from any queue. So at the turn 2 the B<timeline> will be:
+
+ [
+    undef,              # turn 0 no events
+    [ undef ],          # turn 1 event already rendered is removed
+    undef,              # turn 2 no events
+    [ event2, event3 ]  # turn will trigger event2 and then event3
+    [ event1-end ]      # created automatically by event1
+ ]
+
+
+
+
 =head1 AUTHOR
 
 LorenzoTa, C<< <lorenzo at cpan.org> >>
