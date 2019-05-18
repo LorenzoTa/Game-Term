@@ -330,9 +330,6 @@ sub check_events{
 		}
 		else{ $target = undef; } # map events?
 		
-		#use Data::Dump; dd "BEFORE",$$target if $target;
-		#print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
-			
 		# GAME TURN EVENT
 		if ( $target and $ev->{type} eq 'game turn' ){
 			next unless $ev->{check} == $game->{turn};
@@ -352,7 +349,7 @@ sub check_events{
 			}
 			else{die "Unknown target_attr!"}
 			
-			#dd "AFTER",$$target;
+			# dd "AFTER",$$target;
 			
 			# DURATION ( a negative effect after some turn )
 			if( $ev->{duration} ){
@@ -360,14 +357,15 @@ sub check_events{
 					Game::Term::Event->new( 
 							type 	=> 'game turn', 
 							check 	=> $game->{turn} + $ev->{duration} + 1, 
-							message	=> "END of + $ev->{target_mod} energy gain buff",
-							target 	=> $ev->{target} eq 'hero' ? 'hero' : $ev->{target},
+							message	=> "END of + $ev->{target_mod} $ev->{target_attr} buff",
+							#target 	=> $ev->{target} eq 'hero' ? 'hero' : $ev->{target},
+							target 	=> $ev->{target} ,
 							target_attr => $ev->{target_attr},
 							target_mod 	=> - $ev->{target_mod},										
 					);
 			}	
 			
-			dd $game->{timeline} if $debug;			
+			#dd $game->{timeline} if $debug;			
 			next;			
 		}
 		# ACTOR AT EVENT
