@@ -74,7 +74,8 @@ my $scenario = Game::Term::Scenario->new(
 					Game::Term::Event->new( 
 											type => 'actor at',
 											target => 'hero',
-											check => [29,38], # [y,x]
+											#check => [29,38], # [y,x]
+											check => [ [29,36],[29,37],[29,38],[29,39] ],
 											first_time_only => 0,								
 											message	=> 'creature at 29-38',
 											),#

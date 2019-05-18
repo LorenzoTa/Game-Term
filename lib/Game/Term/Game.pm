@@ -331,13 +331,14 @@ sub check_events{
 		else{ $target = undef; } # map events?
 		
 		#use Data::Dump; dd "BEFORE",$$target if $target;
-		print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
+		#print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
 			
 		# GAME TURN EVENT
 		if ( $target and $ev->{type} eq 'game turn' ){
 			next unless $ev->{check} == $game->{turn};
 			
 			use Data::Dump; dd "BEFORE",$$target if $target;
+			print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
 			# ENERGY GAIN
 			if ( $ev->{target_attr} eq 'energy_gain' ){
 			
@@ -375,10 +376,11 @@ sub check_events{
 		# ACTOR AT EVENT
 		elsif ( $target and $ev->{type} eq 'actor at' ){
 			# use Data::Dump; dd $ev; dd $game->{hero};
-			next unless $ev->{check}->[0] == $$target->{y};
-			next unless $ev->{check}->[1] == $$target->{x};
+# next unless $ev->{check}->[0] == $$target->{y};
+# next unless $ev->{check}->[1] == $$target->{x};
+			next unless _is_inside( [$$target->{y}, $$target->{x}],  $ev->{check} );
 			# print "EVENT hero at: $ev->{action}\n";
-			
+			print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
 			if ( $ev->{first_time_only} ){
 				undef $ev;
 			}
@@ -392,6 +394,25 @@ sub check_events{
 	# CLEAN timeline
 	$game->{timeline}[ $game->{turn} ] = undef;
 
+}
+
+sub _is_inside{
+	my $it   = shift;
+	my $area = shift;
+	# an array of coordinates was passed
+	if( ref $area->[0] eq 'ARRAY' ){
+	print "ARRAY!!!!!";dd $area;
+		my $res = grep{
+			$it->[0] == $_->[0] and $it->[1] == $_->[1]
+		} @$area;
+		dd "RES:",$res;
+		return $res;
+	}
+	# a single tile was passed as area
+	else{
+		return ( $it->[0] == $area->[0] and $it->[1] == $area->[1] ) ? 1 : 0;
+	}
+	
 }
 
 sub is_walkable{
