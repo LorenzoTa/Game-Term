@@ -74,10 +74,24 @@ my $scenario = Game::Term::Scenario->new(
 					Game::Term::Event->new( 
 											type => 'actor at',
 											target => 'hero',
-											#check => [29,38], # [y,x]
-											check => [ [29,36],[29,37],[29,38],[29,39] ],
+											check => [29,38], # [y,x]
+											#check => [ [29,36],[29,37],[29,38],[29,39] ],
 											first_time_only => 0,								
 											message	=> 'creature at 29-38',
+											),#
+					
+					Game::Term::Event->new( 
+											type => 'map view',
+											target => 'hero',
+											check => [31,32], # [y,x]
+											#check => [ [29,36],[29,37],[29,38],[29,39] ],
+											area => [
+														[30,23],[30,24],[30,25],[30,26],
+														[31,23],[31,24],[31,25],[31,26],
+														[32,23],[32,24],[32,25],[32,26]
+													],
+											# first_time_only => 1,	# always cleared							
+											message	=> 'whatch the river!',
 											),#
 				],
 );

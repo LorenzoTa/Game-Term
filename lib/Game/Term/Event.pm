@@ -21,6 +21,7 @@ sub validate_conf{
 	my %valid = (
 		'actor at' 	=> 1,
 		'game turn' => 1,
+		'map view'	=> 1,
 	);
 	croak "Unknown event type [$params{type}]!" unless exists $valid{ $params{type} };
 	return %params;

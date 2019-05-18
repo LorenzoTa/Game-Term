@@ -340,10 +340,8 @@ sub check_events{
 			use Data::Dump; dd "BEFORE",$$target if $target;
 			print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
 			# ENERGY GAIN
-			if ( $ev->{target_attr} eq 'energy_gain' ){
-			
-				$$target->{energy_gain} += $ev->{target_mod};
-						
+			if ( $ev->{target_attr} eq 'energy_gain' ){			
+				$$target->{energy_gain} += $ev->{target_mod};						
 			}
 			# SIGHT (only for the hero)
 			elsif( $ev->{target_attr} eq 'sight' ){
@@ -375,15 +373,29 @@ sub check_events{
 		}
 		# ACTOR AT EVENT
 		elsif ( $target and $ev->{type} eq 'actor at' ){
-			# use Data::Dump; dd $ev; dd $game->{hero};
-# next unless $ev->{check}->[0] == $$target->{y};
-# next unless $ev->{check}->[1] == $$target->{x};
+			
 			next unless _is_inside( [$$target->{y}, $$target->{x}],  $ev->{check} );
-			# print "EVENT hero at: $ev->{action}\n";
+			
 			print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
-			if ( $ev->{first_time_only} ){
-				undef $ev;
+			
+			undef $ev if  $ev->{first_time_only};
+			
+			next;
+			
+		}
+		# MAP VIEW (ACTOR AT EVENT)
+		elsif ( $target and $ev->{type} eq 'map view' ){
+			
+			next unless _is_inside( [$$target->{y}, $$target->{x}],  $ev->{check} );
+			
+			print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
+			
+			foreach my $tile( @{ $ev->{area} } ){
+				$game->{ui}{map}[$tile->[0]][$tile->[1]][2] = 1;
 			}
+			$game->{ui}->draw_map();
+			undef $ev; # if  $ev->{first_time_only};
+			
 			next;
 			
 		}
@@ -401,18 +413,14 @@ sub _is_inside{
 	my $area = shift;
 	# an array of coordinates was passed
 	if( ref $area->[0] eq 'ARRAY' ){
-	print "ARRAY!!!!!";dd $area;
-		my $res = grep{
-			$it->[0] == $_->[0] and $it->[1] == $_->[1]
+		return grep{
+						$it->[0] == $_->[0] and $it->[1] == $_->[1]
 		} @$area;
-		dd "RES:",$res;
-		return $res;
 	}
 	# a single tile was passed as area
 	else{
 		return ( $it->[0] == $area->[0] and $it->[1] == $area->[1] ) ? 1 : 0;
-	}
-	
+	}	
 }
 
 sub is_walkable{
