@@ -18,17 +18,23 @@ sub new{
 	if( $param{map} and -e -f -s $param{map} ){ # from_file ????
 		$param{map} = Game::Term::Map->new( from => $param{map} )->{data};
 	}
+	elsif( $param{map} and ref $param{map} eq 'Game::Term::Map'  ){
+		$param{map} = $param{map}->{data};
+	}
+	else{
+		print "No map passed in scenario creation: hoping get_map_from_DATA will be called soon\n";
+	}
 	
 	my $scn = bless {
 	
 		name => $param{name} // 'scenario name',
 		map	=> $param{map},
-		creatures => $param{creatures}//[],
-		events	=> [],
+		actors => $param{actors}//[],
+		events	=> $param{events}//[],
 				
 	}, $class; 
 
-	$scn->get_map_from_DATA() unless ref $scn->{map} eq 'ARRAY';
+	# $scn->get_map_from_DATA() unless ref $scn->{map} eq 'ARRAY';
 	
 	return $scn;
 }
@@ -83,15 +89,5 @@ sub set_hero_position{
 	
 	
 }
+1;
 __DATA__
-S                  S
-     tttt  T        
- ttt    tTT t       
-    tt    tT        
-tttttttttttttttt    
-  ttt   tt      mM  
-    wW              
-         mM   ww    
-             wWwW   
-TTTTTTTTT           
-S        X         S

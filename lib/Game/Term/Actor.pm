@@ -16,6 +16,7 @@ sub new{
 sub validate_conf{
 	my %params = @_;
 	$params{name} //= 'unnamed';
+	$params{race} //= 'unknown';
 	$params{hitpoints} //= 1;
 	$params{energy} //= 0;
 	$params{energy_gain} //= 5;
@@ -32,6 +33,9 @@ sub validate_conf{
 	$params{on_tile} = ' ';
 	$params{x} //= undef;
 	$params{y} //= undef;
+	
+	# ADDED stuf removed from configuration
+	$params{sight} //= 5;
 	return %params;
 }
 

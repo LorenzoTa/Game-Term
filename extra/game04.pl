@@ -1,11 +1,11 @@
 use strict;
 use warnings;
+
 use Game::Term::Game;
-
 use Game::Term::Scenario;
-
 use Game::Term::Actor;
 use Game::Term::Actor::Hero;
+use Game::Term::Event;
 
 # # bare minimum scenario with map in DATA
 # my $scenario = Game::Term::Scenario->new();
@@ -17,7 +17,7 @@ use Game::Term::Actor::Hero;
 my $scenario = Game::Term::Scenario->new( 
 				map=> Game::Term::Map->new(fake_map=>'one')->{data},
 				name => 'Test Scenario 2',
-				creatures => [
+				actors => [
 					Game::Term::Actor->new(	
 											name=>'UNO',
 											y=>26,
@@ -34,8 +34,68 @@ my $scenario = Game::Term::Scenario->new(
 					Game::Term::Actor->new(name=>'TRE',y=>28, x=>51,energy_gain=>2),
 					#Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
 					
-				]);
-#use Data::Dump; dd $scenario;
+				],
+				
+				events => [
+					Game::Term::Event->new( 
+											type 	=> 'game turn', 
+											check 	=> 3, # turn 3
+											target 	=> 'hero', # special string for hero
+											target_attr => 'energy_gain',
+											target_mod 	=> 5,
+											duration => 3,
+											message	=> 'BUFF! energy gain +5 for 3 turns',
+											
+											
+											),#
+					Game::Term::Event->new( 
+											type 	=> 'game turn', 
+											check 	=> 5, # turn 5
+											target 	=> 'DUE', # the name of the actor
+											target_attr => 'energy_gain',
+											target_mod 	=> 5,
+											duration => 3,
+											message	=> 'BUFF! energy gain +5 for 3 turns',
+											
+											
+											),#
+					Game::Term::Event->new( 
+											type 	=> 'game turn', 
+											check 	=> 10, 
+											target 	=> 'hero', 
+											target_attr => 'sight',
+											target_mod 	=> 5,
+											duration => 3,
+											message	=> 'BUFF! sight radius +5 for 3 turns',
+											
+											
+											),#
+											
+					Game::Term::Event->new( 
+											type => 'actor at',
+											target => 'hero',
+											check => [29,38], # [y,x]
+											#check => [ [29,36],[29,37],[29,38],[29,39] ],
+											first_time_only => 0,								
+											message	=> 'creature at 29-38',
+											),#
+					
+					Game::Term::Event->new( 
+											type => 'map view',
+											target => 'hero',
+											check => [31,32], # [y,x]
+											#check => [ [29,36],[29,37],[29,38],[29,39] ],
+											area => [
+														[30,23],[30,24],[30,25],[30,26],[30,27],
+														[31,23],[31,24],[31,25],[31,26],[31,27],
+														[32,23],[32,24],[32,25],[32,26],[32,27],
+													],
+											# first_time_only => 1,	# always cleared							
+											message	=> 'whatch the river!',
+											),#
+				],
+);
+# use Data::Dump; $scenario->{map}=[]; dd $scenario;
 $scenario->set_hero_position( $ARGV[0] // 'south38' );
 
 
@@ -68,5 +128,5 @@ wwwwwwwwww
     wW              
               ww    
              wWwW   
-TTTTTTTTT           
+tTtTtTtTt           
 S                  S

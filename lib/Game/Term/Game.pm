@@ -8,12 +8,15 @@ use File::Spec;
 use YAML::XS qw(Dump DumpFile LoadFile);
 use Storable qw(store retrieve);
 use Time::HiRes qw ( sleep );
+use Carp;
 
 use Game::Term::Configuration;
 use Game::Term::UI;
 
 use Game::Term::Actor;
 use Game::Term::Actor::Hero;
+
+use Game::Term::Event;
 
 our $VERSION = '0.01';
 
@@ -28,7 +31,7 @@ sub new{
 	$param{configuration} //= Game::Term::Configuration->new();
 	
 	$param{scenario} //= Game::Term::Scenario->new( );
-	
+
 	$param{ui} //= Game::Term::UI->new( 
 										configuration => $param{configuration}, 
 										title => $param{scenario}->{name},
@@ -38,10 +41,13 @@ sub new{
 										);
 	$param{scenario}->{map} = undef;
 	
-	# check saved scenario data (creatures and map)!!
-	my @actors = @{$param{scenario}->{creatures}};
+	# check saved scenario data (actors and map)!!
+	my @actors = @{$param{scenario}->{actors}};
 	#use Data::Dump; dd $param{scenario};
-	$param{scenario}->{creatures} = undef;
+	$param{scenario}->{actors} = undef;
+	
+	my @events = @{$param{scenario}->{events}};
+	$param{scenario}->{events} = undef;
 	
 	my $game = bless {
 				is_running => 1,
@@ -56,14 +62,38 @@ sub new{
 				hero => $param{hero},
 				actors	=> [ @actors ],
 				
+				events => [ @events ],
+				
+				timeline => [],
+				
+				turn => 0,
+				
 				
 	}, $class;
-	# load and overwrite info about hero and current scenario(map,creatures,..)from gamestate.sto
+	# push time events in the timeline (removing from events)
+	$game->init_timeline();
+	# load and overwrite info about hero and current scenario(map,actors,..)from gamestate.sto
 	$game->get_game_state();
 	
+	# INJECT into UI parameters (once defined in Configuration.pm)
+	$game->{ui}->{ hero_icon } 		=	$game->{hero}->{icon};
+	$game->{ui}->{ hero_color } 	=	$game->{hero}->{color};
+	$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
+	$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
+	$game->{ui}->init();
+	#use Data::Dump; dd $game->{ui};
 	return $game;
 }
 
+sub init_timeline{
+	my $game = shift;
+	foreach my $ev( @{$game->{events}} ){
+		next unless $ev->{type} eq 'game turn';
+		push @{$game->{timeline}[ $ev->{check} ]}, $ev;
+		undef $ev;	
+	}
+	#use Data::Dump; dd $game->{timeline};
+}
 
 sub get_game_state{
 	my $game = shift;
@@ -147,6 +177,7 @@ sub save_game_state{
 	DumpFile( $state_file.'.yaml', $game_state ) if $debug;
 	
 }
+
 sub play{
 	my $game = shift;
 	#INIT
@@ -163,7 +194,7 @@ sub play{
 			my @usr_cmd = $game->{ui}->get_user_command();
 			next unless @usr_cmd;
 			print "in Game.pm 'command' received: [@usr_cmd]\n" if $debug;
-			$game->commands(@usr_cmd);
+			$game->execute(@usr_cmd);
 			next;
 		}
 		# MAP
@@ -176,8 +207,8 @@ sub play{
 				if ( $actor->{energy} >= 10 and $actor->isa('Game::Term::Actor::Hero') ){
 					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n"
 						 if $debug;
+					
 					# PLAYER: GET USER COMMAND	
-						
 					my @usr_cmd = $game->{ui}->get_user_command();
 					next unless @usr_cmd; # ??? last ???
 					print "in Game.pm 'map' received: [@usr_cmd]\n" if $debug;
@@ -187,7 +218,12 @@ sub play{
 						last;
 					}
 					# movement OK
-					if ( $game->commands(@usr_cmd) ){
+					if ( $game->execute(@usr_cmd) ){
+						# TIME
+						$game->{turn}++;
+						# EVENTS
+						$game->check_events();
+						# RENDER
 						sleep(	
 							$game->{ui}->{hero_slowness} + 
 							# the slowness #4 of the terrain original letter #1 where
@@ -203,17 +239,20 @@ sub play{
 							if $game->{ui}->{hero_terrain} eq 'wood';
 						
 						
-						# draw screen (passing creatures)
+						# draw screen (passing actors)
 						$game->{ui}->draw_map(  @{$game->{actors}}  );
 						$game->{ui}->draw_menu( 
 							[	"walk with WASD or : to enter command mode",
-								"$game->{hero}{name} at y: $game->{hero}{y} ".
+								"(turn: $game->{turn}) $game->{hero}{name} at y: $game->{hero}{y} ".
 								"x: $game->{hero}{x} ($game->{hero}{on_tile})",] 
 						);	
 						$actor->{energy} -= 10;
 					}
 					# NO movement 
-					else{print "DEBUG: no hero move\n"; redo}
+					else{
+							print "DEBUG: no hero move\n"; 
+							redo;
+					}
 				}	
 				# NPC: AUTOMOVE
 				elsif( $actor->{energy} >= 10 ){
@@ -272,6 +311,114 @@ sub play{
 	}
 }
 
+sub check_events{
+	my $game = shift;
+	print "DEBUG: checking events at turn $game->{turn}..\n" if $debug;
+	
+	# PROCESS regular events(all) AND events in the timeline for the current turn
+	foreach my $ev( @{$game->{events}}, @{$game->{timeline}[ $game->{turn} ]} ){
+		next unless $ev;
+		print "DEBUG: analyzing event of type: $ev->{type}..\n" if $debug;
+		
+		# SELECT target
+		my $target;
+		if( $ev->{target} eq 'hero' ){
+			$target = \$game->{hero};
+		}
+		elsif ( my @byname = grep{$_->{name} =~ /$ev->{target}/ }@{$game->{actors}}  ){
+			$target = \$byname[0];		
+		}
+		else{ $target = undef; } # map events?
+		
+		# GAME TURN EVENT
+		if ( $target and $ev->{type} eq 'game turn' ){
+			next unless $ev->{check} == $game->{turn};
+			
+			#use Data::Dump; dd "BEFORE",$$target if $target;
+			print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
+			# ENERGY GAIN
+			if ( $ev->{target_attr} eq 'energy_gain' ){			
+				$$target->{energy_gain} += $ev->{target_mod};						
+			}
+			# SIGHT (only for the hero)
+			elsif( $ev->{target_attr} eq 'sight' ){
+				next unless ref $$target eq 'Game::Term::Actor::Hero';
+				$$target->{sight} += $ev->{target_mod};
+				# but sight is implemented in UI..
+				$game->{ui}{hero_sight} += $ev->{target_mod};
+			}
+			else{die "Unknown target_attr!"}
+			
+			# dd "AFTER",$$target;
+			
+			# DURATION ( a negative effect after some turn )
+			if( $ev->{duration} ){
+				push @{$game->{timeline}[ $game->{turn} + $ev->{duration} + 1]}, 
+					Game::Term::Event->new( 
+							type 	=> 'game turn', 
+							check 	=> $game->{turn} + $ev->{duration} + 1, 
+							message	=> "END of + $ev->{target_mod} $ev->{target_attr} buff",
+							#target 	=> $ev->{target} eq 'hero' ? 'hero' : $ev->{target},
+							target 	=> $ev->{target} ,
+							target_attr => $ev->{target_attr},
+							target_mod 	=> - $ev->{target_mod},										
+					);
+			}	
+			
+			#dd $game->{timeline} if $debug;			
+			next;			
+		}
+		# ACTOR AT EVENT
+		elsif ( $target and $ev->{type} eq 'actor at' ){
+			
+			next unless _is_inside( [$$target->{y}, $$target->{x}],  $ev->{check} );
+			
+			print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
+			
+			undef $ev if  $ev->{first_time_only};
+			
+			next;
+			
+		}
+		# MAP VIEW (ACTOR AT EVENT)
+		elsif ( $target and $ev->{type} eq 'map view' ){
+			
+			next unless _is_inside( [$$target->{y}, $$target->{x}],  $ev->{check} );
+			
+			print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
+			
+			foreach my $tile( @{ $ev->{area} } ){
+				$game->{ui}{map}[$tile->[0]][$tile->[1]][2] = 1;
+			}
+			$game->{ui}->draw_map();
+			undef $ev; # always for this kind of events
+			
+			next;
+			
+		}
+		else{die "Unknown event type in Game.pm"}
+		
+	}
+	
+	# CLEAN timeline
+	$game->{timeline}[ $game->{turn} ] = undef;
+
+}
+
+sub _is_inside{
+	my $it   = shift;
+	my $area = shift;
+	# an array of coordinates was passed
+	if( ref $area->[0] eq 'ARRAY' ){
+		return grep{
+						$it->[0] == $_->[0] and $it->[1] == $_->[1]
+		} @$area;
+	}
+	# a single tile was passed as area
+	else{
+		return ( $it->[0] == $area->[0] and $it->[1] == $area->[1] ) ? 1 : 0;
+	}	
+}
 
 sub is_walkable{
 	my $game = shift;
@@ -280,7 +427,7 @@ sub is_walkable{
 	if ( $game->{configuration}->{terrains}{ $tile->[1] }->[4] < 5 ){ return 1}
 	else{return 0}
 }
-sub commands{
+sub execute{
 	my $game = shift;
 	my ($cmd,@args) = @_;
 	my %table = (

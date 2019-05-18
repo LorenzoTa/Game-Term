@@ -34,7 +34,7 @@ The present document describes Game::Term version 0.01
 
     my $scenario = Game::Term::Scenario->new(
         name => 'Test Scenario 1',
-        creatures => [
+        actors => [
                         Game::Term::Actor->new( name => 'ONE', y => 5, x => 5 ),
                         Game::Term::Actor->new( name => 'TWO', y => 5, x => 7, energy_gain => 2 ),					
                      ]
@@ -122,7 +122,7 @@ Each tile of the map inside the UI will hold an anonymous array with 3 elements:
 
 =back
 
-The map only contains terrain informations, no creatures nor the hero.
+The map only contains terrain informations, no actors nor the hero.
 
 
 =head2 UI
@@ -146,14 +146,14 @@ The scenario is handled using the L<Game::Term::Scenario> module and its few met
 
 If an argument is passed to the program setting up the scenario this will be used as hero's starting position. This argument is passed in like: C<south5> meaning on the south side of the map at tile 5 (starting from 0) or C<west22> or similar. 
 
-The scenario will also sets all default intial values for: the hero position, number and kind of present creatures and every other entities  a scenario can hold.
+The scenario will also sets all default intial values for: the hero position, number and kind of present actors and every other entities  a scenario can hold.
 
 
 =head2 game state and user's saves
 
 The game object created using L<Game::Term::Game> will take track of the game state in a file (normally C<GameState.sto> stored in the main game diretory as stated in the configuration). This file will hold the hero's state and the information about progress achieved in each scenario.
 
-If the hero come back to an already visited scenario, parts of the map already explored will be visible e and creatures already defeated (or enigmas already resolved) will be not present.
+If the hero come back to an already visited scenario, parts of the map already explored will be visible e and actors already defeated (or enigmas already resolved) will be not present.
 
 This beahviour and the above descripted scenario ability (to receive as argument the hero's starting position), make a scenario reusable during game different phases.
 
@@ -173,13 +173,13 @@ It needs to be feed with a scenario and a UI and (if not retrieved looking into 
 The game object receives user's command from the UI, performs it's own operations and instruct the UI on how the screen has to be drawn.
 
 
-=head2 hero and creatures
+=head2 hero and actors
 
-Hero (impersoned by the user) and creatures belong to the C<Game::Term::Actor> class. Hero in particular is an object of the derived class C<Game::Term::Actor::Hero>
+Hero (impersoned by the user) and actors belong to the C<Game::Term::Actor> class. Hero in particular is an object of the derived class C<Game::Term::Actor::Hero>
 
 The C<Game::Term::Actor> class defines few common attributes and has information used by the movement system. Each actor in the game loop receives an amount of energy as specified by its C<energy_gain> properties. When energy reaches a given treshold the actor can move.
 
-This will results in creatures moving at different speed while in reality they just receive less or more moves in respect to the hero.
+This will results in actors moving at different speed while in reality they just receive less or more moves in respect to the hero.
 
 Hero in addition has a sight that modifies the area of the map currently without the "fog of war" and the amplitude of the explored map. This sight range will be shorter while the hero is inside a wood and greater when hero is on elevated places like hills or mountains.
 
@@ -193,6 +193,55 @@ User's command can be of two distinct kinds: map commands are essentially moveme
 
 Generally every command issued while in C<map mode> will result in a screen redraw but the same is not true for all commands issued while in C<command mode> where a pseudo prompt is present.
  
+
+
+=head2 events and timeline
+
+Events are the salt and spices of a sceanrio. They are created from the L<Game::Term::Event> class. They can specify different things happening at some time or under certain condition. For the moment is important to know how they happen and how they modify the game.
+
+Events are created in the scenario perl program and passed to the game object in the C<events =E<gt> [...]> parameter.
+
+Events not triggered at a given turn are left in the game oject and are checcked every game turn to see if they have to be rendered.
+
+Time events are treated differently: once the game object receives them it builds up a B<timeline> structure, a queue of game turns containing one, zero or more events each turn.
+
+This  B<timeline> will be an array of array, like:
+
+ [
+    undef,              # turn 0 no events
+    [ event1 ],         # turn 1 will trigger event1
+    undef,              # turn 2 no events
+    [ event2, event3 ]  # turn will trigger event2 and then event3
+ ]
+
+Once time events are pushed into the B<timeline> they are removed from the game main events list.
+
+When turn 1 will happen ( turns are count based on hero's perspective ) the game object will check its own list of event and events contained in the B<timeline> at the given position. In the above example C<event1> is scheduled to run at turn 1 and it is rendered.
+
+If C<event1> has a C<duration> specified another event is spawned automatically, let's say C<event1-end>, to mark the end of C<event1>.
+
+Let's continue the above example saying that C<event1> will increase hero's sight for 3 turns, the following will happen during the event rendering:
+
+ [
+    undef,              # turn 0 no events
+    [ event1 ],         # turn 1 will trigger event1
+    undef,              # turn 2 no events
+    [ event2, event3 ]  # turn will trigger event2 and then event3
+    [ event1-end ]      # created automatically by event1
+ ]
+
+Time events and events marked to run only once are then removed from any queue. So at the turn 2 the B<timeline> will be:
+
+ [
+    undef,              # turn 0 no events
+    [ undef ],          # turn 1 event already rendered is removed
+    undef,              # turn 2 no events
+    [ event2, event3 ]  # turn will trigger event2 and then event3
+    [ event1-end ]      # created automatically by event1
+ ]
+
+
+
 
 =head1 AUTHOR
 
