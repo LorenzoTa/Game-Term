@@ -337,7 +337,7 @@ sub check_events{
 		if ( $target and $ev->{type} eq 'game turn' ){
 			next unless $ev->{check} == $game->{turn};
 			
-			use Data::Dump; dd "BEFORE",$$target if $target;
+			#use Data::Dump; dd "BEFORE",$$target if $target;
 			print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
 			# ENERGY GAIN
 			if ( $ev->{target_attr} eq 'energy_gain' ){			
@@ -352,7 +352,7 @@ sub check_events{
 			}
 			else{die "Unknown target_attr!"}
 			
-			dd "AFTER",$$target;
+			#dd "AFTER",$$target;
 			
 			# DURATION ( a negative effect after some turn )
 			if( $ev->{duration} ){
@@ -366,7 +366,6 @@ sub check_events{
 							target_mod 	=> - $ev->{target_mod},										
 					);
 			}	
-			
 			
 			dd $game->{timeline} if $debug;			
 			next;			
@@ -394,7 +393,7 @@ sub check_events{
 				$game->{ui}{map}[$tile->[0]][$tile->[1]][2] = 1;
 			}
 			$game->{ui}->draw_map();
-			undef $ev; # if  $ev->{first_time_only};
+			undef $ev; # always for this kind of events
 			
 			next;
 			
