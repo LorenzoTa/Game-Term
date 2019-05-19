@@ -615,8 +615,7 @@ sub execute{
 			chomp $num;
 			$num=~s/\s+$//g;
 			if( $num =~/^\d{1,}$/ and defined $game->{hero}{bag}->[$num] ){
-				# print ' '.$game->{ui}->{ dec_ver }.
-					# " chosed item $num\n";
+				# EFFECT AT NEXT TURN
 				push @{$game->{timeline}[ $game->{turn} + 1 ]},
 					Game::Term::Event->new( 
 							type 		=> 'game turn', 
@@ -630,6 +629,7 @@ sub execute{
 				);
 				# REMOVE if consumable
 				undef $game->{hero}{bag}->[$num] if $game->{hero}{bag}->[$num]->{consumable};
+				# USE COUNTS AS MOVING
 				return 1;
 			}
 			else{
@@ -637,6 +637,56 @@ sub execute{
 					" Warning! Not a number or not such item: [$num]\n";
 				return 0;
 			}
+		},
+		# HELP
+		h => sub{
+			my $help =<<'EOH';
+			
+
+
+MAP MODE (exploration)
+
+w   walk north
+a   walk west
+s   walk south
+d   walk east
+
+b   show bag content
+u   use an item in the bag (counts as a move)
+
+h   show this help
+
+l   show labels on the map (to be implemented)
+
+:   switch to COMMAND MODE
+
+
+
+COMMAND MODE (use TAB to autocomplete commands)
+
+save [filename] 
+	save (using YAML) the current game into filename
+	or inside a filename crafted on the fly
+
+load filename
+	reload the game from a specified save
+
+configuration [filename]
+	reload the UI configuration from a YAML file if specified
+	or from the default one
+	
+show_legenda
+	show the legenda of the map (to be implemented)
+	
+return_to_game
+	bring you back to MAP MODE
+  
+EOH
+
+			foreach my $line ( split /\n/,$help ){
+				print ' '.$game->{ui}->{ dec_ver }."\t$line\n";
+			}
+			
 		},
 		##############################################
 		#	LONGER COMMAND WHILE IN COMMAND MODE
