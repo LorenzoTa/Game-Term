@@ -66,6 +66,8 @@ sub new{
 				
 				timeline => [],
 				
+				messages	=> [],
+				
 				turn => 0,
 				
 				
@@ -309,6 +311,11 @@ sub play{
 		}
 	
 	}
+}
+
+sub message{
+	my $game = shift;
+	push @{ $game->{messages}[ $game->{turn} ],shift }
 }
 
 sub check_events{
