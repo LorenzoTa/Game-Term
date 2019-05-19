@@ -461,7 +461,16 @@ sub is_walkable{
 sub execute{
 	my $game = shift;
 	my ($cmd,@args) = @_;
+	# SKIP if the command is a single letter and in command mode
+	if( $game->{ui}->{mode} eq 'command' and $cmd =~/^\w$/){
+		return;	
+	}
 	my %table = (
+		##############################################
+		#	SINGLE LETTER COMMAND WHILE IN MAP MODE
+		#   they return 1 if a movement was done
+		##############################################
+		
 		# MOVE NORTH
 		w => sub{
 			if ( 
@@ -524,7 +533,6 @@ sub execute{
 				return 1;
 			}
 		},
-		
 		# MOVE WEST
 		a => sub{
 			if ( 
@@ -587,16 +595,32 @@ sub execute{
 				return 1;
 			}
 		},
+		
+		##############################################
+		#	LONGER COMMAND WHILE IN COMMAND MODE
+		#	they can print to STDOUT
+		#	following commands has to be sync with
+		#	$term->Attribs->{completion_function} in UI.pm
+		##############################################
+		
 		save=>sub{
-			#print "save sub command received: @_\n";
-			DumpFile( $_[0], $game );
-			print "succesfully saved game to $_[0]\n";
+			my $filename = shift;
+			$filename //= (join'_',split /:|\s+/,$game->{current_scenario}.
+							' '.
+							scalar localtime(time)).'-save.yaml';
+			DumpFile( $filename , $game );
+			print "succesfully saved game to $filename\n";
 		},
 		load=>sub{
+			my $filepath = shift;
+			unless ($filepath){
+				print "provide a file path to load the game from\n";
+				return;
+			}
 			#print "save sub command received: @_\n";
 			#<mst> though %{$obj} = %{LoadFile(...)} might be better
 			# a big thank to mst for the trick!!!
-			%{$game} = %{LoadFile( $_[0] )};
+			%{$game} = %{LoadFile( $filepath )};
 			print "succesfully loaded game from a save file\n";
 			# local $game->{ui}->{map} = [['fake', 'data']];
 			# use Data::Dump; dd $game;#
@@ -605,6 +629,42 @@ sub execute{
 			# infact we are iterating over actors when reloading $game containing them
 			$game->play();
 		},
+		return_to_game=> sub{ 	
+					
+					$game->{ui}->{mode}='map'; 
+					$game->{ui}->draw_map();
+					$game->{ui}->draw_menu( 
+								$game->{turn},
+								$game->{hero},
+								${$game->{messages}}[ $game->{turn}],
+					);
+					return ;
+		},
+		show_legenda => sub{ 
+					print "to be implemented\n";
+		},
+		configuration => sub{ 
+					my $filepath = shift;
+					unless ($filepath){
+						print "No file was passed: loading the default one from ".
+							"$game->{ui}{from}\n";
+						$filepath = $game->{ui}{from};
+						
+					}
+					$game->{ui}->load_configuration( $filepath );
+					$game->{ui}->init();
+					$game->{ui}->draw_map();
+					$game->{ui}->draw_menu( 
+								$game->{turn},
+								$game->{hero},
+								[
+									"loaded configurations from $filepath", 
+									@{$game->{messages}}[ $game->{turn} ]//'' 
+								],
+					);
+					#return 1;
+		},
+		
 		exit => sub{
 			$game->save_game_state();
 			exit 0;

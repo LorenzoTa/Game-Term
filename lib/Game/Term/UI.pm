@@ -23,55 +23,56 @@ our $noscroll_debug = 1;
 # terrain is class data!!
 my %terrain;
 # commands are class data!!
-my %commands =(
-	# COOMANDS EXECUTED BY UI #--> move these to Game.pm
-	return_to_game=> sub{ 	my $obj = shift; 
-					$obj->{mode}='map'; 
-					$obj->draw_map();
-					return ;
-	},
-	show_legenda => sub{ my $obj = shift; 
-					print "to be implemented\n";
+# my %commands =(
+	# # COOMANDS EXECUTED BY UI #--> move these to Game.pm
+	# return_to_game=> sub{ 	my $obj = shift; 
+					# $obj->{mode}='map'; 
+					# $obj->draw_map();
+					# return ;
+	# },
+	# show_legenda => sub{ my $obj = shift; 
+					# print "to be implemented\n";
 					
-	},
+	# },
 	
-	configuration => sub{ my $obj = shift;
-					my $filepath = shift;
-					unless ($filepath){
-						print "No file was passed: loading the default one from $obj->{from}\n";
-						$filepath = $obj->{from};
+	# configuration => sub{ my $obj = shift;
+					# my $filepath = shift;
+					# unless ($filepath){
+						# print "No file was passed: loading the default one from $obj->{from}\n";
+						# $filepath = $obj->{from};
 						
-					}
-					$obj->load_configuration( $filepath );
-					$obj->init();
-					return 1;
-	},
+					# }
+					# $obj->load_configuration( $filepath );
+					# $obj->init();
+					# return 1;
+	# },
 		
-	# COMMAND EXECUTED BY GAME (returned to game as strings)
-	save => sub {
-			my ($ui, @args) = @_;
-			$args[0] //= (join'_',split /:|\s+/,scalar localtime(time)).'-save.yaml';
-			return ('save', $args[0]);
-	},
-	load => sub {
-			my $ui = shift;
-			my $filepath = shift;
-			unless ($filepath){
-				print "provide a file path to load the game from\n";
-				return;
-			}
-			return ('load', $filepath );
-	},
-	exit => sub { return 'exit'},
+	# # COMMAND EXECUTED BY GAME (returned to game as strings)
+	# save => sub {
+			# my ($ui, @args) = @_;
+			# $args[0] //= (join'_',split /:|\s+/,scalar localtime(time)).'-save.yaml';
+			# return ('save', $args[0]);
+	# },
+	# load => sub {
+			# my $ui = shift;
+			# my $filepath = shift;
+			# unless ($filepath){
+				# print "provide a file path to load the game from\n";
+				# return;
+			# }
+			# return ('load', $filepath );
+	# },
+	# exit => sub { return 'exit'},
 	
 	
-);
+# );
 my $term = Term::ReadLine->new('Game Term');
 $term->Attribs->{completion_function} = sub {
             my ($text, $line, $start) = @_;
             # uncomment next line to see debug stuff while you stress autocomplete
             #print 'DEBUG: $text, $line, $start = >'.(join '< >',$text, $line, $start)."<\n";
-            return grep { /^$text/i } sort keys %commands ;
+            #return grep { /^$text/i } sort keys %commands ;
+			return grep { /^$text/i } sort qw( save load return_to_game configuration show_legenda exit ) ;
     };
 # SOME NOTES ABOUT MAP:
 # The map is initially loaded from the data field of the Game::Term::Map object.
@@ -198,31 +199,34 @@ sub get_user_command{
 			
 			$line=~s/\s+$//g;
 			
-			#return $line;
-			
 			my ($cmd,@args)= split /\s+/,$line;
-			if ($commands{$cmd}){
-				# me NO
-				# $ui->$commands{$cmd}->();
-				# ME OK
-				#$commands{$cmd}->($ui,@args);
-				# Corion NO
-				# my $method = $ui->can( $commands{$cmd} );
-				# return $ui->$method();
-				# <mst> because ->can only looks up methods by name
-				# <mst> my $method = $commands{$cmd}; $ui->$method() would work
-				# <mst> which is the long form version of $ui->${\$commands{$cmd}}()
-				# choroba # NO
-				#$ui->${\$commands{$cmd}}->();
-				# <mst>the last -> is the error
-				# <mst>that's not how method calls in perl look
-				# <mst>that's calling the method, then trying to use the return value of the method as a subref
-				#
-				# integral and mst on irc
-				return  $ui->${\$commands{$cmd}}(@args)  #OK
-				# also OK 
-				#return $commands{$cmd}->($ui,@args);
+			
+			if ( $cmd ){
+				return ($cmd, @args);
+			
 			}
+			# if ($commands{$cmd}){
+				# # me NO
+				# # $ui->$commands{$cmd}->();
+				# # ME OK
+				# #$commands{$cmd}->($ui,@args);
+				# # Corion NO
+				# # my $method = $ui->can( $commands{$cmd} );
+				# # return $ui->$method();
+				# # <mst> because ->can only looks up methods by name
+				# # <mst> my $method = $commands{$cmd}; $ui->$method() would work
+				# # <mst> which is the long form version of $ui->${\$commands{$cmd}}()
+				# # choroba # NO
+				# #$ui->${\$commands{$cmd}}->();
+				# # <mst>the last -> is the error
+				# # <mst>that's not how method calls in perl look
+				# # <mst>that's calling the method, then trying to use the return value of the method as a subref
+				# #
+				# # integral and mst on irc
+				# return  $ui->${\$commands{$cmd}}(@args)  #OK
+				# # also OK 
+				# #return $commands{$cmd}->($ui,@args);
+			# }
 			else{return}
 		}	
 		# MAP MODE
