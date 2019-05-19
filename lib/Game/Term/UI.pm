@@ -87,10 +87,8 @@ $term->Attribs->{completion_function} = sub {
 # SOME NOTES ABOUT MAP:
 # The map is initially loaded from the data field of the Game::Term::Map object.
 # It is the AoA containing one character per tile (terrains).
-
 # This original AoA is passed to set_map_and_hero() where it will be enlarged depending
 # on the map_area settings (the display window). Here the offsets used in print will be calculated.
-
 # Then beautify_map() will modify tiles of the map using colors and deciding which character to use
 # when display the map. Tiles of the map will also be transformed into anonymous arrays to hold other
 # types of informations.
@@ -203,11 +201,9 @@ sub get_user_command{
 		my $ui = shift;
 		# COMMAND MODE
 		if ( $ui->{mode} and $ui->{mode} eq 'command' ){
-			# $ui->draw_map();
-			# $ui->draw_menu(["command mode","use TAB to show available commands"]);
+			
 			ReadMode 'normal';
 			my $line = $term->readline('>');
-			#$|++;
 			return unless $line;
 			chomp $line;
 			
@@ -244,13 +240,8 @@ sub get_user_command{
 		else{
 			ReadMode 'cbreak';
 			my $key = ReadKey(0);
-			#if( $ui->move( $key ) ){
-				return $key;
-			#}
-			#else{return}
+			return $key;
 		}
-		
-		
 }
 
 

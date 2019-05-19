@@ -457,6 +457,7 @@ sub is_walkable{
 	if ( $game->{configuration}->{terrains}{ $tile->[1] }->[4] < 5 ){ return 1}
 	else{return 0}
 }
+
 sub execute{
 	my $game = shift;
 	my ($cmd,@args) = @_;
