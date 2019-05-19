@@ -66,6 +66,8 @@ sub new{
 				
 				timeline => [],
 				
+				messages	=> [],
+				
 				turn => 0,
 				
 				
@@ -186,7 +188,14 @@ sub play{
 	# ?? opposite: hero->on_tile = map
 	# $game->{ui}->{map}[$game->{hero}->{y}][$game->{hero}->{x}] = [ " \e[0m",' ',0];
 	$game->{ui}->draw_map();
-	$game->{ui}->draw_menu( ["hero HP: 42","walk with WASD or : to enter command mode"] );	
+	$game->{ui}->draw_menu( 
+							$game->{turn},
+							$game->{hero},
+							[ 
+								"walk with WASD or : to enter command mode",
+								#@{$game->{messages}->[ $game->{turn}]} 
+							]
+	);	
 
 	while($game->{is_running}){
 		# COMMAND
@@ -242,9 +251,9 @@ sub play{
 						# draw screen (passing actors)
 						$game->{ui}->draw_map(  @{$game->{actors}}  );
 						$game->{ui}->draw_menu( 
-							[	"walk with WASD or : to enter command mode",
-								"(turn: $game->{turn}) $game->{hero}{name} at y: $game->{hero}{y} ".
-								"x: $game->{hero}{x} ($game->{hero}{on_tile})",] 
+							$game->{turn},
+							$game->{hero},
+							${$game->{messages}}[ $game->{turn}],
 						);	
 						$actor->{energy} -= 10;
 					}
@@ -286,6 +295,11 @@ sub play{
 						if ( exists $visible{ $actor->{y}.'_'.$actor->{x} } ){
 							print "$actor->{name} in SIGHT!!\n" if $debug;
 							$game->{ui}->draw_map(  @{$game->{actors}}  );
+							$game->{ui}->draw_menu( 
+								$game->{turn},
+								$game->{hero},
+								${$game->{messages}}[ $game->{turn}],
+							);
 						}
 						$actor->{energy} -= 10;
 						print "$actor->{name} at y: $actor->{y} / 0-$#{$game->{ui}->{map}} x: $actor->{x} / 0-$#{$game->{ui}->{map}[0]}\n" if $debug;
@@ -309,6 +323,20 @@ sub play{
 		}
 	
 	}
+}
+
+sub message{
+	my $game = shift;
+	my $msg	= shift;
+	push @{ $game->{messages}[ $game->{turn} ] }, $msg;
+	print "DEBUG: message $msg\n" if $debug;
+	$game->{ui}->draw_map();
+	$game->{ui}->draw_menu( #$game->{messages}[ $game->{turn} ] 
+							$game->{turn},
+							$game->{hero},
+							${$game->{messages}}[ $game->{turn}],
+						
+	);
 }
 
 sub check_events{
@@ -335,7 +363,8 @@ sub check_events{
 			next unless $ev->{check} == $game->{turn};
 			
 			#use Data::Dump; dd "BEFORE",$$target if $target;
-			print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
+			#print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
+			$game->message( $ev->{message} ) if ref $$target eq 'Game::Term::Actor::Hero';
 			# ENERGY GAIN
 			if ( $ev->{target_attr} eq 'energy_gain' ){			
 				$$target->{energy_gain} += $ev->{target_mod};						
@@ -373,8 +402,8 @@ sub check_events{
 			
 			next unless _is_inside( [$$target->{y}, $$target->{x}],  $ev->{check} );
 			
-			print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
-			
+			#print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
+			$game->message( $ev->{message} ) if ref $$target eq 'Game::Term::Actor::Hero';
 			undef $ev if  $ev->{first_time_only};
 			
 			next;
@@ -385,12 +414,13 @@ sub check_events{
 			
 			next unless _is_inside( [$$target->{y}, $$target->{x}],  $ev->{check} );
 			
-			print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
+			# print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
 			
 			foreach my $tile( @{ $ev->{area} } ){
 				$game->{ui}{map}[$tile->[0]][$tile->[1]][2] = 1;
 			}
-			$game->{ui}->draw_map();
+			# $game->{ui}->draw_map();
+			$game->message( $ev->{message} );
 			undef $ev; # always for this kind of events
 			
 			next;

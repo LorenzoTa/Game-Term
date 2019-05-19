@@ -30,7 +30,7 @@ sub validate_conf{
 	};
 	$params{icon} = 'X';
 	$params{color} = 'Fuchsia';
-	$params{on_tile} = ' ';
+	$params{on_tile} //= '';
 	$params{x} //= undef;
 	$params{y} //= undef;
 	

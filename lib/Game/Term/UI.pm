@@ -429,14 +429,21 @@ sub illuminate{
 		
 sub draw_menu{
 	my $ui = shift;
+	my $turn = shift;
+	my $hero = shift;
 	my $messages = shift;
 	# MENU AREA:
 	# print decoration first row
 	print 	$ui->{dec_color},' o',
 			$ui->{ dec_hor } x ( $ui->{ map_area_w } ),
 			$ui->{dec_color},'o',RESET,"\n";	
-	# menu data
-	print ' ',$ui->{ dec_ver }.$_."\n" for @$messages;
+	# menu data: hero
+	print ' ',$ui->{ dec_ver }."(turn $turn) ".
+			"$hero->{name} at y: $hero->{y} ".
+			"x: $hero->{x} (".($hero->{on_tile}//'').")\n";
+	if ($messages){
+		print ' ',$ui->{ dec_ver }.$_."\n" for @$messages;
+	}
 }
 
 sub set_map_and_hero{
