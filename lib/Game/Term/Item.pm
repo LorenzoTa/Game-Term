@@ -6,6 +6,8 @@ use warnings;
 
 use Carp;
 
+#use Game::Term::Event;
+
 sub new{
 	my $class = shift;
 	my %params = validate_conf(@_);
@@ -20,7 +22,9 @@ sub validate_conf{
 	croak "Item needs a neme!" unless $params{name};
 	$params{consumable} //= 0;
 	$params{duration} //= undef;
-	
+	$params{target_attr} //= 'sight';
+	$params{target_mod} //= 5;
+	$params{message} //= '??';
 	
 	
 	return %params;

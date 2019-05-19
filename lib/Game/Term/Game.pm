@@ -259,7 +259,7 @@ sub play{
 					}
 					# NO movement 
 					else{
-							print "DEBUG: no hero move\n"; 
+							print "DEBUG: no hero move\n" if $debug; 
 							redo;
 					}
 				}	
@@ -469,6 +469,7 @@ sub execute{
 		##############################################
 		#	SINGLE LETTER COMMAND WHILE IN MAP MODE
 		#   they return 1 if a movement was done
+		#	or 0 if not (b for bag, u for use, l for labels?)
 		##############################################
 		
 		# MOVE NORTH
@@ -595,7 +596,11 @@ sub execute{
 				return 1;
 			}
 		},
-		
+		# SHOW BAG
+		b => sub{
+			$game->show_bag();
+			return 0;
+		},
 		##############################################
 		#	LONGER COMMAND WHILE IN COMMAND MODE
 		#	they can print to STDOUT
@@ -674,6 +679,20 @@ sub execute{
 	else{return 0};
 }
 
-
+sub show_bag{
+	my $game = shift;
+	@{ $game->{hero}{bag} } = grep { defined } @{ $game->{hero}{bag} };
+	if( @{ $game->{hero}{bag} } ){
+		my $index = 0;
+		print ' '.$game->{ui}->{ dec_ver }." * Bag content *\n";
+		foreach my $item ( sort @{ $game->{hero}{bag} } ){
+			print ' '.$game->{ui}->{ dec_ver }.
+					"[$index]\t$item->{name}\n"
+		}
+	}
+	else{
+		print ' '.$game->{ui}->{ dec_ver }."Bag is empty\n";
+	}	
+}
 
 1;

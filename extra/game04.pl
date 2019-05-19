@@ -6,6 +6,7 @@ use Game::Term::Scenario;
 use Game::Term::Actor;
 use Game::Term::Actor::Hero;
 use Game::Term::Event;
+use Game::Term::Item;
 
 # # bare minimum scenario with map in DATA
 # my $scenario = Game::Term::Scenario->new();
@@ -105,7 +106,20 @@ my $conf = Game::Term::Configuration->new();
 # changes to configuration...
 # $conf->{interface}{masked_map} = 0;
 
-my $hero = Game::Term::Actor::Hero->new( name => 'My New Hero' );
+my $hero = Game::Term::Actor::Hero->new( 
+											name => 'My New Hero',
+											bag => [
+												Game::Term::Item->new(
+													name => 'potion of sight',
+													duration => 3,
+													consumable => 1,
+													target_attr => 'sight',
+													target_mod	=> 10,
+													message => 'Glu.. Glu..',
+													
+												),
+											],
+);
 
 my $game=Game::Term::Game->new( 
 								debug=>1,  # NO bug
