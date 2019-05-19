@@ -601,6 +601,26 @@ sub execute{
 			$game->show_bag();
 			return 0;
 		},
+		# USE ITEM
+		u => sub{
+			print ' '.$game->{ui}->{ dec_ver }.
+					" enter the number of object to use or return\n";
+			$game->show_bag();
+			
+			my $num = $game->{ui}{reader}->readline('use>');
+			return unless $num;
+			chomp $num;
+			$num=~s/\s+$//g;
+			if( $num =~/^\d+$/ and defined $game->{hero}{bag}->[$num] ){
+				print ' '.$game->{ui}->{ dec_ver }.
+					" chosed item $num\n";
+			}
+			else{
+				print ' '.$game->{ui}->{ dec_ver }.
+					" Warning! Not a number or not such item: [$num]\n";
+				return 0;
+			}
+		},
 		##############################################
 		#	LONGER COMMAND WHILE IN COMMAND MODE
 		#	they can print to STDOUT
