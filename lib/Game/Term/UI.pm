@@ -14,88 +14,6 @@ use YAML::XS qw(Dump DumpFile LoadFile);
 use Game::Term::Configuration;
 use Game::Term::Map;
 
-#ReadMode 'cbreak';
-
-our $VERSION = '0.01';
-
-our $debug = 0;
-our $noscroll_debug = 1;
-# terrain is class data!!
-my %terrain;
-# commands are class data!!
-my %commands =(
-	# COOMANDS EXECUTED BY UI
-	return_to_game=> sub{ 	my $obj = shift; 
-					$obj->{mode}='map'; 
-					#$obj->show();
-					# $obj->draw_map();
-					# $obj->draw_menu(["hero HP: 42","walk with WASD or : to enter command mode"]);
-					$obj->draw_map();
-					return ;
-	},
-	show_legenda => sub{ my $obj = shift; 
-					print "to be implemented\n";
-					# $obj->draw_map();
-					# $obj->draw_menu(["hero HP: 42","walk with WASD"]);
-	},
-	
-	configuration => sub{ my $obj = shift;
-					my $filepath = shift;
-					unless ($filepath){
-						print "No file was passed: loading the default one from $obj->{from}\n";
-						$filepath = $obj->{from};
-						#return;
-					}
-					#my $conf = Game::Term::Configuration->new($filepath);
-					$obj->load_configuration( $filepath );
-					# $obj->init();
-					#$obj->{ hero_icon } = [ $obj->{ hero_color }.$obj->{ hero_icon }.RESET, $obj->{ hero_icon }, 1 ];
-	
-					#$obj->beautify_map();
-					$obj->init();
-					# local $obj->{map} = [$obj->{map}[0][0]];
-					# use Data::Dump; dd $obj;#exit;
-					return 1;
-	},
-		
-	# COMMAND EXECUTED BY GAME (returned to game as strings)
-	save => sub {
-			my ($ui, @args) = @_;
-			$args[0] //= (join'_',split /:|\s+/,scalar localtime(time)).'-save.yaml';
-			return ('save', $args[0]);
-	},
-	load => sub {
-			my $ui = shift;
-			my $filepath = shift;
-			unless ($filepath){
-				print "provide a file path to load the game from\n";
-				return;
-			}
-			return ('load', $filepath );
-	},
-	exit => sub { return 'exit'},
-	
-	
-);
-my $term = Term::ReadLine->new('Game Term');
-$term->Attribs->{completion_function} = sub {
-            my ($text, $line, $start) = @_;
-            # uncomment next line to see debug stuff while you stress autocomplete
-            #print 'DEBUG: $text, $line, $start = >'.(join '< >',$text, $line, $start)."<\n";
-            return grep { /^$text/i } sort keys %commands ;
-    };
-# SOME NOTES ABOUT MAP:
-# The map is initially loaded from the data field of the Game::Term::Map object.
-# It is the AoA containing one character per tile (terrains).
-
-# This original AoA is passed to set_map_and_hero() where it will be enlarged depending
-# on the map_area settings (the display window). Here the offsets used in print will be calculated.
-
-# Then beautify_map() will modify tiles of the map using colors and deciding which character to use
-# when display the map. Tiles of the map will also be transformed into anonymous arrays to hold other
-# types of informations.
-
-# Each tile will end to be:  [ 0:to_display,  1:original_terrain_letter,  2:unmasked ]
 BEGIN {
 		# https://www.perlmonks.org/?node_id=1108329
         # you can force Term::ReadLine to load the ::Perl
@@ -113,6 +31,34 @@ BEGIN {
         # see also http://bvr.github.io/2010/11/term-readline/
      $ENV{TERM} = 'not dumb' if $^O eq 'MSWin32';
 }
+
+
+our $VERSION = '0.01';
+
+our $debug = 0;
+our $noscroll_debug = 1;
+
+# terrain is class data!!
+my %terrain;
+
+my $term = Term::ReadLine->new('Game Term');
+$term->Attribs->{completion_function} = sub {
+            my ($text, $line, $start) = @_;
+            # uncomment next line to see debug stuff while you stress autocomplete
+            #print 'DEBUG: $text, $line, $start = >'.(join '< >',$text, $line, $start)."<\n";
+            #return grep { /^$text/i } sort keys %commands ;
+			return grep { /^$text/i } sort qw( save load return_to_game configuration show_legenda exit ) ;
+    };
+# SOME NOTES ABOUT MAP:
+# The map is initially loaded from the data field of the Game::Term::Map object.
+# It is the AoA containing one character per tile (terrains).
+# This original AoA is passed to set_map_and_hero() where it will be enlarged depending
+# on the map_area settings (the display window). Here the offsets used in print will be calculated.
+# Then beautify_map() will modify tiles of the map using colors and deciding which character to use
+# when display the map. Tiles of the map will also be transformed into anonymous arrays to hold other
+# types of informations.
+
+# Each tile will end to be:  [ 0:to_display,  1:original_terrain_letter,  2:unmasked ]
 
 
 sub new{
@@ -203,54 +149,46 @@ sub get_user_command{
 		my $ui = shift;
 		# COMMAND MODE
 		if ( $ui->{mode} and $ui->{mode} eq 'command' ){
-			# $ui->draw_map();
-			# $ui->draw_menu(["command mode","use TAB to show available commands"]);
+			
 			ReadMode 'normal';
 			my $line = $term->readline('>');
-			#$|++;
 			return unless $line;
 			chomp $line;
-			
 			$line=~s/\s+$//g;
-			
-			#return $line;
-			
 			my ($cmd,@args)= split /\s+/,$line;
-			if ($commands{$cmd}){
-				# me NO
-				# $ui->$commands{$cmd}->();
-				# ME OK
-				#$commands{$cmd}->($ui,@args);
-				# Corion NO
-				# my $method = $ui->can( $commands{$cmd} );
-				# return $ui->$method();
-				# <mst> because ->can only looks up methods by name
-				# <mst> my $method = $commands{$cmd}; $ui->$method() would work
-				# <mst> which is the long form version of $ui->${\$commands{$cmd}}()
-				# choroba # NO
-				#$ui->${\$commands{$cmd}}->();
-				# <mst>the last -> is the error
-				# <mst>that's not how method calls in perl look
-				# <mst>that's calling the method, then trying to use the return value of the method as a subref
-				#
-				# integral and mst on irc
-				return  $ui->${\$commands{$cmd}}(@args)  #OK
-				# also OK 
-				#return $commands{$cmd}->($ui,@args);
+			if ( $cmd ){
+				return ($cmd, @args);
 			}
+			# if ($commands{$cmd}){
+				# # me NO
+				# # $ui->$commands{$cmd}->();
+				# # ME OK
+				# #$commands{$cmd}->($ui,@args);
+				# # Corion NO
+				# # my $method = $ui->can( $commands{$cmd} );
+				# # return $ui->$method();
+				# # <mst> because ->can only looks up methods by name
+				# # <mst> my $method = $commands{$cmd}; $ui->$method() would work
+				# # <mst> which is the long form version of $ui->${\$commands{$cmd}}()
+				# # choroba # NO
+				# #$ui->${\$commands{$cmd}}->();
+				# # <mst>the last -> is the error
+				# # <mst>that's not how method calls in perl look
+				# # <mst>that's calling the method, then trying to use the return value of the method as a subref
+				# #
+				# # integral and mst on irc
+				# return  $ui->${\$commands{$cmd}}(@args)  #OK
+				# # also OK 
+				# #return $commands{$cmd}->($ui,@args);
+			# }
 			else{return}
 		}	
 		# MAP MODE
 		else{
 			ReadMode 'cbreak';
 			my $key = ReadKey(0);
-			#if( $ui->move( $key ) ){
-				return $key;
-			#}
-			#else{return}
+			return $key;
 		}
-		
-		
 }
 
 
