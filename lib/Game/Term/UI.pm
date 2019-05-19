@@ -41,14 +41,14 @@ our $noscroll_debug = 1;
 # terrain is class data!!
 my %terrain;
 
-my $term = Term::ReadLine->new('Game Term');
-$term->Attribs->{completion_function} = sub {
-            my ($text, $line, $start) = @_;
-            # uncomment next line to see debug stuff while you stress autocomplete
-            #print 'DEBUG: $text, $line, $start = >'.(join '< >',$text, $line, $start)."<\n";
-            #return grep { /^$text/i } sort keys %commands ;
-			return grep { /^$text/i } sort qw( save load return_to_game configuration show_legenda exit ) ;
-    };
+#my $term = Term::ReadLine->new('Game Term');
+# $term->Attribs->{completion_function} = sub {
+            # my ($text, $line, $start) = @_;
+            # # uncomment next line to see debug stuff while you stress autocomplete
+            # #print 'DEBUG: $text, $line, $start = >'.(join '< >',$text, $line, $start)."<\n";
+            # #return grep { /^$text/i } sort keys %commands ;
+			# return grep { /^$text/i } sort qw( save load return_to_game configuration show_legenda exit ) ;
+    # };
 # SOME NOTES ABOUT MAP:
 # The map is initially loaded from the data field of the Game::Term::Map object.
 # It is the AoA containing one character per tile (terrains).
@@ -77,7 +77,14 @@ sub new{
 	# $ui->init();	
 	# local $ui->{map} = [$ui->{map}[0][0]];
 					# use Data::Dump; dd $ui;#exit;
-	
+	$ui->{reader} = Term::ReadLine->new('Game Term');
+	$ui->{reader}->Attribs->{completion_function} = sub {
+            my ($text, $line, $start) = @_;
+            # uncomment next line to see debug stuff while you stress autocomplete
+            #print 'DEBUG: $text, $line, $start = >'.(join '< >',$text, $line, $start)."<\n";
+            #return grep { /^$text/i } sort keys %commands ;
+			return grep { /^$text/i } sort qw( save load return_to_game configuration show_legenda exit ) ;
+    };
 	return $ui;	
 }
 
@@ -151,7 +158,7 @@ sub get_user_command{
 		if ( $ui->{mode} and $ui->{mode} eq 'command' ){
 			
 			ReadMode 'normal';
-			my $line = $term->readline('>');
+			my $line = $ui->{reader}->readline('>');
 			return unless $line;
 			chomp $line;
 			$line=~s/\s+$//g;

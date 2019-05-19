@@ -82,7 +82,10 @@ sub new{
 	$game->{ui}->{ hero_color } 	=	$game->{hero}->{color};
 	$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
 	$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
+	$game->{ui}->{hero_terrain}		=   'plain';
 	$game->{ui}->init();
+	
+	$game->{hero}{on_tile}			= 	'plain';
 	#use Data::Dump; dd $game->{ui};
 	return $game;
 }
@@ -259,7 +262,7 @@ sub play{
 					}
 					# NO movement 
 					else{
-							print "DEBUG: no hero move\n"; 
+							print "DEBUG: no hero move\n" if $debug; 
 							redo;
 					}
 				}	
@@ -469,6 +472,7 @@ sub execute{
 		##############################################
 		#	SINGLE LETTER COMMAND WHILE IN MAP MODE
 		#   they return 1 if a movement was done
+		#	or 0 if not (b for bag, u for use, l for labels?)
 		##############################################
 		
 		# MOVE NORTH
@@ -595,7 +599,95 @@ sub execute{
 				return 1;
 			}
 		},
-		
+		# SHOW BAG
+		b => sub{
+			$game->show_bag();
+			return 0;
+		},
+		# USE ITEM
+		u => sub{
+			print ' '.$game->{ui}->{ dec_ver }.
+					" enter the number of object to use or return\n";
+			$game->show_bag();
+			
+			my $num = $game->{ui}{reader}->readline('use item number: ');
+			return unless defined $num;
+			chomp $num;
+			$num=~s/\s+$//g;
+			if( $num =~/^\d{1,}$/ and defined $game->{hero}{bag}->[$num] ){
+				# EFFECT AT NEXT TURN
+				push @{$game->{timeline}[ $game->{turn} + 1 ]},
+					Game::Term::Event->new( 
+							type 		=> 'game turn', 
+							check 		=> $game->{turn} + 1, 
+							target 		=> 'hero', 
+							target_attr => $game->{hero}{bag}->[$num]->{target_attr},
+							target_mod 	=> $game->{hero}{bag}->[$num]->{target_mod},
+							duration 	=> $game->{hero}{bag}->[$num]->{duration},
+							message		=> $game->{hero}{bag}->[$num]->{message},
+			
+				);
+				# REMOVE if consumable
+				undef $game->{hero}{bag}->[$num] if $game->{hero}{bag}->[$num]->{consumable};
+				# USE COUNTS AS MOVING
+				return 1;
+			}
+			else{
+				print ' '.$game->{ui}->{ dec_ver }.
+					" Warning! Not a number or not such item: [$num]\n";
+				return 0;
+			}
+		},
+		# HELP
+		h => sub{
+			my $help =<<'EOH';
+			
+
+
+MAP MODE (exploration)
+
+w   walk north
+a   walk west
+s   walk south
+d   walk east
+
+b   show bag content
+u   use an item in the bag (counts as a move)
+
+h   show this help
+
+l   show labels on the map (to be implemented)
+
+:   switch to COMMAND MODE
+
+
+
+COMMAND MODE (use TAB to autocomplete commands)
+
+save [filename] 
+	save (using YAML) the current game into filename
+	or inside a filename crafted on the fly
+
+load filename
+	reload the game from a specified save
+
+configuration [filename]
+	reload the UI configuration from a YAML file if specified
+	or from the default one
+	
+show_legenda
+	show the legenda of the map (to be implemented)
+	
+return_to_game
+	bring you back to MAP MODE
+  
+EOH
+
+			foreach my $line ( split /\n/,$help ){
+				print ' '.$game->{ui}->{ dec_ver }."\t$line\n";
+			}
+			
+		},
 		##############################################
 		#	LONGER COMMAND WHILE IN COMMAND MODE
 		#	they can print to STDOUT
@@ -674,6 +766,20 @@ sub execute{
 	else{return 0};
 }
 
-
+sub show_bag{
+	my $game = shift;
+	@{ $game->{hero}{bag} } = grep { defined } @{ $game->{hero}{bag} };
+	if( @{ $game->{hero}{bag} } ){
+		my $index = 0;
+		print ' '.$game->{ui}->{ dec_ver }." * Bag content *\n";
+		foreach my $item ( sort @{ $game->{hero}{bag} } ){
+			print ' '.$game->{ui}->{ dec_ver }.
+					"[$index]\t$item->{name}\n"
+		}
+	}
+	else{
+		print ' '.$game->{ui}->{ dec_ver }."Bag is empty\n";
+	}	
+}
 
 1;
