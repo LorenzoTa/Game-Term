@@ -27,16 +27,12 @@ my %commands =(
 	# COOMANDS EXECUTED BY UI #--> move these to Game.pm
 	return_to_game=> sub{ 	my $obj = shift; 
 					$obj->{mode}='map'; 
-					#$obj->show();
-					# $obj->draw_map();
-					# $obj->draw_menu(["hero HP: 42","walk with WASD or : to enter command mode"]);
 					$obj->draw_map();
 					return ;
 	},
 	show_legenda => sub{ my $obj = shift; 
 					print "to be implemented\n";
-					# $obj->draw_map();
-					# $obj->draw_menu(["hero HP: 42","walk with WASD"]);
+					
 	},
 	
 	configuration => sub{ my $obj = shift;
@@ -44,17 +40,10 @@ my %commands =(
 					unless ($filepath){
 						print "No file was passed: loading the default one from $obj->{from}\n";
 						$filepath = $obj->{from};
-						#return;
+						
 					}
-					#my $conf = Game::Term::Configuration->new($filepath);
 					$obj->load_configuration( $filepath );
-					# $obj->init();
-					#$obj->{ hero_icon } = [ $obj->{ hero_color }.$obj->{ hero_icon }.RESET, $obj->{ hero_icon }, 1 ];
-	
-					#$obj->beautify_map();
 					$obj->init();
-					# local $obj->{map} = [$obj->{map}[0][0]];
-					# use Data::Dump; dd $obj;#exit;
 					return 1;
 	},
 		
