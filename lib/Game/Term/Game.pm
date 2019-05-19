@@ -82,7 +82,10 @@ sub new{
 	$game->{ui}->{ hero_color } 	=	$game->{hero}->{color};
 	$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
 	$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
+	$game->{ui}->{hero_terrain}		=   'plain';
 	$game->{ui}->init();
+	
+	$game->{hero}{on_tile}			= 	'plain';
 	#use Data::Dump; dd $game->{ui};
 	return $game;
 }
@@ -607,11 +610,11 @@ sub execute{
 					" enter the number of object to use or return\n";
 			$game->show_bag();
 			
-			my $num = $game->{ui}{reader}->readline('use>');
-			return unless $num;
+			my $num = $game->{ui}{reader}->readline('use item number: ');
+			return unless defined $num;
 			chomp $num;
 			$num=~s/\s+$//g;
-			if( $num =~/^\d+$/ and defined $game->{hero}{bag}->[$num] ){
+			if( $num =~/^\d{1,}$/ and defined $game->{hero}{bag}->[$num] ){
 				print ' '.$game->{ui}->{ dec_ver }.
 					" chosed item $num\n";
 			}
