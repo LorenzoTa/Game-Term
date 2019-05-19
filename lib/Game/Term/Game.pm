@@ -615,8 +615,22 @@ sub execute{
 			chomp $num;
 			$num=~s/\s+$//g;
 			if( $num =~/^\d{1,}$/ and defined $game->{hero}{bag}->[$num] ){
-				print ' '.$game->{ui}->{ dec_ver }.
-					" chosed item $num\n";
+				# print ' '.$game->{ui}->{ dec_ver }.
+					# " chosed item $num\n";
+				push @{$game->{timeline}[ $game->{turn} + 1 ]},
+					Game::Term::Event->new( 
+							type 		=> 'game turn', 
+							check 		=> $game->{turn} + 1, 
+							target 		=> 'hero', 
+							target_attr => $game->{hero}{bag}->[$num]->{target_attr},
+							target_mod 	=> $game->{hero}{bag}->[$num]->{target_mod},
+							duration 	=> $game->{hero}{bag}->[$num]->{duration},
+							message		=> $game->{hero}{bag}->[$num]->{message},
+			
+				);
+				# REMOVE if consumable
+				undef $game->{hero}{bag}->[$num] if $game->{hero}{bag}->[$num]->{consumable};
+				return 1;
 			}
 			else{
 				print ' '.$game->{ui}->{ dec_ver }.
