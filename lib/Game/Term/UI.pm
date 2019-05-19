@@ -14,58 +14,33 @@ use YAML::XS qw(Dump DumpFile LoadFile);
 use Game::Term::Configuration;
 use Game::Term::Map;
 
-#ReadMode 'cbreak';
+BEGIN {
+		# https://www.perlmonks.org/?node_id=1108329
+        # you can force Term::ReadLine to load the ::Perl
+        # by setting the ENV PERL_RL variable
+        # but you have to do it in a begin block
+        # before the use statement
+        # try to comment next line: probably ::Perl will be loaded
+        # anyway if it is installed
+        # try to set to a non available sub module
+        # see details: https://metacpan.org/pod/Term::ReadLine#ENVIRONMENT
+     $ENV{PERL_RL}="Perl";
+        # on win32 systems it ENV TERM is 'dumb'
+        # autocompletion is not possible.
+        # try to comment next line on win32 and watch how does not work
+        # see also http://bvr.github.io/2010/11/term-readline/
+     $ENV{TERM} = 'not dumb' if $^O eq 'MSWin32';
+}
+
 
 our $VERSION = '0.01';
 
 our $debug = 0;
 our $noscroll_debug = 1;
+
 # terrain is class data!!
 my %terrain;
-# commands are class data!!
-# my %commands =(
-	# # COOMANDS EXECUTED BY UI #--> move these to Game.pm
-	# return_to_game=> sub{ 	my $obj = shift; 
-					# $obj->{mode}='map'; 
-					# $obj->draw_map();
-					# return ;
-	# },
-	# show_legenda => sub{ my $obj = shift; 
-					# print "to be implemented\n";
-					
-	# },
-	
-	# configuration => sub{ my $obj = shift;
-					# my $filepath = shift;
-					# unless ($filepath){
-						# print "No file was passed: loading the default one from $obj->{from}\n";
-						# $filepath = $obj->{from};
-						
-					# }
-					# $obj->load_configuration( $filepath );
-					# $obj->init();
-					# return 1;
-	# },
-		
-	# # COMMAND EXECUTED BY GAME (returned to game as strings)
-	# save => sub {
-			# my ($ui, @args) = @_;
-			# $args[0] //= (join'_',split /:|\s+/,scalar localtime(time)).'-save.yaml';
-			# return ('save', $args[0]);
-	# },
-	# load => sub {
-			# my $ui = shift;
-			# my $filepath = shift;
-			# unless ($filepath){
-				# print "provide a file path to load the game from\n";
-				# return;
-			# }
-			# return ('load', $filepath );
-	# },
-	# exit => sub { return 'exit'},
-	
-	
-# );
+
 my $term = Term::ReadLine->new('Game Term');
 $term->Attribs->{completion_function} = sub {
             my ($text, $line, $start) = @_;
@@ -84,23 +59,6 @@ $term->Attribs->{completion_function} = sub {
 # types of informations.
 
 # Each tile will end to be:  [ 0:to_display,  1:original_terrain_letter,  2:unmasked ]
-BEGIN {
-		# https://www.perlmonks.org/?node_id=1108329
-        # you can force Term::ReadLine to load the ::Perl
-        # by setting the ENV PERL_RL variable
-        # but you have to do it in a begin block
-        # before the use statement
-        # try to comment next line: probably ::Perl will be loaded
-        # anyway if it is installed
-        # try to set to a non available sub module
-        # see details: https://metacpan.org/pod/Term::ReadLine#ENVIRONMENT
-     $ENV{PERL_RL}="Perl";
-        # on win32 systems it ENV TERM is 'dumb'
-        # autocompletion is not possible.
-        # try to comment next line on win32 and watch how does not work
-        # see also http://bvr.github.io/2010/11/term-readline/
-     $ENV{TERM} = 'not dumb' if $^O eq 'MSWin32';
-}
 
 
 sub new{
@@ -196,14 +154,10 @@ sub get_user_command{
 			my $line = $term->readline('>');
 			return unless $line;
 			chomp $line;
-			
 			$line=~s/\s+$//g;
-			
 			my ($cmd,@args)= split /\s+/,$line;
-			
 			if ( $cmd ){
 				return ($cmd, @args);
-			
 			}
 			# if ($commands{$cmd}){
 				# # me NO
