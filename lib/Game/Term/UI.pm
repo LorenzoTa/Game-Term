@@ -24,7 +24,7 @@ our $noscroll_debug = 1;
 my %terrain;
 # commands are class data!!
 my %commands =(
-	# COOMANDS EXECUTED BY UI
+	# COOMANDS EXECUTED BY UI #--> move these to Game.pm
 	return_to_game=> sub{ 	my $obj = shift; 
 					$obj->{mode}='map'; 
 					#$obj->show();
