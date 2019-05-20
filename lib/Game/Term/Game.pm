@@ -439,6 +439,9 @@ sub check_events{
 			if( $answer =~ /^y/i ){
 					$game->save_game_state();
 					print "DEBUG: exec: ",(join ' ',$^X,'-I .\lib', $ev->{destination}->[0], $ev->{destination}->[1]),"\n";
+					
+					undef $game;
+					
 					exec($^X,'-I .\lib', $ev->{destination}->[0], $ev->{destination}->[1]);
 			}
 			else{ next }
