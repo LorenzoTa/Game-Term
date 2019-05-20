@@ -436,12 +436,18 @@ sub beautify_map{
 	foreach my $row( 0..$#{$ui->{map}} ){
 		# ITERATE COLUMNS by index
 		foreach my $col( 0 .. $#{$ui->{map}->[0]} ){
-			# to allow configuration reload:
-			# IF was already processed reverse from ARRAY to chr
-			if (ref $ui->{map}[$row][$col] eq 'ARRAY'){
-				$ui->{map}[$row][$col] = $ui->{map}[$row][$col]->[1];#die"[$original_letter]";
-			}
 			
+			my $is_a_reload = 0;
+			my $previous_unmasked;
+			# to allow configuration reload:
+			# IF was already processed: save masked/unmasked bit 
+			# and reverse from ARRAY to chr			
+			if (ref $ui->{map}[$row][$col] eq 'ARRAY'){
+				$is_a_reload = 1;
+				$previous_unmasked = $ui->{map}[$row][$col]->[2];
+				$ui->{map}[$row][$col] = $ui->{map}[$row][$col]->[1];#die"[$original_letter]";
+								
+			}
 			# if the letter is defined in %terrain
 			if(exists $terrain{ $ui->{map}[$row][$col] } ){
 				# FOREGROUND COLOR 
@@ -465,6 +471,8 @@ sub beautify_map{
 				$ui->{map}[$row][$col] = [
 						$bg_color.$color.$to_display.RESET	, # 0 to display
 						$ui->{map}[$row][$col]				, # 1 original letter of terrain
+						$is_a_reload		?				  # 	(if reloading conf
+						$previous_unmasked	:                 # 		use old value) 
 						( $ui->{masked_map} ? 0 : 1)		, # 2 unmasked
 				];
 				
