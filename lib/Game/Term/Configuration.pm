@@ -170,8 +170,8 @@ sub terrains_16_colors{
     b => [ 'bridge', '\\', 'Maroon',  '',  0 ],#   ''
 	# C 
 	# c 
-	# D 
-	# d 
+	D => [ 'closed door', 'H', 'Red',  '',  999 ],
+	d => [ 'door', 'H', 'Green',  '',  0 ],
 	# E 
 	# e 
 	# F 
@@ -233,8 +233,8 @@ sub terrains_256_colors{
     b => [ 'bridge', '\\', 'Olive',  '',  0 ],#   ''
 	# C 
 	# c 
-	# D 
-	# d 
+	D => [ 'closed door', 'H', 'Red',  '',  999 ],
+	d => [ 'door', 'H', 'Green',  '',  0 ],
 	# E 
 	# e 
 	# F 
