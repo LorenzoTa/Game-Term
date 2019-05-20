@@ -73,7 +73,7 @@ The present document describes Game::Term version 0.01
 
 =head1 DESCRIPTION
 
-Game::Term aims to be a fully usable game engine to produce console games. 
+Game::Term aims to be a fully usable game engine to produce console games, ie ASCII art games to be run in the Linux console or Windows cmd.exe command prompt. Colors are provided using ansi escape sequences. 
 The engine is at the moment usable but still not complete and only few things are implemented.
 
 
@@ -189,9 +189,11 @@ Walking on different kinds of terrain will result in faster or slower mevements 
  
 =head2 commands
 
-User's command can be of two distinct kinds: map commands are essentially movements and are issued by the user with the C<wasd> keys. Each keypress will be a separate command. Pressing the C<:> key the user enters in C<command mode> where commands available are issued as longer strings possibly with more terms (like in C<save my_first_save.sav> or C<load ./MyCustomConf.yaml>). Hitting C<TAB> will expand command names. The command C<return_to_game> is used to return back to the C<map mode>.
+User's commands can be of two distinct kinds: map commands are essentially movements (and few others that also consume a move like using object, or that not count as movement like inspecting the bag) and are issued by the user with the C<wasd> keys. Each keypress will be a separate command. The C<h> command prints a short description of all commands.
 
-Generally every command issued while in C<map mode> will result in a screen redraw but the same is not true for all commands issued while in C<command mode> where a pseudo prompt is present.
+Pressing the C<:> key the user enters in C<command mode> where commands available are issued as longer strings possibly with more terms (like in C<save my_first_save.sav> or C<configuration ./MyCustomConf.yaml>). Hitting C<TAB> will expand command names. The command C<return_to_game> is used to return back to the C<map mode>.
+
+Generally every command issued while in C<map mode> will result in a screen redraw but the same is not true for commands issued while in C<command mode> where a pseudo prompt is present.
  
 
 
