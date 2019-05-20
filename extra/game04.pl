@@ -80,6 +80,15 @@ my $scenario = Game::Term::Scenario->new(
 											first_time_only => 0,								
 											message	=> 'hero at 29-38',
 											),#
+											
+					Game::Term::Event->new( 
+											type => 'door',
+											target => 'hero',
+											check => [15,38], 
+											first_time_only => 0,								
+											message	=> 'a cave open in ground..',
+											destination => ['game05.pl', 'east5'],
+											),#
 					
 					Game::Term::Event->new( 
 											type => 'map view',
