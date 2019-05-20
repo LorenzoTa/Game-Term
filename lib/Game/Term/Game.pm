@@ -744,7 +744,10 @@ EOH
 						
 					}
 					$game->{ui}->load_configuration( $filepath );
-					$game->{ui}->init();
+					# ISSUE #30
+					# $game->{ui}->init();
+					$game->{ui}->beautify_map();
+					# end of ISSUE #30
 					$game->{ui}->draw_map();
 					$game->{ui}->draw_menu( 
 								$game->{turn},
