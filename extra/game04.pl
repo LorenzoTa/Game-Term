@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-
+use lib './lib';
 use Game::Term::Game;
 use Game::Term::Scenario;
 use Game::Term::Actor;
@@ -79,6 +79,15 @@ my $scenario = Game::Term::Scenario->new(
 											#check => [ [29,36],[29,37],[29,38],[29,39] ],
 											first_time_only => 0,								
 											message	=> 'hero at 29-38',
+											),#
+											
+					Game::Term::Event->new( 
+											type => 'door',
+											target => 'hero',
+											check => [15,38], 
+											first_time_only => 0,								
+											message	=> 'a cave open in ground..',
+											destination => ['./extra/game05.pl', 'east5'],
 											),#
 					
 					Game::Term::Event->new( 

@@ -429,6 +429,26 @@ sub check_events{
 			next;
 			
 		}
+		# DOOR (ACTOR AT EVENT)
+		elsif ( $target and $ev->{type} eq 'door' ){
+			
+			next unless _is_inside( [$$target->{y}, $$target->{x}],  $ev->{check} );
+			$game->message( $ev->{message} );
+			my $answer = $game->{ui}{reader}->readline('Enter?: ');
+			chomp $answer;
+			if( $answer =~ /^y/i ){
+					$game->save_game_state();
+					print "DEBUG: exec: ",(join ' ',$^X,'-I ./lib', $ev->{destination}->[0], $ev->{destination}->[1]),"\n";
+					
+					undef $game;
+					#$game->DESTROY();
+					
+					system($^X,'-I .\lib', $ev->{destination}->[0], $ev->{destination}->[1]);
+					exit;
+			}
+			else{ next }
+			
+		}
 		else{die "Unknown event type in Game.pm"}
 		
 	}
