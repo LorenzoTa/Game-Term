@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-
+use lib './lib';
 use Game::Term::Game;
 use Game::Term::Scenario;
 use Game::Term::Actor;

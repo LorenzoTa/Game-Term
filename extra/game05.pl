@@ -9,7 +9,20 @@ use Game::Term::Event;
 use Game::Term::Item;
 
 # # bare minimum scenario with map in DATA
-my $scenario = Game::Term::Scenario->new();
+my $scenario = Game::Term::Scenario->new(
+	events	=> [
+												Game::Term::Event->new( 
+													type => 'door',
+													target => 'hero',
+													check => [6,19], 
+													first_time_only => 0,								
+													message	=> 'a cave open in ground..',
+													destination => ['./extra/game04.pl', 'east5'],
+													),#
+					
+											],
+
+);
 $scenario->{name} ='Test Scenario 3';
 $scenario->get_map_from_DATA();
 $scenario->set_hero_position( $ARGV[0] // 'south11' );
@@ -35,6 +48,7 @@ my $hero = Game::Term::Actor::Hero->new(
 													
 												),
 											],
+											
 );
 
 my $game=Game::Term::Game->new( 
@@ -55,7 +69,7 @@ WWWWWWwwwwwwwwWWWWWW
     tt    tT        
 wwwwwwwwww          
   ttt           mM  
-    wW              
+    wW             d
               ww    
              wWwW   
 tTtTtTtTt           
