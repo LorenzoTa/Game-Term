@@ -477,8 +477,8 @@ sub beautify_map{
 				$ui->{map}[$row][$col] = [
 						$bg_color.$color.$to_display.RESET	, # 0 to display
 						$ui->{map}[$row][$col]				, # 1 original letter of terrain
-						$is_a_reload		?				  # 	(if reloading conf
-						$previous_unmasked	:                 # 		use old value) 
+						$is_a_reload		?				  #   (if reloading conf
+						$previous_unmasked	:                 # 	use old value of unamsked) 
 						( $ui->{masked_map} ? 0 : 1)		, # 2 unmasked
 				];
 				
@@ -558,7 +558,14 @@ sub set_hero_pos{
 	print "DEBUG: original map size; rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n" if $debug;
 	foreach my $row ( 0..$#{$ui->{map}} ){
 		foreach my $col ( 0..$#{$ui->{map}->[$row]} ){
-			if ( ${$ui->{map}}[$row][$col] eq 'X' ){
+			if ( 
+					${$ui->{map}}[$row][$col] eq 'X' or
+					( 
+						ref ${$ui->{map}}[$row][$col] eq 'ARRAY' 
+						and
+						${$ui->{map}}[$row][$col][1] eq 'X'
+					)
+				){
 				print "DEBUG: original map found hero at row $row col $col\n" if $debug;
 				# clean this tile
 				${$ui->{map}}[$row][$col] = ' ';

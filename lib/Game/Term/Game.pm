@@ -132,7 +132,7 @@ sub get_game_state{
 			# LOAD actors
 			$game->{actors} = $$game_state->{ $game->{current_scenario} }{actors};
 			# LOAD map
-			$game->{ui}->{map} = $$game_state->{ $game->{current_scenario} }{map};
+############$game->{ui}->{map} = $$game_state->{ $game->{current_scenario} }{map};
 		}
 		else{
 			print "DEBUG: no data of '$game->{current_scenario}' in $state_file\n" if $debug;
@@ -438,12 +438,12 @@ sub check_events{
 			chomp $answer;
 			if( $answer =~ /^y/i ){
 					$game->save_game_state();
-					print "DEBUG: exec: ",(join ' ',$^X,'-I ./lib', $ev->{destination}->[0], $ev->{destination}->[1]),"\n";
+					print "DEBUG: SYSTEM: ",(join ' ',$^X,'-I ./lib', @{ $ev->{destination} } ),"\n";
 					
 					undef $game;
 					#$game->DESTROY();
 					
-					system($^X,'-I .\lib', $ev->{destination}->[0], $ev->{destination}->[1]);
+					system( $^X,'-I .\lib', @{ $ev->{destination} } );
 					exit;
 			}
 			else{ next }

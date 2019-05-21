@@ -17,7 +17,10 @@ my $scenario = Game::Term::Scenario->new(
 													check => [6,19], 
 													first_time_only => 0,								
 													message	=> 'a cave open in ground..',
-													destination => ['./extra/game04.pl', 'east5'],
+													destination => [
+																	'./extra/game04.pl', 
+																	'middle', 15, 38
+																	],
 													),#
 					
 											],
