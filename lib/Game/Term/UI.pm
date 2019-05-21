@@ -83,7 +83,7 @@ sub new{
             # uncomment next line to see debug stuff while you stress autocomplete
             #print 'DEBUG: $text, $line, $start = >'.(join '< >',$text, $line, $start)."<\n";
             #return grep { /^$text/i } sort keys %commands ;
-			return grep { /^$text/i } sort qw( save load return_to_game configuration show_legenda exit ) ;
+			return grep { /^$text/i } sort qw( save load return_to_game configuration show_legenda help exit ) ;
     };
 	return $ui;	
 }
