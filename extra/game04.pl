@@ -87,7 +87,7 @@ my $scenario = Game::Term::Scenario->new(
 											check => [15,38], 
 											first_time_only => 0,								
 											message	=> 'a cave open in ground..',
-											destination => ['./extra/game05.pl', 'east5'],
+											destination => ['./extra/game05.pl', 'east6'],
 											),#
 					
 					Game::Term::Event->new( 
@@ -106,7 +106,7 @@ my $scenario = Game::Term::Scenario->new(
 				],
 );
 # use Data::Dump; $scenario->{map}=[]; dd $scenario;
-$scenario->set_hero_position( $ARGV[0] // 'south38' );
+$scenario->set_hero_position( @ARGV ? @ARGV : 'south38' );
 
 
 my $conf = Game::Term::Configuration->new();
@@ -131,7 +131,7 @@ my $hero = Game::Term::Actor::Hero->new(
 );
 
 my $game=Game::Term::Game->new( 
-								debug=>1,  # NO bug
+								debug=>2,  # NO bug
 								configuration => $conf, 
 								scenario => $scenario,
 								hero	=> $hero,

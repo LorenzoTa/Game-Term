@@ -75,7 +75,7 @@ sub new{
 	# push time events in the timeline (removing from events)
 	$game->init_timeline();
 	# load and overwrite info about hero and current scenario(map,actors,..)from gamestate.sto
-	$game->get_game_state();
+#$game->get_game_state();
 	
 	# INJECT into UI parameters (once defined in Configuration.pm)
 	$game->{ui}->{ hero_icon } 		=	$game->{hero}->{icon};
@@ -83,7 +83,12 @@ sub new{
 	$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
 	$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
 	$game->{ui}->{hero_terrain}		=   'plain';
+	
+	# beautify the map and others..
 	$game->{ui}->init();
+	# apply MASK now!
+	$game->get_game_state();
+	
 	
 	$game->{hero}{on_tile}			= 	'plain';
 	#use Data::Dump; dd $game->{ui};
@@ -131,8 +136,19 @@ sub get_game_state{
 				if $debug;
 			# LOAD actors
 			$game->{actors} = $$game_state->{ $game->{current_scenario} }{actors};
-			# LOAD map
-			$game->{ui}->{map} = $$game_state->{ $game->{current_scenario} }{map};
+			# LOAD map mask
+############$game->{ui}->{map} = $$game_state->{ $game->{current_scenario} }{map};
+			foreach my $row ( 0..$#{$game->{ui}{map}} ){
+				foreach my $col ( 0..$#{$game->{ui}{map}->[$row]} ){
+					#$mask->[$row][$col] = $game->{ui}{map}->[$row][$col][2];
+					next unless ref $game->{ui}{map}->[$row][$col] eq 'ARRAY';
+					$game->{ui}{map}->[$row][$col]->[2]
+					=
+					$$game_state->{ $game->{current_scenario} }{map_mask}->[$row][$col];
+					print $$game_state->{ $game->{current_scenario} }{map_mask}->[$row][$col];
+				}
+				print "\n";
+			}
 		}
 		else{
 			print "DEBUG: no data of '$game->{current_scenario}' in $state_file\n" if $debug;
@@ -172,8 +188,17 @@ sub save_game_state{
 	}
 	# populate GameState.sto with the structure
 	$$game_state->{ hero } = $game->{hero};
+	# MASK of unmasked tiles
+	my $mask;
+	foreach my $row ( 0..$#{$game->{ui}{map}} ){
+		foreach my $col ( 0..$#{$game->{ui}{map}->[$row]} ){
+			$mask->[$row][$col] = $game->{ui}{map}->[$row][$col][2];
+		}
+	}
+	
 	$$game_state->{ $game->{current_scenario} } = {
-						map 		=> $game->{ui}->{map},
+						#map 		=> $game->{ui}->{map},
+						map_mask => $mask,
 						actors 	=> $game->{actors},
 	};
 	
@@ -190,6 +215,8 @@ sub play{
 	$game->{hero}->{x} = $game->{ui}->{hero_x};
 	# ?? opposite: hero->on_tile = map
 	# $game->{ui}->{map}[$game->{hero}->{y}][$game->{hero}->{x}] = [ " \e[0m",' ',0];
+#$game->get_game_state();
+
 	$game->{ui}->draw_map();
 	$game->{ui}->draw_menu( 
 							$game->{turn},
@@ -438,12 +465,12 @@ sub check_events{
 			chomp $answer;
 			if( $answer =~ /^y/i ){
 					$game->save_game_state();
-					print "DEBUG: exec: ",(join ' ',$^X,'-I ./lib', $ev->{destination}->[0], $ev->{destination}->[1]),"\n";
+					print "DEBUG: SYSTEM: ",(join ' ',$^X,'-I ./lib', @{ $ev->{destination} } ),"\n";
 					
 					undef $game;
 					#$game->DESTROY();
 					
-					system($^X,'-I .\lib', $ev->{destination}->[0], $ev->{destination}->[1]);
+					system( $^X,'-I .\lib', @{ $ev->{destination} } );
 					exit;
 			}
 			else{ next }

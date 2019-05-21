@@ -221,6 +221,12 @@ sub set_map_offsets{
 		$ui->{map_off_y} = $ui->{hero_y} - $ui->{map_area_h} / 2;		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
+	# M
+	elsif ( $ui->{hero_side} eq 'M' ){		
+		$ui->{map_off_x} = $ui->{hero_x} - $ui->{map_area_w} / 2;
+		$ui->{map_off_y} = $ui->{hero_y} - $ui->{map_area_h} / 2;		
+		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
+	}
 	else{die}
 
 }
@@ -471,8 +477,8 @@ sub beautify_map{
 				$ui->{map}[$row][$col] = [
 						$bg_color.$color.$to_display.RESET	, # 0 to display
 						$ui->{map}[$row][$col]				, # 1 original letter of terrain
-						$is_a_reload		?				  # 	(if reloading conf
-						$previous_unmasked	:                 # 		use old value) 
+						$is_a_reload		?				  #   (if reloading conf
+						$previous_unmasked	:                 # 	use old value of unamsked) 
 						( $ui->{masked_map} ? 0 : 1)		, # 2 unmasked
 				];
 				
@@ -526,6 +532,10 @@ sub set_no_scrolling_area{
 			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 2);
 			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4);			
 		}
+		#
+		elsif ( $ui->{hero_side} eq 'M' ){
+				$ui->{scrolling} = 1;
+		}
 		else{die}
 	}
 	# FIX no_scroll_area inside map
@@ -548,17 +558,25 @@ sub set_hero_pos{
 	print "DEBUG: original map size; rows: 0..",$#{$ui->{map}}," cols: 0..",$#{$ui->{map}->[0]}," \n" if $debug;
 	foreach my $row ( 0..$#{$ui->{map}} ){
 		foreach my $col ( 0..$#{$ui->{map}->[$row]} ){
-			if ( ${$ui->{map}}[$row][$col] eq 'X' ){
+			if ( 
+					${$ui->{map}}[$row][$col] eq 'X' or
+					( 
+						ref ${$ui->{map}}[$row][$col] eq 'ARRAY' 
+						and
+						${$ui->{map}}[$row][$col][1] eq 'X'
+					)
+				){
 				print "DEBUG: original map found hero at row $row col $col\n" if $debug;
 				# clean this tile
-				${$ui->{map}}[$row][$col] = ' ';
+				${$ui->{map}}[$row][$col] = 'd';
 				$ui->{hero_y} = $row;
 				$ui->{hero_x} = $col;
 				if    ( $row == 0 )						{ $ui->{hero_side} = 'N' }
 				elsif ( $row == $#{$ui->{map}} )		{ $ui->{hero_side} = 'S' }
 				elsif ( $col == 0 )						{ $ui->{hero_side} = 'W' }
 				elsif ( $col == $#{$ui->{map}->[$row]} ){ $ui->{hero_side} = 'E' }
-				else									{ die "Hero side not found!" }
+				#else									{ die "Hero side not found!" }
+				else									{ $ui->{hero_side} = 'M' }
 			}				
 		}
 	}
