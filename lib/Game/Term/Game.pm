@@ -438,11 +438,13 @@ sub check_events{
 			chomp $answer;
 			if( $answer =~ /^y/i ){
 					$game->save_game_state();
-					print "DEBUG: exec: ",(join ' ',$^X,'-I .\lib', $ev->{destination}->[0], $ev->{destination}->[1]),"\n";
+					print "DEBUG: exec: ",(join ' ',$^X,'-I ./lib', $ev->{destination}->[0], $ev->{destination}->[1]),"\n";
 					
 					undef $game;
+					#$game->DESTROY();
 					
-					exec($^X,'-I .\lib', $ev->{destination}->[0], $ev->{destination}->[1]);
+					system($^X,'-I .\lib', $ev->{destination}->[0], $ev->{destination}->[1]);
+					exit;
 			}
 			else{ next }
 			
