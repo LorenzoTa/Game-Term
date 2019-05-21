@@ -568,7 +568,7 @@ sub set_hero_pos{
 				){
 				print "DEBUG: original map found hero at row $row col $col\n" if $debug;
 				# clean this tile
-				${$ui->{map}}[$row][$col] = ' ';
+				${$ui->{map}}[$row][$col] = 'd';
 				$ui->{hero_y} = $row;
 				$ui->{hero_x} = $col;
 				if    ( $row == 0 )						{ $ui->{hero_side} = 'N' }

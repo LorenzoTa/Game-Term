@@ -87,7 +87,7 @@ my $scenario = Game::Term::Scenario->new(
 											check => [15,38], 
 											first_time_only => 0,								
 											message	=> 'a cave open in ground..',
-											destination => ['./extra/game05.pl', 'east5'],
+											destination => ['./extra/game05.pl', 'east6'],
 											),#
 					
 					Game::Term::Event->new( 
