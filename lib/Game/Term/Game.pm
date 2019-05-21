@@ -75,7 +75,7 @@ sub new{
 	# push time events in the timeline (removing from events)
 	$game->init_timeline();
 	# load and overwrite info about hero and current scenario(map,actors,..)from gamestate.sto
-$game->get_game_state();
+#$game->get_game_state();
 	
 	# INJECT into UI parameters (once defined in Configuration.pm)
 	$game->{ui}->{ hero_icon } 		=	$game->{hero}->{icon};
@@ -83,7 +83,10 @@ $game->get_game_state();
 	$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
 	$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
 	$game->{ui}->{hero_terrain}		=   'plain';
+	
 	$game->{ui}->init();
+	$game->get_game_state();
+	
 	
 	$game->{hero}{on_tile}			= 	'plain';
 	#use Data::Dump; dd $game->{ui};
@@ -137,10 +140,10 @@ sub get_game_state{
 				foreach my $col ( 0..$#{$game->{ui}{map}->[$row]} ){
 					#$mask->[$row][$col] = $game->{ui}{map}->[$row][$col][2];
 					next unless ref $game->{ui}{map}->[$row][$col] eq 'ARRAY';
-					$game->{ui}{map}->[$row][$col][2]
+					$game->{ui}{map}->[$row][$col]->[2]
 					=
-					$$game_state->{ $game->{current_scenario} }{map_mask}->[$row][$col]
-					#print $$game_state->{ $game->{current_scenario} }{map_mask}->[$row][$col];
+					$$game_state->{ $game->{current_scenario} }{map_mask}->[$row][$col];
+					print $$game_state->{ $game->{current_scenario} }{map_mask}->[$row][$col];
 				}
 				print "\n";
 			}
