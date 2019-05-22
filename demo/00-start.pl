@@ -17,24 +17,17 @@ use Game::Term::Item;
 # OR scenario with custom fake map
 my $scenario = Game::Term::Scenario->new( 
 				map=> Game::Term::Map->new(fake_map=>'one')->{data},
-				name => 'Test Scenario 2',
+				name => 'A river in the wood',
 				actors => [
 					Game::Term::Actor->new(	
 											name=>'UNO',
 											y=>26,
 											x=>31,
-											#y=>5,
-
-											# x=>11,
-											# energy_gain=>20),
-
-											#x=>5,
 											energy_gain=>4),
 
 					Game::Term::Actor->new(name=>'DUE',y=>28, x=>41,energy_gain=>2),
 					Game::Term::Actor->new(name=>'TRE',y=>28, x=>51,energy_gain=>2),
-					#Game::Term::Actor->new(name=>'UNO',energy_gain=>2),
-					
+										
 				],
 				
 				events => [
@@ -87,7 +80,16 @@ my $scenario = Game::Term::Scenario->new(
 											check => [15,38], 
 											first_time_only => 0,								
 											message	=> 'a cave open in ground..',
-											destination => ['./extra/game05.pl', 'east6'],
+											destination => ['./demo/01-cave.pl', 'east6'],
+											),#
+					
+					Game::Term::Event->new( 
+											type => 'door',
+											target => 'hero',
+											check => [18,17], 
+											first_time_only => 0,								
+											message	=> 'a cave open in ground..',
+											destination => ['./demo/01-cave.pl', 18,0],
 											),#
 					
 					Game::Term::Event->new( 
@@ -105,7 +107,7 @@ my $scenario = Game::Term::Scenario->new(
 											),#
 				],
 );
-# use Data::Dump; $scenario->{map}=[]; dd $scenario;
+
 $scenario->set_hero_position( @ARGV ? @ARGV : 'south38' );
 
 

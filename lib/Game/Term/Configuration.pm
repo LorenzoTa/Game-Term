@@ -220,7 +220,7 @@ sub terrains_16_colors{
 	y => [ 'wood', '^', [ 'Olive', 'Green'], '',        0.5 ],
 	# Z 
 	# z
-		
+	'#' => [ 'stone', '#',   'Grey',  'On_Grey',       999 ], 	
 }
 
 sub terrains_256_colors{
@@ -283,7 +283,7 @@ sub terrains_256_colors{
 	y => [ 'wood', '^', [ 'Olive', 'Green'], '',        0.5 ],
 	# Z 
 	# z
-		
+	'#' => [ 'stone', '#',   'Grey',  'On_Grey',       999 ], 		
 }
 
 sub validate_conf{
