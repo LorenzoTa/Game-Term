@@ -16,7 +16,7 @@ my $scenario = Game::Term::Scenario->new(
 													target => 'hero',
 													check => [6,19], 
 													first_time_only => 0,								
-													message	=> 'a cave open in ground..',
+													message	=> 'a hole in the floor, casting light..',
 													destination => [
 																	'./extra/game04.pl', 
 																	'middle', 15, 38
@@ -35,28 +35,28 @@ $scenario->set_hero_position( $ARGV[0] // 'south11' );
 $scenario->set_hero_position( $ARGV[0] // 'east5' );
 
 
-my $conf = Game::Term::Configuration->new();
+# my $conf = Game::Term::Configuration->new();
 
 
 my $hero = Game::Term::Actor::Hero->new( 
 											name => 'My New Hero',
-											bag => [
-												Game::Term::Item->new(
-													name => 'potion of sight',
-													duration => 3,
-													consumable => 1,
-													target_attr => 'sight',
-													target_mod	=> 10,
-													message => 'Glu.. Glu..',
+											# bag => [
+												# Game::Term::Item->new(
+													# name => 'potion of sight',
+													# duration => 3,
+													# consumable => 1,
+													# target_attr => 'sight',
+													# target_mod	=> 10,
+													# message => 'Glu.. Glu..',
 													
-												),
-											],
+												# ),
+											# ],
 											
 );
 
 my $game=Game::Term::Game->new( 
 								debug=>1,  # NO bug
-								configuration => $conf, 
+								#configuration => $conf, 
 								scenario => $scenario,
 								hero	=> $hero,
 								
