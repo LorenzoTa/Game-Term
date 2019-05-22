@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use lib './lib';
+use lib './lib'; 
 use Game::Term::Game;
 use Game::Term::Scenario;
 use Game::Term::Actor;
@@ -16,15 +16,10 @@ use Game::Term::Item;
 
 # OR scenario with custom fake map
 my $scenario = Game::Term::Scenario->new( 
-				map=> Game::Term::Map->new(fake_map=>'one')->{data},
+				#map=> Game::Term::Map->new(fake_map=>'one')->{data},
 				name => 'A river in the wood',
 				actors => [
-					Game::Term::Actor->new(	
-											name=>'UNO',
-											y=>26,
-											x=>31,
-											energy_gain=>4),
-
+					Game::Term::Actor->new(name=>'UNO',y=>26, x=>31, energy_gain=>4),
 					Game::Term::Actor->new(name=>'DUE',y=>28, x=>41,energy_gain=>2),
 					Game::Term::Actor->new(name=>'TRE',y=>28, x=>51,energy_gain=>2),
 										
@@ -80,6 +75,8 @@ my $scenario = Game::Term::Scenario->new(
 											check => [15,38], 
 											first_time_only => 0,								
 											message	=> 'a cave open in ground..',
+											# ARGV passed to the program are used to set hero's position
+											# two form are supported: a single argument sideN (like in east23 or north12) 
 											destination => ['./demo/01-cave.pl', 'east6'],
 											),#
 					
@@ -89,13 +86,16 @@ my $scenario = Game::Term::Scenario->new(
 											check => [18,17], 
 											first_time_only => 0,								
 											message	=> 'a cave open in ground..',
-											destination => ['./demo/01-cave.pl', 18,0],
+											# ARGV passed to the program are used to set hero's position
+											# a multiple argument with coordinates: middle 13 45 or middle 23 56
+											destination => ['./demo/01-cave.pl', 'middle',18,0],
 											),#
 					
 					Game::Term::Event->new( 
 											type => 'map view',
 											target => 'hero',
 											check => [31,32], # [y,x]
+											# check can be an AREA too:
 											#check => [ [29,36],[29,37],[29,38],[29,39] ],
 											area => [
 														[30,23],[30,24],[30,25],[30,26],[30,27],
@@ -108,15 +108,23 @@ my $scenario = Game::Term::Scenario->new(
 				],
 );
 
+$scenario->get_map_from_DATA();
+
 $scenario->set_hero_position( @ARGV ? @ARGV : 'south38' );
 
-
+# CONFIGURATION defualt (16 colors)
 my $conf = Game::Term::Configuration->new();
-# OR
+
+# Linux and win10 users can use 256 colors
+# my $conf = Game::Term::Configuration->new( map_colors=>256 );
+
+# CONFIGURATION from file
 # my $conf = Game::Term::Configuration->new( from=>'./conf.txt' );
 # changes to configuration...
 # $conf->{interface}{masked_map} = 0;
 
+
+# HERO must be created in the first scenario
 my $hero = Game::Term::Actor::Hero->new( 
 											name => 'My New Hero',
 											bag => [
@@ -132,26 +140,49 @@ my $hero = Game::Term::Actor::Hero->new(
 											],
 );
 
+# the GAME main object
 my $game=Game::Term::Game->new( 
-								debug=>2,  # NO bug
-								configuration => $conf, 
-								scenario => $scenario,
-								hero	=> $hero,
+								debug			=> 0,
+								configuration 	=> $conf, 
+								scenario 		=> $scenario,
+								hero			=> $hero,
 								
 							);
 
-
+# start the game loop
 $game->play()
 
 __DATA__
-WWWWWWwwwwwwwwWWWWWW
-     tttt           
- ttt    tTT t       
-    tt    tT        
-wwwwwwwwww          
-  ttt           mM  
-    wW              
-              ww    
-             wWwW   
-tTtTtTtTt           
-S                  S
+tttt ttTTTTTTTTTTTTTTTTTTTTTTTTTTmmmMMWWwwMMttt ttmMMMMmmmmmmmmMtMMMMM hhhhhMMMM
+ttttt ttttTTTTTTTTTTTTTTTTTTTTTTTmmmmmWWMwmttttttmMMMmtttthhmmmMMmmmmmttt  httmm
+ttttttTTTTTttttttTTTTTttttttttttt  bbWWwwmmttttttmMM ht MttthhmMMmmm tt hhhhMMmm
+ ttttTTtttttttttttttttttttttttttt WWbbwtwmmttttttmMhhh  MMMthhmMMmmthhhhh tMtmmt
+ tttTTttt                   ttttWWWwwbbwtmmtttttt M hh   MMtttt tmm hhtth MMmmMt
+   tttt     tttttttt           WWwwwwwbbtttttttt  MMMMmm      tttMmhh tth Mmm tt
+   Tt     tttttttttt          WWwwhhhhh    tttt   MMMMMm         Mthhtt Mmmm mtt
+   ttt  ttwwwwwtt     ttttttAAAAAhhhhh     tttt       Mmmm      MMt  t Mmmtmmm t
+  tt   ttwwwwwwww   ttttttt AAAAAhhmMMM     ttt          m   MMmmhhh   Mm t t  t
+  t   tttwwWWWWww  ttttttt   WWwhhhmMMMM    ttt        mmm   Mmhhhmh MMMm t   tt
+     ttttwwBBWWww  tt tt     WWwwhhhMM                mmMMMMMhhhtmhh     tttt tt
+     ttttwBBWWWww  t  t       Wwwwhh             ttt   MMhhhhhttttmtmm  tttttttt
+     ttttBBwWWWww  t  hmmmh   WWwwww     tttttttttttt  MMhttttttttmmmm  tttttttt
+     tttBBwwwwww   tt hhhmh    WWwwww   tttttttTTtttt                m   ttttt t
+     ttttttwwwwtttttthhhhhh      WWww   ttttttttTTTTttttTttt       ttmmm   ttttt
+      ttt tttttt tt t            WWwwwd   tttttttttTTtttTTTttt     tttTt      tt
+             tt tt      WWWWWWaaWWwwww      tttttttttttttttTTtt    tttTttt      
+          hhhh  t   WWWWWWwwwwaawwwwww      tt           tttTtt     ttTTTt     t
+         mmhhhhttdWWWwwwwwwsss   wwwww                      ttttt     ttTTtttttt
+      h mm ht  tssWWwwssssssss    sss                       ttttt      tTtttttTt
+     hhmmhttttttswWwssssssss       ss      tttt                 tttt      tttTtt
+     hhhhhttttttswWwsSSssSSs           ttttttt   ttttt       tttt           tTTT
+         ttttt sswwwssSSSSSs           tttttt    ttttt        tTt       ttttttTT
+        tttttsssswwWwsSSSSSSss        ttttttt    ttttt      tttTt      ttttttTTt
+        tt   sssswWwwsssSSSSSs       tthhttt    tttt       ttTTTt      tttTTTTTt
+       ttt ssssswWwwwssssSSsss   ttttthhhht    sssss       tTTttt      tttttttTt
+           ssssswWwwwwsssssss    tthhhhhht     ssSSss      tTTt             ttTT
+           sswwwwWWWwwwsssssss    hhhhhhtt     ssSSSss                      tttT
+          sswwWWWWWWWwwwssssss      ttttt  yyt tsssssss                ttt  tttT
+         sswwWWWWWWWWWWWwwwssss          yyyytttt  ttt           tt   tttt  ttTT
+ t      sswwWWWWWWWWWWWWWWWWwws          TTTTTTTttt    ttt ttttttttttttttt  ttTt
+ttt    ssswWWWWWWWWWWWWWWWWWWwww         TTTTTTTTTttt tt ttttTTTTtttttttttttTTTt
+ttt  ssssswWWWWWWWWWWWWWWWWWWWWWw       TTTTTTTTTTTtt tTTTTTTTttTTTTTTtttttttttt

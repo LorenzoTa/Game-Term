@@ -164,14 +164,16 @@ sub terrains_16_colors{
 	#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
 	' ' => [  'plain', ' ', '', '',        0 ],
-	A => [ 'bridge', '-', 'Maroon',  '',  0 ],
-	a => [ 'bridge', '|', 'Maroon',  '',  0 ],
-	B => [ 'bridge', '/', 'Maroon',  '',  0 ], # you need two of this
-    b => [ 'bridge', '\\', 'Maroon',  '',  0 ],#   ''
+	A => [ 'bridge', '-', ['Maroon'],  '',  0 ],
+	a => [ 'bridge', '|', ['Maroon'],  '',  0 ],
+	B => [ 'bridge', '/', ['Maroon'],  '',  0 ], # you need two of this
+    b => [ 'bridge', '\\', ['Maroon'],  '',  0 ],#   ''
+	# BUG single color is not applied
+	################### b => [ 'bridge', '\\', 'Maroon',  '',  0 ],#   ''
 	# C 
 	# c 
-	D => [ 'closed door', 'H', 'Red',  '',  999 ],
-	d => [ 'door', 'H', 'Green',  '',  0 ],
+	D => [ 'closed door', 'H', ['Red'],  '',  999 ],
+	d => [ 'door', 'H', ['Green'],  '',  0 ],
 	# E 
 	# e 
 	# F 
@@ -201,7 +203,7 @@ sub terrains_16_colors{
 	# R 
 	# r 
 	S => [ 'unwalkable swamp', [qw( ~ - ~ - ~)], 'Green', 'On_Olive',  999 ],
-	s => [ 'swamp', '-', 'Olive',  '',       1 ],
+	s => [ 'swamp', ['v', '-'], ['Olive'],  '',       1 ],
 	T => [ 'unwalkable wood', 'O',   [ 'Olive', 'Lime' ],  '',       999 ], 
 	t => [ 'wood', ['O', 'o'], [ 'Olive', 'Green'], '',        0.5 ],
 	#t => [  'walkable wood', [qw(O o 0 o O O)], [ ANSI34, ANSI70, ANSI106, ANSI148, ANSI22], '',        0.3 ],
@@ -233,8 +235,8 @@ sub terrains_256_colors{
     b => [ 'bridge', '\\', 'Olive',  '',  0 ],#   ''
 	# C 
 	# c 
-	D => [ 'closed door', 'H', 'Red',  '',  999 ],
-	d => [ 'door', 'H', 'Green',  '',  0 ],
+	D => [ 'closed door', 'H', ['Red'],  '',  999 ],
+	d => [ 'door', 'H', ['Green'],  '',  0 ],
 	# E 
 	# e 
 	# F 

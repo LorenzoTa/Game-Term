@@ -8,7 +8,7 @@ use Game::Term::Actor::Hero;
 use Game::Term::Event;
 use Game::Term::Item;
 
-# # bare minimum scenario with map in DATA
+
 my $scenario = Game::Term::Scenario->new(
 	events	=> [
 					Game::Term::Event->new( 
@@ -38,34 +38,24 @@ my $scenario = Game::Term::Scenario->new(
 
 );
 $scenario->{name} ='A small cave under the river';
+
 $scenario->get_map_from_DATA();
-$scenario->set_hero_position( $ARGV[0] // 'south11' );
+
+# ARGV passed to the program are used to set hero's position
+# two form are supported: a single argument sideN (like in east23 or north12) and
+# a multiple argument with coordinates: middle 13 45 or middle 23 56
+$scenario->set_hero_position( @ARGV );
 
 
-$scenario->set_hero_position( $ARGV[0] // 'east5' );
+# an HERO must be passed but will be filled with data
+# hold in the GameState.sto file
 
-
-my $hero = Game::Term::Actor::Hero->new( 
-											name => 'My New Hero',
-											# bag => [
-												# Game::Term::Item->new(
-													# name => 'potion of sight',
-													# duration => 3,
-													# consumable => 1,
-													# target_attr => 'sight',
-													# target_mod	=> 10,
-													# message => 'Glu.. Glu..',
-													
-												# ),
-											# ],
-											
-);
+my $hero = Game::Term::Actor::Hero->new( );
 
 my $game=Game::Term::Game->new( 
-								debug=>2,  # NO bug
-								# configuration => $conf, 
-								scenario => $scenario,
-								hero	=> $hero,
+								debug		=> 0, 
+								scenario 	=> $scenario,
+								hero		=> $hero,
 								
 							);
 
@@ -92,4 +82,4 @@ __DATA__
 ######ww ######  ###
     #www  ###### ###
 d   wwwww   ###  ###
-    wwwwww      ####
+                ####

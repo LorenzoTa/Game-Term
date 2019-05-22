@@ -484,7 +484,7 @@ sub beautify_map{
 				
 			}
 			# letter not defined in %terrain final tile is anonymous array too
-			else {  $ui->{map}[$row][$col]  =  [ $ui->{map}[$row][$col], $ui->{map}[$row][$col], 0]}
+			else { print "WARNING: $ui->{map}[$row][$col] NOT FOUND IN TERRAINS!\n"; $ui->{map}[$row][$col]  =  [ $ui->{map}[$row][$col], $ui->{map}[$row][$col], 0]}
 		}
 	}
 	# BEAUTIFY vertical decoration
