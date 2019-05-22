@@ -423,7 +423,7 @@ sub set_map_and_hero{
 	
 	$ui->set_no_scrolling_area();
 	
-	if ( $debug > 1 ){
+	if ( $debug > 1 and $ui->{hero_side} ne 'M' ){
 		local $ui->{map}->[$ui->{no_scroll_area}{min_y}][$ui->{no_scroll_area}{min_x}] = ['+', '', 1];
 		local $ui->{map}->[$ui->{no_scroll_area}{max_y}][$ui->{no_scroll_area}{max_x}] = ['+', '', 1];
 	
@@ -538,17 +538,19 @@ sub set_no_scrolling_area{
 		}
 		else{die}
 	}
-	# FIX no_scroll_area inside map
-	map {$_ = 0 if $_< 0} $ui->{no_scroll_area}{min_x},$ui->{no_scroll_area}{min_y};
-	if ( $ui->{no_scroll_area}{max_y} > $#{$ui->{map}} ){
-		$ui->{no_scroll_area}{max_y}=$#{$ui->{map}};
+	unless ( $ui->{hero_side} eq 'M' ){
+		# FIX no_scroll_area inside map
+		map {$_ = 0 if $_< 0} $ui->{no_scroll_area}{min_x},$ui->{no_scroll_area}{min_y};
+		if ( $ui->{no_scroll_area}{max_y} > $#{$ui->{map}} ){
+			$ui->{no_scroll_area}{max_y}=$#{$ui->{map}};
+		}
+		if ( $ui->{no_scroll_area}{max_x} > $#{$ui->{map}->[0]} ){
+			$ui->{no_scroll_area}{max_x}=$#{$ui->{map}->[0]};
+		}
+		
+		print "DEBUG: no_scroll area from $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
+				"to $ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n" if $debug;
 	}
-	if ( $ui->{no_scroll_area}{max_x} > $#{$ui->{map}->[0]} ){
-		$ui->{no_scroll_area}{max_x}=$#{$ui->{map}->[0]};
-	}
-	
-	print "DEBUG: no_scroll area from $ui->{no_scroll_area}{min_y}-$ui->{no_scroll_area}{min_x} ",
-			"to $ui->{no_scroll_area}{max_y}-$ui->{no_scroll_area}{max_x}\n" if $debug;
 	
 }
 

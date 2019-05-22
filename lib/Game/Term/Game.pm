@@ -137,7 +137,8 @@ sub get_game_state{
 			# LOAD actors
 			$game->{actors} = $$game_state->{ $game->{current_scenario} }{actors};
 			# LOAD map mask
-############$game->{ui}->{map} = $$game_state->{ $game->{current_scenario} }{map};
+			print "DEBUG: applying mask from GameState to the map\n" if $debug;
+			print "DEBUG: mask retrieved:\n" if $debug > 1;
 			foreach my $row ( 0..$#{$game->{ui}{map}} ){
 				foreach my $col ( 0..$#{$game->{ui}{map}->[$row]} ){
 					#$mask->[$row][$col] = $game->{ui}{map}->[$row][$col][2];
@@ -145,7 +146,9 @@ sub get_game_state{
 					$game->{ui}{map}->[$row][$col]->[2]
 					=
 					$$game_state->{ $game->{current_scenario} }{map_mask}->[$row][$col];
-					print $$game_state->{ $game->{current_scenario} }{map_mask}->[$row][$col];
+										
+					print $$game_state->{ $game->{current_scenario} }{map_mask}->[$row][$col]
+						if $debug > 1;
 				}
 				print "\n";
 			}

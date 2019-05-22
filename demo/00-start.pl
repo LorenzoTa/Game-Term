@@ -142,7 +142,7 @@ my $hero = Game::Term::Actor::Hero->new(
 
 # the GAME main object
 my $game=Game::Term::Game->new( 
-								debug			=> 0,
+								debug			=> 2,
 								configuration 	=> $conf, 
 								scenario 		=> $scenario,
 								hero			=> $hero,
