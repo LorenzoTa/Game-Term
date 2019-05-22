@@ -130,6 +130,14 @@ sub get_game_state{
 		print "DEBUG: loaded HERO from $state_file\n" if $debug;
 		#use Data::Dump; dd $game_state if $debug;
 		
+		# LOAD TIMELINE
+		foreach my $turn(0..$#{ $$game_state->{timeline} }){
+			next unless defined $$game_state->{timeline}->[ $turn ];
+			print "DEBUG: importing events in timeline from gamestate for turn $turn\n" if $debug;
+			push @{$game->{timeline}[ $turn ]},
+				@{$$game_state->{timeline}->[ $turn ]};
+		}
+		
 		# eventually LOAD data of the current scenario
 		if(	$$game_state->{ $game->{current_scenario} } ){
 			print "DEBUG: loaded data of '$game->{current_scenario}' from $state_file\n" 
@@ -189,9 +197,19 @@ sub save_game_state{
 		print "DEBUG: $state_file not found: a new one will be created\n" if $debug;
 		$game_state = {};
 	}
-	# populate GameState.sto with the structure
+	# POPULATE GameState.sto with the structure:
+	# 1-HERO
 	$$game_state->{ hero } = $game->{hero};
-	# MASK of unmasked tiles
+	# 2-TIMELINE events with hero as target
+	undef $$game_state->{ timeline };
+	# BETTER shift timeline until $game->{turn} ?????
+	foreach my $turn ( $game->{turn}..$#{$game->{timeline}} ){
+		next unless defined ${$game->{timeline}}[$turn];
+		push @{ $$game_state->{ timeline }[$turn - $game->{turn}] },
+			@{$game->{timeline}->[$turn]};
+	}
+	
+	# 3-MASK of unmasked tiles of current scenario
 	my $mask;
 	foreach my $row ( 0..$#{$game->{ui}{map}} ){
 		foreach my $col ( 0..$#{$game->{ui}{map}->[$row]} ){
