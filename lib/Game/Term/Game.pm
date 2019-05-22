@@ -381,15 +381,22 @@ sub check_events{
 		next unless $ev;
 		print "DEBUG: analyzing event of type: $ev->{type}..\n" if $debug;
 		
-		# SELECT target
+		# SELECT target:
+		# HERO
 		my $target;
 		if( $ev->{target} eq 'hero' ){
 			$target = \$game->{hero};
 		}
-		elsif ( my @byname = grep{$_->{name} =~ /$ev->{target}/ }@{$game->{actors}}  ){
+		# other ACTOR
+		elsif ( my @byname = grep{defined $_ and $_->{name} =~ /$ev->{target}/ }@{$game->{actors}}  ){
 			$target = \$byname[0];		
 		}
-		else{ $target = undef; } # map events?
+		# UNDEF
+		else{ 
+			print "DEBUG: undef target event will be removed\n" if $debug;
+			undef $ev;
+			next;		
+		} 
 		
 		# GAME TURN EVENT
 		if ( $target and $ev->{type} eq 'game turn' ){
@@ -479,7 +486,7 @@ sub check_events{
 			else{ next }
 			
 		}
-		else{die "Unknown event type in Game.pm"}
+		else{ die "Unknown event type in Game.pm" }
 		
 	}
 	
