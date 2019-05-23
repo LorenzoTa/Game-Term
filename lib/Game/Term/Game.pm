@@ -99,10 +99,12 @@ sub init_timeline{
 	my $game = shift;
 	foreach my $ev( @{$game->{events}} ){
 		next unless $ev->{type} eq 'game turn';
-		push @{$game->{timeline}[ $ev->{check} ]}, $ev;
+		my $given_turn = $ev->{check};
+		delete $ev->{check};
+		push @{$game->{timeline}[ $given_turn ]}, $ev;
 		undef $ev;	
 	}
-	#use Data::Dump; dd $game->{timeline};
+	use Data::Dump; dd "TIMELINE(init)",$game->{timeline};
 }
 
 sub get_game_state{
@@ -137,6 +139,7 @@ sub get_game_state{
 			push @{$game->{timeline}[ $turn ]},
 				@{$$game_state->{timeline}->[ $turn ]};
 		}
+		use Data::Dump; dd "TIMELINE(gamestate)",$game->{timeline};
 		
 		# eventually LOAD data of the current scenario
 		if(	$$game_state->{ $game->{current_scenario} } ){
