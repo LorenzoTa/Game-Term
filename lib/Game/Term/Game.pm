@@ -418,7 +418,7 @@ sub check_events{
 # NEED a run_event method!!		
 		# GAME TURN EVENT
 		if ( $target and $ev->{type} eq 'game turn' ){
-			next unless $ev->{check} == $game->{turn};
+############next unless $ev->{check} == $game->{turn};
 			
 			#use Data::Dump; dd "BEFORE",$$target if $target;
 			#print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
