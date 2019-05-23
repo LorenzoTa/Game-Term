@@ -415,7 +415,7 @@ sub check_events{
 			undef $ev;
 			next;		
 		} 
-		
+# NEED a run_event method!!		
 		# GAME TURN EVENT
 		if ( $target and $ev->{type} eq 'game turn' ){
 			next unless $ev->{check} == $game->{turn};
