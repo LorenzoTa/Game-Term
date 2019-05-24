@@ -397,6 +397,129 @@ sub check_events{
 	my $game = shift;
 	print "DEBUG: checking events at turn $game->{turn}..\n" if $debug;
 	
+	foreach my $ev( @{$game->{events}} ){
+		next unless $ev;
+		print "DEBUG: analyzing event of type: $ev->{type}..\n" if $debug;
+		# target: HERO
+		my $target;
+		if( $ev->{target} eq 'hero' ){
+			$target = \$game->{hero};
+		}
+		# target: other ACTOR
+		elsif ( my @byname = grep{defined $_ and $_->{name} =~ /$ev->{target}/ }@{$game->{actors}}  ){
+			$target = \$byname[0];		
+		}
+		# target: UNDEF
+		else{ 
+			print "DEBUG: undef target event will be removed\n" if $debug;
+			undef $ev;
+			next;		
+		}		
+		# 
+		if ( 
+				( 	
+					$ev->{type} eq 'actor at' 	or
+					$ev->{type} eq 'map view' 	or
+					$ev->{type} eq 'door'		
+				)								and  
+				_is_inside( [$$target->{y}, $$target->{x}],  $ev->{check} )
+		){
+			$game->run_event( $ev, $target );
+		}
+		elsif( $ev->{type} eq 'game turn'){
+			$game->run_event( $ev, $target );
+		}
+		else{ next }
+	}
+
+	# CLEAN timeline
+	$game->{timeline}[ $game->{turn} ] = undef;
+
+}
+
+sub run_event{
+	my $game = shift;
+	my $ev = shift;
+	my $target = shift;
+	unless ($target){
+		if( $ev->{target} eq 'hero' ){
+			$target = \$game->{hero};
+		}
+		# target: other ACTOR
+		elsif ( my @byname = grep{defined $_ and $_->{name} =~ /$ev->{target}/ }@{$game->{actors}}  ){
+			$target = \$byname[0];		
+		}
+		# target: UNDEF
+		else{ 
+			print "DEBUG: undef target event will be removed\n" if $debug;
+			undef $ev;
+			next;		
+		}	
+	}
+	# MESSAGE
+	$game->message( $ev->{message} ) if ref $$target eq 'Game::Term::Actor::Hero';
+	# GAME TURN type
+	if ($ev->{type} eq 'game turn'){
+		# ENERGY GAIN
+		if ( $ev->{target_attr} and $ev->{target_attr} eq 'energy_gain' ){			
+			$$target->{energy_gain} += $ev->{target_mod};						
+		}
+		# SIGHT (only for the hero)
+		elsif( $ev->{target_attr} and $ev->{target_attr} eq 'sight' ){
+			next unless ref $$target eq 'Game::Term::Actor::Hero';
+			$$target->{sight} += $ev->{target_mod};
+			# but sight is implemented in UI..
+			$game->{ui}{hero_sight} += $ev->{target_mod};
+		}
+		else{die "Unknown target_attr!"}
+		# DURATION ( a negative effect after some turn )
+		if( $ev->{duration} ){
+			push @{$game->{timeline}[ $game->{turn} + $ev->{duration} + 1]}, 
+				Game::Term::Event->new( 
+						type 	=> 'game turn', 
+						check 	=> $game->{turn} + $ev->{duration} + 1, 
+						message	=> "END of + $ev->{target_mod} $ev->{target_attr} buff",
+						#target 	=> $ev->{target} eq 'hero' ? 'hero' : $ev->{target},
+						target 	=> $ev->{target} ,
+						target_attr => $ev->{target_attr},
+						target_mod 	=> - $ev->{target_mod},										
+				);
+		}
+		else { undef $ev }
+	}
+	# ACTOR at 
+	elsif ( $ev->{type} eq 'actor at' ){
+		print "DEBUG: nothing to do...\n"
+	}	
+	# MAP VIEW time
+	elsif ( $ev->{type} eq 'map view' ){
+		foreach my $tile( @{ $ev->{area} } ){
+				$game->{ui}{map}[$tile->[0]][$tile->[1]][2] = 1;
+			}
+	}	
+	# DOOR (ACTOR AT EVENT) type
+	elsif ( $ev->{type} eq 'door' ){
+		
+		my $answer = $game->{ui}{reader}->readline('Enter?: ');
+		chomp $answer;
+		if( $answer =~ /^y/i ){
+			$game->save_game_state();
+			print "DEBUG: SYSTEM: ",(join ' ',$^X,'-I ./lib', @{ $ev->{destination} } ),"\n";
+			undef $game;
+			system( $^X,'-I .\lib', @{ $ev->{destination} } );
+			exit;
+		}
+		else{ next }
+		
+	}
+	else{ print  "DEBUG: nothing to d for event type: $ev->{type}\n" }
+
+}
+
+sub check_eventsORIGINAL{
+	my $game = shift;
+	print "DEBUG: checking events at turn $game->{turn}..\n" if $debug;
+	
 	# PROCESS regular events(all) AND events in the timeline for the current turn
 	foreach my $ev( @{$game->{events}}, @{$game->{timeline}[ $game->{turn} ]} ){
 		next unless $ev;
