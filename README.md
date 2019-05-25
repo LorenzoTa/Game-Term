@@ -81,7 +81,7 @@ name="SYNOPSIS"
     # ..with map in DATA of the current file
     $scenario-&#62;get_map_from_DATA();
         
-        # set the hero at given position or to a defualt location
+    # set the hero at given position or to a defualt location
     $scenario-&#62;set_hero_position( @ARGV ? @ARGV : &#39;south11&#39; );
 
     # a basic configuration will use 16 colors
