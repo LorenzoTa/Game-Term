@@ -9,6 +9,7 @@ use YAML::XS qw(Dump DumpFile LoadFile);
 use Storable qw(store retrieve);
 use Time::HiRes qw ( sleep );
 use Carp;
+use Data::Dump;
 
 use Game::Term::Configuration;
 use Game::Term::UI;
@@ -104,7 +105,7 @@ sub init_timeline{
 		push @{$game->{timeline}[ $given_turn ]}, $ev;
 		undef $ev;	
 	}
-	use Data::Dump; dd "TIMELINE(init)",$game->{timeline};
+	dd "TIMELINE(init)",$game->{timeline} if $debug > 1;
 }
 
 sub get_game_state{
@@ -130,7 +131,7 @@ sub get_game_state{
 		$game->{hero}{on_tile} = undef;
 		$game->{hero}{energy} = 0;
 		print "DEBUG: loaded HERO from $state_file\n" if $debug;
-		#use Data::Dump; dd $game_state if $debug;
+		dd "hero (after gamestate import)",$game->{hero} if $debug > 1;
 		
 		# LOAD TIMELINE
 		foreach my $turn(0..$#{ $$game_state->{timeline} }){
@@ -139,7 +140,7 @@ sub get_game_state{
 			push @{$game->{timeline}[ $turn ]},
 				@{$$game_state->{timeline}->[ $turn ]};
 		}
-		use Data::Dump; dd "TIMELINE(gamestate)",$game->{timeline};
+		dd "TIMELINE(gamestate)",$game->{timeline} if $debug > 1;
 		
 		# eventually LOAD data of the current scenario
 		if(	$$game_state->{ $game->{current_scenario} } ){
@@ -161,7 +162,7 @@ sub get_game_state{
 					print $$game_state->{ $game->{current_scenario} }{map_mask}->[$row][$col]
 						if $debug > 1;
 				}
-				print "\n";
+				print "\n" if $debug > 1;
 			}
 		}
 		else{
@@ -170,14 +171,11 @@ sub get_game_state{
 	}
 	# GameState.sto does not exists
 	else {
-		print "DEBUG: $state_file not found\n" if $debug;
+		print "DEBUG: $state_file not found (a new one will be created)\n" if $debug;
 		# create with just hero inside
 		$game_state = { hero => $game->{hero} };
-		die unless store ( \$game_state, $state_file );
-	}
-	
-	
-	
+		die "Unable to store into $state_file!" unless store ( \$game_state, $state_file );
+	}	
 }
 
 sub save_game_state{
@@ -192,8 +190,6 @@ sub save_game_state{
 		$game_state = retrieve( $state_file ) 
 			or die "Unable to retrieve previous game state from $state_file";
 		print "DEBUG: succesfully retrieved previous game state from $state_file\n" if $debug;
-		# dd $game_state if $debug;
-		# print "DEBUG: \$game_state ref: ",ref($$game_state),"\n";
 	}
 	# GameState.sto does not exists
 	else {
@@ -203,6 +199,7 @@ sub save_game_state{
 	# POPULATE GameState.sto with the structure:
 	# 1-HERO
 	$$game_state->{ hero } = $game->{hero};
+	
 	# 2-TIMELINE events with hero as target
 	undef $$game_state->{ timeline };
 	# BETTER shift timeline until $game->{turn} ?????
@@ -221,12 +218,11 @@ sub save_game_state{
 	}
 	
 	$$game_state->{ $game->{current_scenario} } = {
-						#map 		=> $game->{ui}->{map},
 						map_mask => $mask,
 						actors 	=> $game->{actors},
 	};
 	
-	die unless store ( $game_state, $state_file );
+	die "Unable to store into $state_file!" unless store ( $game_state, $state_file );
 	
 	DumpFile( $state_file.'.yaml', $game_state ) if $debug;
 	
@@ -396,7 +392,7 @@ sub message{
 sub check_events{
 	my $game = shift;
 	print "DEBUG: checking events at turn $game->{turn}..\n" if $debug;
-	
+	# regular EVENTS + timeline EVENTS
 	foreach my $ev( @{$game->{events}},@{$game->{timeline}[ $game->{turn} ]} ){
 		next unless $ev;
 		print "DEBUG: analyzing event of type: $ev->{type}..\n" if $debug;
@@ -411,11 +407,11 @@ sub check_events{
 		}
 		# target: UNDEF
 		else{ 
-			print "DEBUG: undef target event will be removed\n" if $debug;
+			print "DEBUG: event with undef target will be removed\n" if $debug;
 			undef $ev;
 			next;		
 		}		
-		# 
+		# these events need to be CHECKED
 		if ( 
 				( 	
 					$ev->{type} eq 'actor at' 	or
@@ -426,28 +422,34 @@ sub check_events{
 		){
 			$game->run_event( $ev, $target );
 		}
+		# game turn events RUN always (check is ignored)
 		elsif( $ev->{type} eq 'game turn'){
 			$game->run_event( $ev, $target );
 		}
-		else{ next }
+		else{ 
+			print "DEBUG: skipping unmanaged event type: [$ev->{type}]\n";
+			next;		
+		}
 	}
-
 	# CLEAN timeline
 	$game->{timeline}[ $game->{turn} ] = undef;
-
 }
 
 sub run_event{
 	my $game = shift;
 	my $ev = shift;
 	my $target = shift;
+	# events not passing via check_events are invoked without target
 	unless ($target){
 		# target: HERO 
 		if( $ev->{target} eq 'hero' ){
 			$target = \$game->{hero};
 		}
 		# target: other ACTOR
-		elsif ( my @byname = grep{defined $_ and $_->{name} =~ /$ev->{target}/ }@{$game->{actors}}  ){
+		elsif ( 
+					my @byname = grep{defined $_ and 
+					$_->{name} =~ /$ev->{target}/ }@{$game->{actors}}  
+				){
 			$target = \$byname[0];		
 		}
 		# target: UNDEF
@@ -514,7 +516,7 @@ sub run_event{
 		else{ next }
 		
 	}
-	else{ print  "DEBUG: nothing to d for event type: $ev->{type}\n" }
+	else{ print  "DEBUG: nothing to do for event type: $ev->{type}\n" }
 
 }
 
