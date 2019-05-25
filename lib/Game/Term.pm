@@ -166,7 +166,7 @@ If the hero come back to an already visited scenario, parts of the map already e
 
 This beahviour and the above descripted scenario ability (to receive as argument the hero's starting position), make a scenario reusable during game different phases.
 
-Eaxample: hero explores part of C<scenario one> (which defaults are stored in C<scenario_one.pl> file) and exits the map entering into C<scenario two> (stored in C<scenario_two.pl>). When they come back to C<scenario one> not the defaults contained in C<scenario_one.pl> file are used but the data about C<scenario one> contained in the C<GameState.sto> file.   
+Eaxample: hero explores part of C<scenario one> (which defaults are stored in C<scenario_one.pl> file) and exits the map entering into C<scenario two> (stored in C<scenario_two.pl>). When they come back to C<scenario one> not the defaults contained in C<scenario_one.pl> file are used but the data about C<scenario one> contained in the C<GameState.sto> file. This is valid for the map, actors and also for events (more on this in a while). So a perl program containing a scenario holds data used first time it is used: after data will be retrieved from theC<GameState.sto> file.    
 
 By other hand user can save the game every moment: this action will save a precise snapshot of the game at the current time, in the current scenario. All objects stored in the save file (the game one using the scenario one, the configuration, the hero and all) can be saved and reloaded by the user at any moment. This does not affect the game state file that is modified only exiting a scenario.
 
@@ -289,6 +289,11 @@ Time events and events marked to run only once are then removed from any queue. 
  ]
 
 In the current implementation all events must have a valid C<target> or they will be removed from the queue.
+
+To exit from the current scenario entering into another one, basically, does not delete this timeline but will import scheduled timeline events into the timeline of the new scenario. So an effect during 10 turns can be in effect 3 turns in a scenario and 7 turns in the next one (this is valid only for the hero: effects on other actors will end exiting the current scenario).
+
+Events not in the timeline (doors or other events triggered at particular locations) are saved in the C<GameState.sto> file section dedicated to current scenario on exit. These saved events will overwrite events defined in the scenario file when hero will enter it again.
+
 
 
 =head1 AUTHOR
