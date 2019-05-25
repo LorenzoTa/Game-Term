@@ -74,7 +74,7 @@ sub new{
 				
 	}, $class;
 	# push time events in the timeline (removing from events)
-	$game->init_timeline();
+#$game->init_timeline();
 	# load and overwrite info about hero and current scenario(map,actors,..)from gamestate.sto
 #$game->get_game_state();
 	
@@ -148,6 +148,10 @@ sub get_game_state{
 				if $debug;
 			# LOAD actors
 			$game->{actors} = $$game_state->{ $game->{current_scenario} }{actors};
+			dd "loaded ACTORS:", $game->{actors} if $debug > 1;
+			# LOAD events
+			$game->{events} = $$game_state->{ $game->{current_scenario} }{events};
+			dd "loaded EVENTS:", $game->{events} if $debug > 1;
 			# LOAD map mask
 			print "DEBUG: applying mask from GameState to the map\n" if $debug;
 			print "DEBUG: mask retrieved:\n" if $debug > 1;
@@ -167,6 +171,7 @@ sub get_game_state{
 		}
 		else{
 			print "DEBUG: no data of '$game->{current_scenario}' in $state_file\n" if $debug;
+			$game->init_timeline();
 		}		
 	}
 	# GameState.sto does not exists
@@ -175,6 +180,7 @@ sub get_game_state{
 		# create with just hero inside
 		$game_state = { hero => $game->{hero} };
 		die "Unable to store into $state_file!" unless store ( \$game_state, $state_file );
+		$game->init_timeline();
 	}	
 }
 
@@ -197,16 +203,22 @@ sub save_game_state{
 		$game_state = {};
 	}
 	# POPULATE GameState.sto with the structure:
+	
 	# 1-HERO
 	$$game_state->{ hero } = $game->{hero};
 	
-	# 2-TIMELINE events with hero as target
+	# 2-TIMELINE 
 	undef $$game_state->{ timeline };
-	# BETTER shift timeline until $game->{turn} ?????
 	foreach my $turn ( $game->{turn}..$#{$game->{timeline}} ){
 		next unless defined ${$game->{timeline}}[$turn];
-		push @{ $$game_state->{ timeline }[$turn - $game->{turn}] },
-			@{$game->{timeline}->[$turn]};
+		foreach my $ev( @{$game->{timeline}->[$turn]} ){
+			if( $ev->{target} eq 'hero' ){
+				push @{ $$game_state->{ timeline }[$turn - $game->{turn}] }, $ev;
+			}
+			else{
+				$game->run_event($ev);
+			}		
+		}		
 	}
 	
 	# 3-MASK of unmasked tiles of current scenario
@@ -217,9 +229,11 @@ sub save_game_state{
 		}
 	}
 	
+	my @ev_to_save = grep{ defined } @{$game->{events}};
 	$$game_state->{ $game->{current_scenario} } = {
-						map_mask => $mask,
-						actors 	=> $game->{actors},
+						map_mask 	=> $mask,
+						actors 		=> $game->{actors},
+						events		=> [ @ev_to_save ],
 	};
 	
 	die "Unable to store into $state_file!" unless store ( $game_state, $state_file );
