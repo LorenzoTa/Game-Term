@@ -397,7 +397,7 @@ sub check_events{
 	my $game = shift;
 	print "DEBUG: checking events at turn $game->{turn}..\n" if $debug;
 	
-	foreach my $ev( @{$game->{events}} ){
+	foreach my $ev( @{$game->{events}},@{$game->{timeline}[ $game->{turn} ]} ){
 		next unless $ev;
 		print "DEBUG: analyzing event of type: $ev->{type}..\n" if $debug;
 		# target: HERO
@@ -442,6 +442,7 @@ sub run_event{
 	my $ev = shift;
 	my $target = shift;
 	unless ($target){
+		# target: HERO 
 		if( $ev->{target} eq 'hero' ){
 			$target = \$game->{hero};
 		}
@@ -456,8 +457,9 @@ sub run_event{
 			next;		
 		}	
 	}
-	# MESSAGE
+	# event MESSAGE
 	$game->message( $ev->{message} ) if ref $$target eq 'Game::Term::Actor::Hero';
+	
 	# GAME TURN type
 	if ($ev->{type} eq 'game turn'){
 		# ENERGY GAIN
@@ -815,7 +817,7 @@ sub execute{
 			return unless defined $num;
 			chomp $num;
 			$num=~s/\s+$//g;
-			if( $num =~/^\d{1,}$/ and defined $game->{hero}{bag}->[$num] ){
+			if( $num =~/^\d+$/ and defined $game->{hero}{bag}->[$num] ){
 				# EFFECT AT NEXT TURN
 				push @{$game->{timeline}[ $game->{turn} + 1 ]},
 					Game::Term::Event->new( 
@@ -828,6 +830,7 @@ sub execute{
 							message		=> $game->{hero}{bag}->[$num]->{message},
 			
 				);
+				use Data::Dump; dd "timeline",$game->{timeline};
 				# REMOVE if consumable
 				undef $game->{hero}{bag}->[$num] if $game->{hero}{bag}->[$num]->{consumable};
 				# USE COUNTS AS MOVING
