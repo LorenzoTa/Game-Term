@@ -24,14 +24,14 @@ The present document describes Game::Term version 0.01
 
     use strict;
     use warnings;
+	
+    use Game::Term::Configuration;
     use Game::Term::Game;
-
     use Game::Term::Scenario;
     use Game::Term::Actor;
     use Game::Term::Actor::Hero;
 
-    # bare minimum scenario with map in DATA
-
+    # bare minimum scenario.. 
     my $scenario = Game::Term::Scenario->new(
         name => 'Test Scenario 1',
         actors => [
@@ -39,14 +39,22 @@ The present document describes Game::Term version 0.01
                         Game::Term::Actor->new( name => 'TWO', y => 5, x => 7, energy_gain => 2 ),					
                      ]
     );
+	
+    # ..with map in DATA of the current file
     $scenario->get_map_from_DATA();
-    $scenario->set_hero_position( $ARGV[0] // 'south11' );
+	
+	# set the hero at given position or to a defualt location
+    $scenario->set_hero_position( @ARGV ? @ARGV : 'south11' );
 
-
+    # a basic configuration will use 16 colors
+    # use Game::Term::Configuration->new( colors_map => 256 )
+    # if your console supports them
     my $conf = Game::Term::Configuration->new();
 	
+    # hero has to be qualified in the first scenario
     my $hero = Game::Term::Actor::Hero->new( name => 'My New Hero' );
 
+    # the game object feed with all the above
     my $game = Game::Term::Game->new( 
                                       debug         => 0,  
                                       configuration => $conf, 
@@ -55,7 +63,7 @@ The present document describes Game::Term version 0.01
 
     );
 
-
+    # start the game loop
     $game->play();
 
     __DATA__
@@ -84,7 +92,7 @@ The first group is C<interface> and is about the appearence and default director
 
 The second group is C<terrains> and holds various infos about every possible terrain based on how many colors the engine will use (2, 16 or 256 as specified in the C<interface> section).
 
-Once generated the configuration is saved into the C<GameTermConfDefault.conf> under the game directory and will be loaded from this file.
+Once generated the configuration is saved into the C<GameTermConfDefault.conf> under the game directory and will be loaded from this file preferentially.
 
 The engine lets you to reload the configuration during the game.
 
@@ -131,22 +139,23 @@ The User Interface is governed by the L<Game::Term::UI> module. It loads and app
 
 UI will create a frame where a scrolllable map is displayed. Scroll is ruled by hero's position.
 
-All fancy color effects provided by L<Term::ANSIColor> are applied in the UI. 
+All fancy color effects provided by L<Term::ANSIColor> are applied in the UI (Windows user might need to load and run C<ansicon.exe> from L<https://github.com/adoxa/ansicon> to have ansi sequences correctly interpreted). 
 
 Generally the UI will mask parts of the map not yet explored and will put "fog of war" in empty spaces ( plains ) outside hero's sight.
 
+Even if the map is all discovered only creatures in the hero's sight are displayed and their moves will trigger a refresh of the map.
 
 =head2 scenarios
 
 The scenario concept cover two distinct things. Firstly a C<scenario> is a regular Perl program as shown in the synopis: a C<.pl> program that uses the current suit of modules, mainly building up a L<Game::Term::Game> object, to start a new game by calling C<$game-E<gt>play()> 
 
-To make this funnier the above perl program will inject into the game object a scenario constitued by a map, some creature lurking on the map an possibly *** to be implemented *** events, enigmas and more.
+To make this funnier the above perl program will inject into the game object a scenario constitued by a map, some creature lurking on the map and possibly events and more.
 
-The scenario is handled using the L<Game::Term::Scenario> module and its few methods.
+The scenario is created and handled using the L<Game::Term::Scenario> module and its few methods.
 
-If an argument is passed to the program setting up the scenario this will be used as hero's starting position. This argument is passed in like: C<south5> meaning on the south side of the map at tile 5 (starting from 0) or C<west22> or similar. 
+If an argument is passed to the program setting up the scenario this will be used as hero's starting position. This argument is passed in like: C<south5> meaning on the south side of the map at tile 5 (starting from 0) or C<west22> or similar. An alternative way of passing hero's starting position is formed by three arguments (the string C<middle> and C<y> and C<x> coordinates) like: C<middle 19 72> to intend hero enters at row 19 column 72.
 
-The scenario will also sets all default intial values for: the hero position, number and kind of present actors and every other entities  a scenario can hold.
+The scenario will also sets all default intial values for: the hero position, number and kind of present actors and every other entities a scenario can hold.
 
 
 =head2 game state and user's saves
@@ -195,22 +204,59 @@ Pressing the C<:> key the user enters in C<command mode> where commands availabl
 
 Generally every command issued while in C<map mode> will result in a screen redraw but the same is not true for commands issued while in C<command mode> where a pseudo prompt is present.
  
+Currently commands are (as shown by the inline help):
 
+      MAP MODE (exploration)
+
+      w   walk north
+      a   walk west
+      s   walk south
+      d   walk east
+
+      b   show bag content
+      u   use an item in the bag (counts as a move)
+
+      h   show this help
+
+      l   show labels on the map (to be implemented)
+
+      :   switch to COMMAND MODE
+
+
+
+      COMMAND MODE (use TAB to autocomplete commands)
+
+      save [filename]
+              save (using YAML) the current game into filename
+              or inside a filename crafted on the fly
+
+      load filename
+              reload the game from a specified save
+
+      configuration [filename]
+              reload the UI configuration from a YAML file if specified
+              or from the default one
+
+      show_legenda
+              show the legenda of the map (to be implemented)
+
+      return_to_game
+              bring you back to MAP MODE
 
 =head2 events and timeline
 
-Events are the salt and spices of a sceanrio. They are created from the L<Game::Term::Event> class. They can specify different things happening at some time or under certain condition. For the moment is important to know how they happen and how they modify the game.
+Events are the salt and spices of a sceanrio. They are created from the L<Game::Term::Event> class. They can specify different things happening at some time or under certain conditions. For the moment is important to know how they happen and how they modify the game.
 
-Events are created in the scenario perl program and passed to the game object in the C<events =E<gt> [...]> parameter.
+Events are created in the scenario (perl program) and passed to the game object in the C<events =E<gt> [...]> parameter.
 
-Events not triggered at a given turn are left in the game oject and are checcked every game turn to see if they have to be rendered.
+Events not triggered at a given turn are left in the game oject and are checked every game turn to see if they have to be rendered (hero at given tile, doors to other scenarios and alike).
 
-Time events are treated differently: once the game object receives them it builds up a B<timeline> structure, a queue of game turns containing one, zero or more events each turn.
+Time events are treated differently: once the game object receives them, it builds up a B<timeline> structure, a queue of game turns containing one, zero or more events each turn.
 
-This  B<timeline> will be an array of array, like:
+This  B<timeline> will be an array of array, like (* on current turn):
 
  [
-    undef,              # turn 0 no events
+  * undef,              # turn 0 no events
     [ event1 ],         # turn 1 will trigger event1
     undef,              # turn 2 no events
     [ event2, event3 ]  # turn will trigger event2 and then event3
@@ -226,9 +272,9 @@ Let's continue the above example saying that C<event1> will increase hero's sigh
 
  [
     undef,              # turn 0 no events
-    [ event1 ],         # turn 1 will trigger event1
+   *[ event1 ],         # turn 1 will trigger event1
     undef,              # turn 2 no events
-    [ event2, event3 ]  # turn will trigger event2 and then event3
+    [ event2, event3 ]  # turn 3 will trigger event2 and then event3
     [ event1-end ]      # created automatically by event1
  ]
 
@@ -237,12 +283,12 @@ Time events and events marked to run only once are then removed from any queue. 
  [
     undef,              # turn 0 no events
     [ undef ],          # turn 1 event already rendered is removed
-    undef,              # turn 2 no events
+   *undef,              # turn 2 no events
     [ event2, event3 ]  # turn will trigger event2 and then event3
     [ event1-end ]      # created automatically by event1
  ]
 
-
+In the current implementation all events must have a valid C<target> or they will be removed from the queue.
 
 
 =head1 AUTHOR

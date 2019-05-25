@@ -27,6 +27,7 @@ WriteMakefile(
 		'Term::ReadKey' => '0',
 		'Term::ReadLine' => '0',
 		'List::Util' => '0',
+		'Data::Dump' => '0',
 		# 
         #'Foo::Bar::Module' => '5.0401',
     },

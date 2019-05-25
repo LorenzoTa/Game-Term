@@ -26,39 +26,39 @@ my $scenario = Game::Term::Scenario->new(
 				],
 				
 				events => [
-					Game::Term::Event->new( 
-											type 	=> 'game turn', 
-											check 	=> 3, # turn 3
-											target 	=> 'hero', # special string for hero
-											target_attr => 'energy_gain',
-											target_mod 	=> 5,
-											duration => 3,
-											message	=> 'BUFF! energy gain +5 for 3 turns',
+					# Game::Term::Event->new( 
+											# type 	=> 'game turn', 
+											# check 	=> 3, # turn 3
+											# target 	=> 'hero', # special string for hero
+											# target_attr => 'energy_gain',
+											# target_mod 	=> 5,
+											# duration => 3,
+											# message	=> 'BUFF! energy gain +5 for 3 turns',
 											
 											
-											),#
+											# ),#
 					Game::Term::Event->new( 
 											type 	=> 'game turn', 
 											check 	=> 5, # turn 5
 											target 	=> 'DUE', # the name of the actor
 											target_attr => 'energy_gain',
 											target_mod 	=> 5,
-											duration => 3,
+											duration => 50,
 											message	=> 'BUFF! energy gain +5 for 3 turns',
 											
 											
 											),#
-					Game::Term::Event->new( 
-											type 	=> 'game turn', 
-											check 	=> 10, 
-											target 	=> 'hero', 
-											target_attr => 'sight',
-											target_mod 	=> 5,
-											duration => 3,
-											message	=> 'BUFF! sight radius +5 for 3 turns',
+					# Game::Term::Event->new( 
+											# type 	=> 'game turn', 
+											# check 	=> 10, 
+											# target 	=> 'hero', 
+											# target_attr => 'sight',
+											# target_mod 	=> 5,
+											# duration => 3,
+											# message	=> 'BUFF! sight radius +5 for 3 turns',
 											
 											
-											),#
+											# ),#
 											
 					Game::Term::Event->new( 
 											type => 'actor at',
@@ -130,7 +130,7 @@ my $hero = Game::Term::Actor::Hero->new(
 											bag => [
 												Game::Term::Item->new(
 													name => 'potion of sight',
-													duration => 3,
+													duration => 5,
 													consumable => 1,
 													target_attr => 'sight',
 													target_mod	=> 10,
