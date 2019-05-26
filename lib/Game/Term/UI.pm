@@ -401,22 +401,12 @@ sub set_map_and_hero{
 
 	my $original_map_w = $#{$ui->{map}->[0]} + 1;
 	my $original_map_h = $#{$ui->{map}} + 1;
-	#print "DEBUG: ???? original map was $original_map_w x $original_map_h\n" if $debug;
 	
-	# get hero position and side 
 	$ui->set_hero_pos();
 	
-	# change hero icon to []
-	#print "DEBUG hero icon before: $ui->{ hero_icon }\n";
-	# if ( ref $ui->{ hero_icon } eq 'ARRAY' ){
-		# $ui->{ hero_icon } = ${$ui->{ hero_icon }}[1];
-	# }
 	unless ( ref $ui->{ hero_icon } eq 'ARRAY' ){
-		# print "DEBUG: I make it an array..\n";
-		# $ui->{ hero_icon } = [ (join '',(color_names_to_ANSI($ui->{ hero_color }),$ui->{ hero_icon },RESET)), $ui->{ hero_icon }, 1 ];
 		$ui->{ hero_icon } = [ color_names_to_ANSI($ui->{ hero_color }).$ui->{ hero_icon }.RESET , $ui->{ hero_icon }, 1 ];
 	}
-	#print "DEBUG hero icon after:\n"; use Data::Dump; dd $ui->{ hero_icon };
 		
 	$ui->beautify_map();		
 	
@@ -572,6 +562,10 @@ sub set_hero_pos{
 				${$ui->{map}}[$row][$col] = 'd';
 				$ui->{hero_y} = $row;
 				$ui->{hero_x} = $col;
+		#DOUBLE!!!!!!!!!!!
+				$ui->{hero}{y} = $row;
+				$ui->{hero}{x} = $col;
+				
 				if    ( $row == 0 )						{ $ui->{hero_side} = 'N' }
 				elsif ( $row == $#{$ui->{map}} )		{ $ui->{hero_side} = 'S' }
 				elsif ( $col == 0 )						{ $ui->{hero_side} = 'W' }
