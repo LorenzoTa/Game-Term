@@ -85,6 +85,8 @@ sub new{
             #return grep { /^$text/i } sort keys %commands ;
 			return grep { /^$text/i } sort qw( save load return_to_game configuration show_legenda help exit ) ;
     };
+	# get HERO passed by Game object
+	$ui->{hero} = $params{hero};
 	return $ui;	
 }
 
@@ -150,6 +152,8 @@ sub init{
 	print "DEBUG: NEW MAP: rows: 0..$#{$ui->{map}} cols: 0..$#{$ui->{ map }[0]}\n" if $debug;
 	
 	$ui->set_map_offsets();
+	# local $ui->{map} = [$ui->{map}[0][0]];
+	# use Data::Dump; dd $ui; #exit;
 }
 
 sub get_user_command{
@@ -202,29 +206,29 @@ sub get_user_command{
 sub set_map_offsets{
 	my $ui = shift;	
 	if ( $ui->{hero_side} eq 'S' ){		
-		$ui->{map_off_x} =  $ui->{hero_x} - $ui->{map_area_w} / 2; 
-		$ui->{map_off_y} =  $ui->{hero_y} - $ui->{map_area_h} ;		
+		$ui->{map_off_x} =  $ui->{hero}{x} - $ui->{map_area_w} / 2; 
+		$ui->{map_off_y} =  $ui->{hero}{y} - $ui->{map_area_h} ;		
 		print "DEBUG: SOUTH map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
 	elsif ( $ui->{hero_side} eq 'N' ){		
-		$ui->{map_off_x} =  $ui->{hero_x} - $ui->{map_area_w} / 2;
-		$ui->{map_off_y} =  $ui->{hero_y}   ;		
+		$ui->{map_off_x} =  $ui->{hero}{x} - $ui->{map_area_w} / 2;
+		$ui->{map_off_y} =  $ui->{hero}{y}   ;		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
 	elsif ( $ui->{hero_side} eq 'E' ){		
-		$ui->{map_off_x} = $ui->{hero_x} - $ui->{map_area_w} ;
-		$ui->{map_off_y} =  $ui->{hero_y} - $ui->{map_area_h} / 2; # ok ma no ... f di hero.. $ui->{map_area_h} + 1;
+		$ui->{map_off_x} = $ui->{hero}{x} - $ui->{map_area_w} ;
+		$ui->{map_off_y} =  $ui->{hero}{y} - $ui->{map_area_h} / 2; # ok ma no ... f di hero.. $ui->{map_area_h} + 1;
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}	
 	elsif ( $ui->{hero_side} eq 'W' ){		
-		$ui->{map_off_x} = $ui->{hero_x} - 1; # ???? 
-		$ui->{map_off_y} = $ui->{hero_y} - $ui->{map_area_h} / 2;		
+		$ui->{map_off_x} = $ui->{hero}{x} - 1; # ???? 
+		$ui->{map_off_y} = $ui->{hero}{y} - $ui->{map_area_h} / 2;		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
 	# M
 	elsif ( $ui->{hero_side} eq 'M' ){		
-		$ui->{map_off_x} = $ui->{hero_x} - $ui->{map_area_w} / 2;
-		$ui->{map_off_y} = $ui->{hero_y} - $ui->{map_area_h} / 2;		
+		$ui->{map_off_x} = $ui->{hero}{x} - $ui->{map_area_w} / 2;
+		$ui->{map_off_y} = $ui->{hero}{y} - $ui->{map_area_h} / 2;		
 		print "DEBUG: map print offsets: x =  $ui->{map_off_x} y = $ui->{map_off_y}\n" if $debug;
 	}
 	else{die}
@@ -251,7 +255,7 @@ sub draw_map{
  	
 	# draw hero
 	# this must set $hero->{on_terrain}
-	local $ui->{map}[ $ui->{hero_y} ][ $ui->{hero_x} ] = $ui->{hero_icon}; 
+	local $ui->{map}[ $ui->{hero}{y} ][ $ui->{hero}{x} ] = $ui->{hero_icon}; 
 	
 	
 	# TITLE AREA:
@@ -340,10 +344,10 @@ sub must_scroll{
 	return 0 if $ui->{no_scroll};
 	return 1 if $ui->{scrolling};
 	if(	 
-		$ui->{hero_y} < $ui->{no_scroll_area}{min_y} or
-		$ui->{hero_y} > $ui->{no_scroll_area}{max_y} or
-		$ui->{hero_x} < $ui->{no_scroll_area}{min_x} or
-		$ui->{hero_x} > $ui->{no_scroll_area}{max_x} #and $ui->{scrolling} == 0
+		$ui->{hero}{y} < $ui->{no_scroll_area}{min_y} or
+		$ui->{hero}{y} > $ui->{no_scroll_area}{max_y} or
+		$ui->{hero}{x} < $ui->{no_scroll_area}{min_x} or
+		$ui->{hero}{x} > $ui->{no_scroll_area}{max_x} #and $ui->{scrolling} == 0
 	
 	){
 		print "DEBUG: OUT of scrolling area\n" if $debug;
@@ -356,27 +360,22 @@ sub must_scroll{
 sub illuminate{
 	my $ui = shift;
 	my %ret;
-	my $max_y = $ui->{hero_y}  + $ui->{hero_sight} < $#{ $ui->{map} } 	?
-				$ui->{hero_y}  + $ui->{hero_sight}						:
+	my $max_y = $ui->{hero}{y}  + $ui->{hero}{sight} < $#{ $ui->{map} } 	?
+				$ui->{hero}{y}  + $ui->{hero}{sight}						:
 				$#{ $ui->{map} };
 				
-	foreach my $row ( $ui->{hero_y} - $ui->{hero_sight}  .. $max_y ){
-		my $delta_x = $ui->{hero_sight} ** 2 - ($ui->{hero_y} - $row) ** 2;
+	foreach my $row ( $ui->{hero}{y} - $ui->{hero}{sight}  .. $max_y ){
+		my $delta_x = $ui->{hero}{sight} ** 2 - ($ui->{hero}{y} - $row) ** 2;
 		if( $delta_x >= 0 ){				
 				$delta_x = int sqrt $delta_x;			
-				my $low = max 0, $ui->{hero_x} - $delta_x;
-				my $high = min $#{ $ui->{map}->[$row] }, $ui->{hero_x} + $delta_x;
+				my $low = max 0, $ui->{hero}{x} - $delta_x;
+				my $high = min $#{ $ui->{map}->[$row] }, $ui->{hero}{x} + $delta_x;
 				map { $ret{ $row.'_'.$_ }++ } $low .. $high;				
 		}
 	}
-	   return %ret;
+	return %ret;
 }
-# sub is_walkable{
-	# my $tile = shift; 
-	
-	# if ( $terrain{ $tile->[1]}->[4] < 5 ){ return 1}
-	# else{return 0}
-# }
+
 		
 sub draw_menu{
 	my $ui = shift;
@@ -402,22 +401,12 @@ sub set_map_and_hero{
 
 	my $original_map_w = $#{$ui->{map}->[0]} + 1;
 	my $original_map_h = $#{$ui->{map}} + 1;
-	#print "DEBUG: ???? original map was $original_map_w x $original_map_h\n" if $debug;
 	
-	# get hero position and side 
 	$ui->set_hero_pos();
 	
-	# change hero icon to []
-	#print "DEBUG hero icon before: $ui->{ hero_icon }\n";
-	# if ( ref $ui->{ hero_icon } eq 'ARRAY' ){
-		# $ui->{ hero_icon } = ${$ui->{ hero_icon }}[1];
-	# }
 	unless ( ref $ui->{ hero_icon } eq 'ARRAY' ){
-		# print "DEBUG: I make it an array..\n";
-		# $ui->{ hero_icon } = [ (join '',(color_names_to_ANSI($ui->{ hero_color }),$ui->{ hero_icon },RESET)), $ui->{ hero_icon }, 1 ];
 		$ui->{ hero_icon } = [ color_names_to_ANSI($ui->{ hero_color }).$ui->{ hero_icon }.RESET , $ui->{ hero_icon }, 1 ];
 	}
-	#print "DEBUG hero icon after:\n"; use Data::Dump; dd $ui->{ hero_icon };
 		
 	$ui->beautify_map();		
 	
@@ -505,32 +494,32 @@ sub set_no_scrolling_area{
 	
 	if ( $ui->{no_scroll} == 0 ){
 		if ( $ui->{hero_side} eq 'S' ){  
-			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
-			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 2);
+			$ui->{no_scroll_area}{min_x} = $ui->{hero}{x} - int($ui->{map_area_w} / 4);
+			$ui->{no_scroll_area}{min_y} = $ui->{hero}{y} - int($ui->{map_area_h} / 2);
 			
-			$ui->{no_scroll_area}{max_y} = $ui->{hero_y};
-			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);			
+			$ui->{no_scroll_area}{max_y} = $ui->{hero}{y};
+			$ui->{no_scroll_area}{max_x} = $ui->{hero}{x} + int($ui->{map_area_w} / 4);			
 		}
 		elsif ( $ui->{hero_side} eq 'N' ){ 
-			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 4);
-			$ui->{no_scroll_area}{min_y} = $ui->{hero_y}; 
+			$ui->{no_scroll_area}{min_x} = $ui->{hero}{x} - int($ui->{map_area_w} / 4);
+			$ui->{no_scroll_area}{min_y} = $ui->{hero}{y}; 
 			
-			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 4);
-			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 2);				
+			$ui->{no_scroll_area}{max_x} = $ui->{hero}{x} + int($ui->{map_area_w} / 4);
+			$ui->{no_scroll_area}{max_y} = $ui->{hero}{y} + int($ui->{map_area_h} / 2);				
 		}		
 		elsif ( $ui->{hero_side} eq 'E' ){
-			$ui->{no_scroll_area}{min_x} = $ui->{hero_x} - int($ui->{map_area_w} / 2);
-			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4);
+			$ui->{no_scroll_area}{min_x} = $ui->{hero}{x} - int($ui->{map_area_w} / 2);
+			$ui->{no_scroll_area}{min_y} = $ui->{hero}{y} - int($ui->{map_area_h} / 4);
 			
-			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} ;
-			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4 );						
+			$ui->{no_scroll_area}{max_x} = $ui->{hero}{x} ;
+			$ui->{no_scroll_area}{max_y} = $ui->{hero}{y} + int($ui->{map_area_h} / 4 );						
 		}
 		elsif ( $ui->{hero_side} eq 'W' ){
-			$ui->{no_scroll_area}{min_x} = $ui->{hero_x};
-			$ui->{no_scroll_area}{min_y} = $ui->{hero_y} - int($ui->{map_area_h} / 4);
+			$ui->{no_scroll_area}{min_x} = $ui->{hero}{x};
+			$ui->{no_scroll_area}{min_y} = $ui->{hero}{y} - int($ui->{map_area_h} / 4);
 			
-			$ui->{no_scroll_area}{max_x} = $ui->{hero_x} + int($ui->{map_area_w} / 2);
-			$ui->{no_scroll_area}{max_y} = $ui->{hero_y} + int($ui->{map_area_h} / 4);			
+			$ui->{no_scroll_area}{max_x} = $ui->{hero}{x} + int($ui->{map_area_w} / 2);
+			$ui->{no_scroll_area}{max_y} = $ui->{hero}{y} + int($ui->{map_area_h} / 4);			
 		}
 		#
 		elsif ( $ui->{hero_side} eq 'M' ){
@@ -573,6 +562,10 @@ sub set_hero_pos{
 				${$ui->{map}}[$row][$col] = 'd';
 				$ui->{hero_y} = $row;
 				$ui->{hero_x} = $col;
+		#DOUBLE!!!!!!!!!!!
+				$ui->{hero}{y} = $row;
+				$ui->{hero}{x} = $col;
+				
 				if    ( $row == 0 )						{ $ui->{hero_side} = 'N' }
 				elsif ( $row == $#{$ui->{map}} )		{ $ui->{hero_side} = 'S' }
 				elsif ( $col == 0 )						{ $ui->{hero_side} = 'W' }
@@ -582,7 +575,7 @@ sub set_hero_pos{
 			}				
 		}
 	}
-	unless( defined $ui->{hero_y} and defined $ui->{hero_x}){die "Hero not found!"}
+	unless( defined $ui->{hero}{y} and defined $ui->{hero}{x}){die "Hero not found!"}
 	
 }
 
