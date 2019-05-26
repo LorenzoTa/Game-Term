@@ -373,27 +373,9 @@ sub illuminate{
 				map { $ret{ $row.'_'.$_ }++ } $low .. $high;				
 		}
 	}
-	# my $max_y = $ui->{hero_y}  + $ui->{hero_sight} < $#{ $ui->{map} } 	?
-				# $ui->{hero_y}  + $ui->{hero_sight}						:
-				# $#{ $ui->{map} };
-				
-	# foreach my $row ( $ui->{hero_y} - $ui->{hero_sight}  .. $max_y ){
-		# my $delta_x = $ui->{hero_sight} ** 2 - ($ui->{hero_y} - $row) ** 2;
-		# if( $delta_x >= 0 ){				
-				# $delta_x = int sqrt $delta_x;			
-				# my $low = max 0, $ui->{hero_x} - $delta_x;
-				# my $high = min $#{ $ui->{map}->[$row] }, $ui->{hero_x} + $delta_x;
-				# map { $ret{ $row.'_'.$_ }++ } $low .. $high;				
-		# }
-	# }
-	   return %ret;
+	return %ret;
 }
-# sub is_walkable{
-	# my $tile = shift; 
-	
-	# if ( $terrain{ $tile->[1]}->[4] < 5 ){ return 1}
-	# else{return 0}
-# }
+
 		
 sub draw_menu{
 	my $ui = shift;
