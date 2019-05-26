@@ -85,6 +85,9 @@ sub new{
 	$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
 	$game->{ui}->{hero_terrain}		=   'plain';
 	
+	# INJECT into UI HERO
+	$game->{ui}->{ hero } = $game->{ hero };
+	
 	# beautify the map and others..
 	$game->{ui}->init();
 	# apply MASK now!

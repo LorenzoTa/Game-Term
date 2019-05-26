@@ -85,6 +85,8 @@ sub new{
             #return grep { /^$text/i } sort keys %commands ;
 			return grep { /^$text/i } sort qw( save load return_to_game configuration show_legenda help exit ) ;
     };
+	# get HERO passed by Game object
+	$ui->{hero} = $params{hero};
 	return $ui;	
 }
 
@@ -150,6 +152,8 @@ sub init{
 	print "DEBUG: NEW MAP: rows: 0..$#{$ui->{map}} cols: 0..$#{$ui->{ map }[0]}\n" if $debug;
 	
 	$ui->set_map_offsets();
+	local $ui->{map} = [$ui->{map}[0][0]];
+	use Data::Dump; dd $ui; #exit;
 }
 
 sub get_user_command{
