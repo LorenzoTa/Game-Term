@@ -85,17 +85,24 @@ sub new{
 	$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
 	$game->{ui}->{hero_terrain}		=   'plain';
 	
-	# INJECT into UI HERO
-	$game->{ui}->{ hero } = $game->{ hero };
 	
 	# beautify the map and others..
 	$game->{ui}->init();
 	# apply MASK now!
 	$game->get_game_state();
 	
+	# INJECT into UI HERO now!
+	$game->{ui}->{ hero } = $game->{ hero };
+	
 	
 	$game->{hero}{on_tile}			= 	'plain';
-	#use Data::Dump; dd $game->{ui};
+	
+	if ($debug > 1){
+		local $game->{ui}->{map} = ["FAKE","DATA"];
+		print "DEBUG: UI after injections by Game object constructor:\n";
+		dd $game->{ui};
+	}
+	
 	return $game;
 }
 

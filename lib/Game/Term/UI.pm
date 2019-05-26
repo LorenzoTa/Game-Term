@@ -152,8 +152,8 @@ sub init{
 	print "DEBUG: NEW MAP: rows: 0..$#{$ui->{map}} cols: 0..$#{$ui->{ map }[0]}\n" if $debug;
 	
 	$ui->set_map_offsets();
-	local $ui->{map} = [$ui->{map}[0][0]];
-	use Data::Dump; dd $ui; #exit;
+	# local $ui->{map} = [$ui->{map}[0][0]];
+	# use Data::Dump; dd $ui; #exit;
 }
 
 sub get_user_command{
@@ -360,12 +360,12 @@ sub must_scroll{
 sub illuminate{
 	my $ui = shift;
 	my %ret;
-	my $max_y = $ui->{hero_y}  + $ui->{hero_sight} < $#{ $ui->{map} } 	?
-				$ui->{hero_y}  + $ui->{hero_sight}						:
+	my $max_y = $ui->{hero_y}  + $ui->{hero}{sight} < $#{ $ui->{map} } 	?
+				$ui->{hero_y}  + $ui->{hero}{sight}						:
 				$#{ $ui->{map} };
 				
-	foreach my $row ( $ui->{hero_y} - $ui->{hero_sight}  .. $max_y ){
-		my $delta_x = $ui->{hero_sight} ** 2 - ($ui->{hero_y} - $row) ** 2;
+	foreach my $row ( $ui->{hero_y} - $ui->{hero}{sight}  .. $max_y ){
+		my $delta_x = $ui->{hero}{sight} ** 2 - ($ui->{hero_y} - $row) ** 2;
 		if( $delta_x >= 0 ){				
 				$delta_x = int sqrt $delta_x;			
 				my $low = max 0, $ui->{hero_x} - $delta_x;
@@ -373,6 +373,19 @@ sub illuminate{
 				map { $ret{ $row.'_'.$_ }++ } $low .. $high;				
 		}
 	}
+	# my $max_y = $ui->{hero_y}  + $ui->{hero_sight} < $#{ $ui->{map} } 	?
+				# $ui->{hero_y}  + $ui->{hero_sight}						:
+				# $#{ $ui->{map} };
+				
+	# foreach my $row ( $ui->{hero_y} - $ui->{hero_sight}  .. $max_y ){
+		# my $delta_x = $ui->{hero_sight} ** 2 - ($ui->{hero_y} - $row) ** 2;
+		# if( $delta_x >= 0 ){				
+				# $delta_x = int sqrt $delta_x;			
+				# my $low = max 0, $ui->{hero_x} - $delta_x;
+				# my $high = min $#{ $ui->{map}->[$row] }, $ui->{hero_x} + $delta_x;
+				# map { $ret{ $row.'_'.$_ }++ } $low .. $high;				
+		# }
+	# }
 	   return %ret;
 }
 # sub is_walkable{
