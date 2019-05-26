@@ -91,10 +91,13 @@ sub new{
 	# apply MASK now!
 	$game->get_game_state();
 	
+
+
 	# INJECT into UI HERO now!
 	$game->{ui}->{ hero } = $game->{ hero };
 	
 	
+
 	$game->{hero}{on_tile}			= 	'plain';
 	
 	if ($debug > 1){
