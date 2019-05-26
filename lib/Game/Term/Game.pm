@@ -90,7 +90,7 @@ sub new{
 	# apply MASK now!
 	$game->get_game_state();
 	
-	
+	# problems here around
 	$game->{hero}{on_tile}			= 	'plain';
 	#use Data::Dump; dd $game->{ui};
 	return $game;
