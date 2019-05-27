@@ -970,6 +970,19 @@ EOH
 					# $game->{ui}->init();
 					$game->{ui}->beautify_map();
 					# end of ISSUE #30
+					dd $game->{hero};
+					#$game->{hero}->{color} = $game->{configuration}{interface}{hero_color};
+					my $prev_icon = $game->{hero}{icon}->[1];
+					print "DEBUG:\n\tprevious icon: $prev_icon\n\tnew color: $game->{ui}{hero_color}\n";
+					$game->{hero}{icon} = [ 
+								$game->{ui}->color_names_to_ANSI($game->{ui}->{hero_color}).$prev_icon, 	# to DISPLAY
+								$prev_icon, 															# original
+								1                                 												# masked ??
+					];
+					dd $game->{hero};
+					
+					
+					
 					$game->{ui}->draw_map();
 					$game->{ui}->draw_menu( 
 								$game->{turn},
