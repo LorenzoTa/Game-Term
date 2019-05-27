@@ -578,6 +578,8 @@ sub set_hero_pos{
 }
 
 our %conv = (
+			reset 	=>  RESET,	
+			
 			Black	=>	ANSI0,
 			Maroon	=>	ANSI1,
 			Green	=>	ANSI2,

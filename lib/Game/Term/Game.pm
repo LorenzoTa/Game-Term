@@ -74,9 +74,11 @@ sub new{
 	# BEAUTIFY HERO
 	unless ( ref $game->{hero}{icon} eq 'ARRAY' ){
 		$game->{hero}{icon} = [ 
-								$game->{ui}->color_names_to_ANSI($game->{hero}->{color}).$game->{hero}{icon}, 	# to DISPLAY
-								$game->{hero}{icon}, 															# original
-								1                                 												# masked ??
+								$game->{ui}->color_names_to_ANSI($game->{hero}->{color}).	# to DISPLAY
+																	$game->{hero}{icon}.
+												$game->{ui}->color_names_to_ANSI('reset'), 	
+								$game->{hero}{icon}, 										# original
+								1                                 							# masked ??
 		];
 	}
 	
@@ -974,9 +976,11 @@ EOH
 					# let CONFIGURATION reload hero's color
 					my $prev_icon = $game->{hero}{icon}->[1];
 					$game->{hero}{icon} = [ 
-								$game->{ui}->color_names_to_ANSI($game->{ui}->{hero_color}).$prev_icon, # to DISPLAY
-								$prev_icon, 															# original
-								1                                 										# masked ??
+								$game->{ui}->color_names_to_ANSI($game->{ui}->{hero_color}).	# to DISPLAY
+																				$prev_icon.
+												 $game->{ui}->color_names_to_ANSI('reset'), 
+								$prev_icon, 													# original
+								1                                 								# masked ??
 					];
 					# REDRAW
 					$game->{ui}->draw_map();
