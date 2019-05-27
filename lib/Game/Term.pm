@@ -354,7 +354,7 @@ L<https://metacpan.org/release/Game::Term>
 
 Jason Hood for his precious work:  L<ansicon|https://github.com/adoxa/ansicon>
 
-The whole L<perlmonks.org> community for continuos support and specially Corion, choroba, marto
+The whole L<perlmonks.org|https://perlmonks.org> community for continuos support and specially Corion, choroba, marto
 tybalt89 (the illumunate method is mainly his work), Tux, Marshall, hippo, Eily..
 
 Folks on perl irc channel and especially mst and integral for some nice trick they show me.

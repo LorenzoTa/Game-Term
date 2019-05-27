@@ -424,7 +424,7 @@ name="ACKNOWLEDGEMENTS"
 <p>Jason Hood for his precious work: <a href="https://github.com/adoxa/ansicon" class="podlinkurl"
 >ansicon</a></p>
 
-<p>The whole <a href="http://search.cpan.org/perldoc?perlmonks.org" class="podlinkpod"
+<p>The whole <a href="https://perlmonks.org" class="podlinkpod"
 >perlmonks.org</a> community for continuos support and specially Corion, choroba, marto tybalt89 (the illumunate method is mainly his work), Tux, Marshall, hippo, Eily..</p>
 
 <p>Folks on perl irc channel and especially mst and integral for some nice trick they show me.</p>
