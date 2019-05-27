@@ -53,7 +53,7 @@ $scenario->set_hero_position( @ARGV );
 my $hero = Game::Term::Actor::Hero->new( );
 
 my $game=Game::Term::Game->new( 
-								debug		=> 2, 
+								debug		=> $ENV{PERL_GAMETERM_DEBUG}//0, 
 								scenario 	=> $scenario,
 								hero		=> $hero,
 								

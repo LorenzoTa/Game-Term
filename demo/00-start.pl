@@ -142,7 +142,7 @@ my $hero = Game::Term::Actor::Hero->new(
 
 # the GAME main object
 my $game=Game::Term::Game->new( 
-								debug			=> 2,
+								debug			=> $ENV{PERL_GAMETERM_DEBUG}//0,
 								configuration 	=> $conf, 
 								scenario 		=> $scenario,
 								hero			=> $hero,

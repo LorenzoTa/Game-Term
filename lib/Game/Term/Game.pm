@@ -445,7 +445,7 @@ sub check_events{
 			$game->run_event( $ev, $target );
 		}
 		else{ 
-			print "DEBUG: skipping unmanaged event type: [$ev->{type}]\n";
+			print "DEBUG: skipping unmanaged event type: [$ev->{type}]\n" if $debug;
 			next;		
 		}
 	}
