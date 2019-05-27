@@ -17,6 +17,18 @@
 -->
 
 <!-- start doc -->
+
+To try the game engine demo:
+
+<pre>
+
+  clone  https://github.com/LorenzoTa/Game-Term
+  cd Game-Term
+  perl -I .\lib .\demo\00-start.pl
+
+</pre>
+
+
 <a name='___top' class='dummyTopAnchor' ></a>
 
 <div class='indexgroup'>

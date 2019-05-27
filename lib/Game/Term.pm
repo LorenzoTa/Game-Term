@@ -302,7 +302,7 @@ Debug can be set to C<0> that means that the game is intended to be played and t
 
 The debug level is passed during the construction of the game object C<debug =E<gt> 1> or <debug =E<gt> 2>
 
-
+To mantain the game developer sane if debug is set the game state is also saved into an specular YAML file named C<GameState.sto.yaml>
 
 =head1 AUTHOR
 
