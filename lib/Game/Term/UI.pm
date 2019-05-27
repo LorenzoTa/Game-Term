@@ -255,8 +255,8 @@ sub draw_map{
  	
 	# draw hero
 	# this must set $hero->{on_terrain}
-	local $ui->{map}[ $ui->{hero}{y} ][ $ui->{hero}{x} ] = $ui->{hero_icon}; 
-	
+	#local $ui->{map}[ $ui->{hero}{y} ][ $ui->{hero}{x} ] = $ui->{hero_icon}; 
+	local $ui->{map}[ $ui->{hero}{y} ][ $ui->{hero}{x} ] = $ui->{hero}{icon}; 
 	
 	# TITLE AREA:
 	# print decoration first row
@@ -404,8 +404,11 @@ sub set_map_and_hero{
 	
 	$ui->set_hero_pos();
 	
-	unless ( ref $ui->{ hero_icon } eq 'ARRAY' ){
-		$ui->{ hero_icon } = [ color_names_to_ANSI($ui->{ hero_color }).$ui->{ hero_icon }.RESET , $ui->{ hero_icon }, 1 ];
+	# unless ( ref $ui->{ hero_icon } eq 'ARRAY' ){
+		# $ui->{ hero_icon } = [ color_names_to_ANSI($ui->{ hero_color }).$ui->{ hero_icon }.RESET , $ui->{ hero_icon }, 1 ];
+	# }
+	unless ( ref $ui->{hero}{icon} eq 'ARRAY' ){
+		$ui->{hero}{icon} = [ color_names_to_ANSI($ui->{ hero_color }).$ui->{hero}{icon}.RESET , $ui->{hero}{icon}, 1 ];
 	}
 		
 	$ui->beautify_map();		
