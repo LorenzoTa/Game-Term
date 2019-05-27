@@ -76,7 +76,7 @@ sub new{
 	
 	# INJECT into UI parameters (once defined in Configuration.pm)
 	#$game->{ui}->{ hero_icon } 		=	$game->{hero}->{icon};
-	$game->{ui}->{ hero_color } 	=	$game->{hero}->{color};
+	#$game->{ui}->{ hero_color } 	=	$game->{hero}->{color};
 	#$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
 	#$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
 	$game->{ui}->{hero_terrain}		=   'plain';

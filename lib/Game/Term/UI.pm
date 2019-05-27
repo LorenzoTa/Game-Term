@@ -133,7 +133,7 @@ sub load_configuration{
 	my %interface_conf = $conf_obj->get_interface();
 	print "DEBUG: interface:\n",map{ "\t$_ => '$interface_conf{$_}'\n" } sort keys %interface_conf if $debug > 1;
 	# translate color names to ANSIx
-	$interface_conf{hero_color} = $ui->color_names_to_ANSI($interface_conf{hero_color});
+	#$interface_conf{hero_color} = $ui->color_names_to_ANSI($interface_conf{hero_color});
 	$interface_conf{dec_color} = $ui->color_names_to_ANSI($interface_conf{dec_color});
 	# apply
 	foreach my $key ( keys %interface_conf ){
