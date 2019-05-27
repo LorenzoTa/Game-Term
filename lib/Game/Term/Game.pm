@@ -81,7 +81,7 @@ sub new{
 	# INJECT into UI parameters (once defined in Configuration.pm)
 	$game->{ui}->{ hero_icon } 		=	$game->{hero}->{icon};
 	$game->{ui}->{ hero_color } 	=	$game->{hero}->{color};
-	$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
+	#$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
 	$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
 	$game->{ui}->{hero_terrain}		=   'plain';
 	
@@ -95,12 +95,11 @@ sub new{
 
 	# INJECT into UI HERO now!
 	$game->{ui}->{ hero } = $game->{ hero };
-	
-	
 
 	$game->{hero}{on_tile}			= 	'plain';
 	
 	if ($debug > 1){
+		print "HERO addresses: game: $game->{ hero } UI: $game->{ui}->{ hero }\n";
 		local $game->{ui}->{map} = ["FAKE","DATA"];
 		print "DEBUG: UI after injections by Game object constructor:\n";
 		dd $game->{ui};
@@ -317,14 +316,13 @@ sub play{
 							$game->{configuration}->{terrains}->{$game->{ui}->{map}->[ $game->{hero}->{y} ][ $game->{hero}->{x} ]->[1]}->[4]
 						);
 						# sigth modifications
-						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} + 2 
+						local $game->{hero}{sight} = $game->{hero}{sight} + 2 
 							if $game->{ui}->{hero_terrain} eq 'hill';
-						local $game->{ui}->{hero_sight}  = $game->{ui}->{hero_sight} + 4 
+						local $game->{hero}{sight}  = $game->{hero}{sight} + 4 
 							if $game->{ui}->{hero_terrain} eq 'mountain';
-						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} - 2 
+						local $game->{hero}{sight} = $game->{hero}{sight} - 2 
 							if $game->{ui}->{hero_terrain} eq 'wood';
-						
-						
+												
 						# draw screen (passing actors)
 						$game->{ui}->draw_map(  @{$game->{actors}}  );
 						$game->{ui}->draw_menu( 
