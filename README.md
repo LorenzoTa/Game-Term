@@ -24,7 +24,7 @@ To try the game engine demo:
 
   clone  https://github.com/LorenzoTa/Game-Term
   cd Game-Term
-  perl -I .\lib .\demo\00-start.pl
+  perl -I ./lib ./demo/00-start.pl
 
 </pre>
 
