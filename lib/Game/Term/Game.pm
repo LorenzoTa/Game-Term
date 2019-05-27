@@ -82,8 +82,8 @@ sub new{
 	$game->{ui}->{hero_terrain}		=   'plain';
 	
 	
-	# # beautify the map and others..
-	# $game->{ui}->init();
+	# beautify the map and others..
+	$game->{ui}->init();
 	# # apply MASK now!
 	$game->get_game_state();
 	
@@ -92,9 +92,15 @@ sub new{
 	# INJECT into UI HERO now!
 	$game->{ui}->{ hero } = $game->{ hero };
 	
+	# BEAUTIFY HERO ????
+	unless ( ref $game->{hero}{icon} eq 'ARRAY' ){
+		#$game->{hero}{icon} = [ $game->{ui}->color_names_to_ANSI($game->{hero}->{color}).$game->{hero}{icon}, $game->{hero}{icon}, 1 ];
+		$game->{hero}{icon} = [ $game->{ui}->color_names_to_ANSI('Red').$game->{hero}{icon}, $game->{hero}{icon}, 1 ];
+	}
 	
-	# beautify the map and others..
-	$game->{ui}->init();
+	
+	# # beautify the map and others..
+	# $game->{ui}->init();
 	
 
 	$game->{hero}{on_tile}			= 	'plain';
