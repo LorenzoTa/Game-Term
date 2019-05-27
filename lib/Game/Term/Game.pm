@@ -82,7 +82,7 @@ sub new{
 	$game->{ui}->{ hero_icon } 		=	$game->{hero}->{icon};
 	$game->{ui}->{ hero_color } 	=	$game->{hero}->{color};
 	#$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
-	$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
+	#$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
 	$game->{ui}->{hero_terrain}		=   'plain';
 	
 	
@@ -310,7 +310,7 @@ sub play{
 						$game->check_events();
 						# RENDER
 						sleep(	
-							$game->{ui}->{hero_slowness} + 
+							$game->{hero}->{slowness} + 
 							# the slowness #4 of the terrain original letter #1 where
 							# the hero currently is on the map
 							$game->{configuration}->{terrains}->{$game->{ui}->{map}->[ $game->{hero}->{y} ][ $game->{hero}->{x} ]->[1]}->[4]
