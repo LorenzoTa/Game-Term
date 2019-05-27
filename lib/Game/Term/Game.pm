@@ -79,7 +79,7 @@ sub new{
 	#$game->{ui}->{ hero_color } 	=	$game->{hero}->{color};
 	#$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
 	#$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
-	$game->{ui}->{hero_terrain}		=   'plain';
+	#$game->{ui}->{hero_terrain}		=   'plain';
 	
 	
 	# beautify the map (not hero!) and others..
@@ -314,11 +314,18 @@ sub play{
 						);
 						# sigth modifications
 						local $game->{hero}{sight} = $game->{hero}{sight} + 2 
-							if $game->{ui}->{hero_terrain} eq 'hill';
+							if $game->{hero}->{on_tile} eq 'hill';
 						local $game->{hero}{sight}  = $game->{hero}{sight} + 4 
-							if $game->{ui}->{hero_terrain} eq 'mountain';
+							if $game->{hero}->{on_tile} eq 'mountain';
 						local $game->{hero}{sight} = $game->{hero}{sight} - 2 
-							if $game->{ui}->{hero_terrain} eq 'wood';
+							if $game->{hero}->{on_tile} eq 'wood';
+						
+						# local $game->{hero}{sight} = $game->{hero}{sight} + 2 
+							# if $game->{ui}->{hero_terrain} eq 'hill';
+						# local $game->{hero}{sight}  = $game->{hero}{sight} + 4 
+							# if $game->{ui}->{hero_terrain} eq 'mountain';
+						# local $game->{hero}{sight} = $game->{hero}{sight} - 2 
+							# if $game->{ui}->{hero_terrain} eq 'wood';
 												
 						# draw screen (passing actors)
 						$game->{ui}->draw_map(  @{$game->{actors}}  );
@@ -718,7 +725,7 @@ sub execute{
 				$game->{ui}->{hero_y}--;
 				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-				$game->{ui}->{hero_terrain} = 
+				#$game->{ui}->{hero_terrain} = 
 				$game->{hero}->{on_tile} 	= 
 											$game->{configuration}->{terrains}->
 												{$game->{ui}->{map}->
@@ -749,7 +756,7 @@ sub execute{
 				$game->{ui}->{hero_y}++;
 				$game->{ui}->{map_off_y}++ if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-				$game->{ui}->{hero_terrain} = 
+				#$game->{ui}->{hero_terrain} = 
 				$game->{hero}->{on_tile} 	= 
 											$game->{configuration}->{terrains}->
 												{$game->{ui}->{map}->
@@ -780,7 +787,7 @@ sub execute{
 				$game->{ui}->{hero_x}--;
 				$game->{ui}->{map_off_x}-- if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-				$game->{ui}->{hero_terrain} = 
+				#$game->{ui}->{hero_terrain} = 
 				$game->{hero}->{on_tile} 	= 
 											$game->{configuration}->{terrains}->
 												{$game->{ui}->{map}->
@@ -811,7 +818,7 @@ sub execute{
 				$game->{ui}->{hero_x}++;
 				$game->{ui}->{map_off_x}++ if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-				$game->{ui}->{hero_terrain} = 
+				#$game->{ui}->{hero_terrain} = 
 				$game->{hero}->{on_tile} 	= 
 											$game->{configuration}->{terrains}->
 												{$game->{ui}->{map}->
