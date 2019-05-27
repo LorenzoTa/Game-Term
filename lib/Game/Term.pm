@@ -320,7 +320,7 @@ automatically be notified of progress on your bug as I make changes.
 =head1 SUPPORT
 
 
-The main support site for this module is L<perlmonks.org>
+The main support site for this module is  L<perlmonks.org|http://perlmonks.org/>
 
 You can find documentation for this module with the perldoc command.
 
@@ -352,7 +352,7 @@ L<https://metacpan.org/release/Game::Term>
 
 =head1 ACKNOWLEDGEMENTS
 
-Jason Hood for his precious work: L<https://github.com/adoxa/ansicon>
+Jason Hood for his precious work:  L<ansicon|https://github.com/adoxa/ansicon>
 
 The whole L<perlmonks.org> community for continuos support and specially Corion, choroba, marto
 tybalt89 (the illumunate method is mainly his work), Tux, Marshall, hippo, Eily..
