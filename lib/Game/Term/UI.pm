@@ -404,15 +404,7 @@ sub set_map_and_hero{
 	
 	$ui->set_hero_pos();
 	
-	# unless ( ref $ui->{ hero_icon } eq 'ARRAY' ){
-		# $ui->{ hero_icon } = [ $ui->color_names_to_ANSI($ui->{ hero_color }).$ui->{ hero_icon }.RESET , $ui->{ hero_icon }, 1 ];
-	# }
-	# use Data::Dump;
-	# dd "BEFORE\n",$ui->{hero};
-	# unless ( ref $ui->{hero}{icon} eq 'ARRAY' ){
-		# $ui->{hero}{icon} = [ $ui->color_names_to_ANSI($ui->{hero}{color}).$ui->{hero}{icon}.RESET , $ui->{hero}{icon}, 1 ];
-	# }
-	# dd "AFTER\n",$ui->{hero};
+	# HERO beautify happens in Game.pm after import from GameState.sto !!
 	
 	$ui->beautify_map();		
 	
