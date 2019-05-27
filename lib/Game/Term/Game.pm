@@ -27,8 +27,7 @@ sub new{
 	my $class = shift;
 	my %param = @_;
 	$debug = $param{debug};
-	# GET hero..
-	# if $param{hero} or ..	
+	
 	$param{configuration} //= Game::Term::Configuration->new();
 	
 	$param{scenario} //= Game::Term::Scenario->new( );
@@ -37,60 +36,48 @@ sub new{
 										configuration => $param{configuration}, 
 										title => $param{scenario}->{name},
 										map => $param{scenario}->{map},
-										debug => $param{debug},
-										
-										);
+										debug => $param{debug},										
+	);
+	
 	$param{scenario}->{map} = undef;
 	
 	# check saved scenario data (actors and map)!!
 	my @actors = @{$param{scenario}->{actors}};
-	#use Data::Dump; dd $param{scenario};
 	$param{scenario}->{actors} = undef;
-	
 	my @events = @{$param{scenario}->{events}};
 	$param{scenario}->{events} = undef;
 	
 	my $game = bless {
-				is_running => 1,
-				
-				configuration => $param{configuration} ,
-				
-				# scenario => $param{scenario}, ### ??????
-				current_scenario => $param{scenario}->{name},
-				
-				ui	=> $param{ui},
-				
+				is_running => 1,				
+				configuration => $param{configuration} ,				
+				current_scenario => $param{scenario}->{name},				
+				ui	=> $param{ui},				
 				hero => $param{hero},
-				actors	=> [ @actors ],
-				
-				events => [ @events ],
-				
-				timeline => [],
-				
-				messages	=> [],
-				
-				turn => 0,
-				
-				
+				actors	=> [ @actors ],				
+				events => [ @events ],				
+				timeline => [],				
+				messages	=> [],				
+				turn => 0,				
 	}, $class;
-	
-	# INJECT into UI parameters (once defined in Configuration.pm)
-	#$game->{ui}->{ hero_icon } 		=	$game->{hero}->{icon};
-	#$game->{ui}->{ hero_color } 	=	$game->{hero}->{color};
-	#$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
-	#$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
-	#$game->{ui}->{hero_terrain}		=   'plain';
-	
 	
 	# beautify the map (not hero!) and others..
 	$game->{ui}->init();
-	# apply MASK now!
+	# retrieve hero, actors,events and apply MASK now!
 	$game->get_game_state();
 	# INJECT into UI HERO now!
 	$game->{ui}->{ hero } = $game->{ hero };
+	# let CONFIGURATION to overwrite hero's color
+	if ( $game->{configuration}{interface}{hero_color} ){ #dd $game->{configuration}; exit;
+		$game->{hero}->{color} = $game->{configuration}{interface}{hero_color};
+	}
+	
 	# BEAUTIFY HERO
 	unless ( ref $game->{hero}{icon} eq 'ARRAY' ){
-		$game->{hero}{icon} = [ $game->{ui}->color_names_to_ANSI($game->{hero}->{color}).$game->{hero}{icon}, $game->{hero}{icon}, 1 ];
+		$game->{hero}{icon} = [ 
+								$game->{ui}->color_names_to_ANSI($game->{hero}->{color}).$game->{hero}{icon}, 	# to DISPLAY
+								$game->{hero}{icon}, 															# original
+								1                                 												# masked ??
+		];
 	}
 	
 	$game->{hero}{on_tile}			= 	'plain';

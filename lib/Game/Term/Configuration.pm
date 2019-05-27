@@ -318,7 +318,7 @@ sub validate_conf{
 	$conf{ fog_char }		//= '.'; #chr(176); 177 178
 
 	# $conf{ hero_icon } = 'X'; #chr(2);#'X'; 30 1 2
-	# $conf{ hero_color } //= 'Red';
+	$conf{ hero_color } //= 'Red';
 	# $conf{ hero_sight } = 5;
 	# $conf{ hero_slowness } //= 0; # used to microsleep
 
