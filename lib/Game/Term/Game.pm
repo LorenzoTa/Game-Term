@@ -73,10 +73,6 @@ sub new{
 				
 				
 	}, $class;
-	# push time events in the timeline (removing from events)
-#$game->init_timeline();
-	# load and overwrite info about hero and current scenario(map,actors,..)from gamestate.sto
-#$game->get_game_state();
 	
 	# INJECT into UI parameters (once defined in Configuration.pm)
 	$game->{ui}->{ hero_icon } 		=	$game->{hero}->{icon};
@@ -86,15 +82,20 @@ sub new{
 	$game->{ui}->{hero_terrain}		=   'plain';
 	
 	
-	# beautify the map and others..
-	$game->{ui}->init();
-	# apply MASK now!
+	# # beautify the map and others..
+	# $game->{ui}->init();
+	# # apply MASK now!
 	$game->get_game_state();
 	
 
 
 	# INJECT into UI HERO now!
 	$game->{ui}->{ hero } = $game->{ hero };
+	
+	
+	# beautify the map and others..
+	$game->{ui}->init();
+	
 
 	$game->{hero}{on_tile}			= 	'plain';
 	
