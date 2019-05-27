@@ -43,7 +43,7 @@ The present document describes Game::Term version 0.01
     # ..with map in DATA of the current file
     $scenario->get_map_from_DATA();
 	
-	# set the hero at given position or to a defualt location
+    # set the hero at given position or to a defualt location
     $scenario->set_hero_position( @ARGV ? @ARGV : 'south11' );
 
     # a basic configuration will use 16 colors
@@ -319,6 +319,9 @@ automatically be notified of progress on your bug as I make changes.
 
 =head1 SUPPORT
 
+
+The main support site for this module is L<perlmonks.org>
+
 You can find documentation for this module with the perldoc command.
 
     perldoc Game::Term
@@ -349,6 +352,12 @@ L<https://metacpan.org/release/Game::Term>
 
 =head1 ACKNOWLEDGEMENTS
 
+Jason Hood for his precious work: L<https://github.com/adoxa/ansicon>
+
+The whole L<perlmonks.org> community for continuos support and specially Corion, choroba, marto
+tybalt89 (the illumunate method is mainly his work), Tux, Marshall, Eily..
+
+Folks on perl irc channel and especially mst and integral for some nice trick they show me.
 
 =head1 LICENSE AND COPYRIGHT
 
