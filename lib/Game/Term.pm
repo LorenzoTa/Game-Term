@@ -94,7 +94,7 @@ The second group is C<terrains> and holds various infos about every possible ter
 
 Once generated the configuration is saved into the C<GameTermConfDefault.conf> under the game directory and will be loaded from this file preferentially.
 
-The engine lets you to reload the configuration during the game.
+The engine lets you to reload the configuration during the game: so if you dont like the default hero's icon or color you can change them in the configuration file created after the game start and reload the configuration (see the appropriate command below) to have them applied.
 
 
 
