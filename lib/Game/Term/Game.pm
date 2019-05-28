@@ -27,8 +27,7 @@ sub new{
 	my $class = shift;
 	my %param = @_;
 	$debug = $param{debug};
-	# GET hero..
-	# if $param{hero} or ..	
+	
 	$param{configuration} //= Game::Term::Configuration->new();
 	
 	$param{scenario} //= Game::Term::Scenario->new( );
@@ -37,70 +36,59 @@ sub new{
 										configuration => $param{configuration}, 
 										title => $param{scenario}->{name},
 										map => $param{scenario}->{map},
-										debug => $param{debug},
-										
-										);
+										debug => $param{debug},										
+	);
+	
 	$param{scenario}->{map} = undef;
 	
 	# check saved scenario data (actors and map)!!
 	my @actors = @{$param{scenario}->{actors}};
-	#use Data::Dump; dd $param{scenario};
 	$param{scenario}->{actors} = undef;
-	
 	my @events = @{$param{scenario}->{events}};
 	$param{scenario}->{events} = undef;
 	
 	my $game = bless {
-				is_running => 1,
-				
-				configuration => $param{configuration} ,
-				
-				# scenario => $param{scenario}, ### ??????
-				current_scenario => $param{scenario}->{name},
-				
-				ui	=> $param{ui},
-				
+				is_running => 1,				
+				configuration => $param{configuration} ,				
+				current_scenario => $param{scenario}->{name},				
+				ui	=> $param{ui},				
 				hero => $param{hero},
-				actors	=> [ @actors ],
-				
-				events => [ @events ],
-				
-				timeline => [],
-				
-				messages	=> [],
-				
-				turn => 0,
-				
-				
+				actors	=> [ @actors ],				
+				events => [ @events ],				
+				timeline => [],				
+				messages	=> [],				
+				turn => 0,				
 	}, $class;
-	# push time events in the timeline (removing from events)
-#$game->init_timeline();
-	# load and overwrite info about hero and current scenario(map,actors,..)from gamestate.sto
-#$game->get_game_state();
 	
-	# INJECT into UI parameters (once defined in Configuration.pm)
-	$game->{ui}->{ hero_icon } 		=	$game->{hero}->{icon};
-	$game->{ui}->{ hero_color } 	=	$game->{hero}->{color};
-	$game->{ui}->{ hero_sight } 	= 	$game->{hero}->{sight};
-	$game->{ui}->{ hero_slowness } 	=	$game->{hero}->{slowness};
-	$game->{ui}->{hero_terrain}		=   'plain';
-	
-	
-	# beautify the map and others..
+	# beautify the map (not hero!) and others..
 	$game->{ui}->init();
-	# apply MASK now!
+	# retrieve hero, actors,events and apply MASK now!
 	$game->get_game_state();
-	
-
-
 	# INJECT into UI HERO now!
 	$game->{ui}->{ hero } = $game->{ hero };
+	# let CONFIGURATION to overwrite hero's COLOR
+	if ( $game->{configuration}{interface}{hero_color} ){
+		$game->{hero}->{color} = $game->{configuration}{interface}{hero_color};
+	}
+	# let CONFIGURATION to overwrite hero's ICON
+	if ( $game->{configuration}{interface}{hero_icon} ){
+		$game->{hero}->{icon} = $game->{configuration}{interface}{hero_icon};
+	}
+	# BEAUTIFY HERO
+	unless ( ref $game->{hero}{icon} eq 'ARRAY' ){
+		$game->{hero}{icon} = [ 
+								$game->{ui}->color_names_to_ANSI($game->{hero}->{color}).	# to DISPLAY
+																	$game->{hero}{icon}.
+												$game->{ui}->color_names_to_ANSI('reset'), 	
+								$game->{hero}{icon}, 										# original
+								1                                 							# masked ??
+		];
+	}
 	
-	
-
 	$game->{hero}{on_tile}			= 	'plain';
 	
 	if ($debug > 1){
+		print "HERO addresses: game: $game->{ hero } UI: $game->{ui}->{ hero }\n";
 		local $game->{ui}->{map} = ["FAKE","DATA"];
 		print "DEBUG: UI after injections by Game object constructor:\n";
 		dd $game->{ui};
@@ -311,20 +299,26 @@ sub play{
 						$game->check_events();
 						# RENDER
 						sleep(	
-							$game->{ui}->{hero_slowness} + 
+							$game->{hero}->{slowness} + 
 							# the slowness #4 of the terrain original letter #1 where
 							# the hero currently is on the map
 							$game->{configuration}->{terrains}->{$game->{ui}->{map}->[ $game->{hero}->{y} ][ $game->{hero}->{x} ]->[1]}->[4]
 						);
 						# sigth modifications
-						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} + 2 
-							if $game->{ui}->{hero_terrain} eq 'hill';
-						local $game->{ui}->{hero_sight}  = $game->{ui}->{hero_sight} + 4 
-							if $game->{ui}->{hero_terrain} eq 'mountain';
-						local $game->{ui}->{hero_sight} = $game->{ui}->{hero_sight} - 2 
-							if $game->{ui}->{hero_terrain} eq 'wood';
+						local $game->{hero}{sight} = $game->{hero}{sight} + 2 
+							if $game->{hero}->{on_tile} eq 'hill';
+						local $game->{hero}{sight}  = $game->{hero}{sight} + 4 
+							if $game->{hero}->{on_tile} eq 'mountain';
+						local $game->{hero}{sight} = $game->{hero}{sight} - 2 
+							if $game->{hero}->{on_tile} eq 'wood';
 						
-						
+						# local $game->{hero}{sight} = $game->{hero}{sight} + 2 
+							# if $game->{ui}->{hero_terrain} eq 'hill';
+						# local $game->{hero}{sight}  = $game->{hero}{sight} + 4 
+							# if $game->{ui}->{hero_terrain} eq 'mountain';
+						# local $game->{hero}{sight} = $game->{hero}{sight} - 2 
+							# if $game->{ui}->{hero_terrain} eq 'wood';
+												
 						# draw screen (passing actors)
 						$game->{ui}->draw_map(  @{$game->{actors}}  );
 						$game->{ui}->draw_menu( 
@@ -371,6 +365,8 @@ sub play{
 						my %visible = $game->{ui}->illuminate();
 						if ( exists $visible{ $actor->{y}.'_'.$actor->{x} } ){
 							print "$actor->{name} in SIGHT!!\n" if $debug;
+							$game->message( "$actor->{name} in SIGHT!!");
+							
 							$game->{ui}->draw_map(  @{$game->{actors}}  );
 							$game->{ui}->draw_menu( 
 								$game->{turn},
@@ -405,7 +401,7 @@ sub play{
 sub message{
 	my $game = shift;
 	my $msg	= shift;
-	push @{ $game->{messages}[ $game->{turn} ] }, $msg;
+	push @{ $game->{messages}[ $game->{turn} ] }, "$game->{hero}{y}-$game->{hero}{x}\t$msg";
 	print "DEBUG: message $msg\n" if $debug;
 	$game->{ui}->draw_map();
 	$game->{ui}->draw_menu( #$game->{messages}[ $game->{turn} ] 
@@ -454,7 +450,7 @@ sub check_events{
 			$game->run_event( $ev, $target );
 		}
 		else{ 
-			print "DEBUG: skipping unmanaged event type: [$ev->{type}]\n";
+			print "DEBUG: skipping unmanaged event type: [$ev->{type}]\n" if $debug;
 			next;		
 		}
 	}
@@ -505,10 +501,10 @@ sub run_event{
 		else{die "Unknown target_attr!"}
 		# DURATION ( a negative effect after some turn )
 		if( $ev->{duration} ){
-			push @{$game->{timeline}[ $game->{turn} + $ev->{duration} + 1]}, 
+			push @{$game->{timeline}[ $game->{turn} + $ev->{duration} ]}, 
 				Game::Term::Event->new( 
 						type 	=> 'game turn', 
-						check 	=> $game->{turn} + $ev->{duration} + 1, 
+						check 	=> $game->{turn} + $ev->{duration} , 
 						message	=> "END of + $ev->{target_mod} $ev->{target_attr} buff",
 						#target 	=> $ev->{target} eq 'hero' ? 'hero' : $ev->{target},
 						target 	=> $ev->{target} ,
@@ -711,29 +707,25 @@ sub execute{
 		w => sub{
 			if ( 
 				# we are inside the real map
-				$game->{ui}->{hero_y} > 0 	and
+				$game->{hero}{y} > 0 	and
 				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{ui}->{hero_y} - 1 ]
-										[ $game->{ui}->{hero_x} ]
+					$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
+										[ $game->{hero}{x} ]
 				)
 						
 			){
-        
-				$game->{hero}->{y}--;
-				$game->{ui}->{hero_y}--;
+        		$game->{hero}{y}--;
 				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-				$game->{ui}->{hero_terrain} = 
 				$game->{hero}->{on_tile} 	= 
 											$game->{configuration}->{terrains}->
 												{$game->{ui}->{map}->
-													[ $game->{hero}->{y} ]
-													[ $game->{hero}->{x} ]->[1]  
+													[ $game->{hero}{y} ]
+													[ $game->{hero}{x} ]->[1]  
 												}->[0];
-				# $game->{ui}->draw_map();
 				print __PACKAGE__, 
 					" HERO on $game->{hero}->{on_tile} ",
-					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
+					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
 				
 				return 1;
 			}
@@ -742,29 +734,26 @@ sub execute{
 		s => sub{
 			if ( 
 				# we are inside the real map
-				$game->{ui}->{hero_y} < $#{$game->{ui}->{map}} 	and
+				$game->{hero}{y} < $#{$game->{ui}->{map}} 	and
 				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{ui}->{hero_y} + 1 ]
-										[ $game->{ui}->{hero_x} ]
+					$game->{ui}->{map}->[ $game->{hero}{y} + 1 ]
+										[ $game->{hero}{x} ]
 				)
 						
 			){
         
-				$game->{hero}->{y}++;
-				$game->{ui}->{hero_y}++;
+				$game->{hero}{y}++;
 				$game->{ui}->{map_off_y}++ if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-				$game->{ui}->{hero_terrain} = 
-				$game->{hero}->{on_tile} 	= 
-											$game->{configuration}->{terrains}->
-												{$game->{ui}->{map}->
-													[ $game->{hero}->{y} ]
-													[ $game->{hero}->{x} ]->[1]  
-												}->[0];
-				# $game->{ui}->draw_map();
+				$game->{hero}{on_tile} 	= 
+										$game->{configuration}->{terrains}->
+											{$game->{ui}->{map}->
+												[ $game->{hero}{y} ]
+												[$game->{hero}{x} ]->[1]  
+											}->[0];
 				print __PACKAGE__, 
 					" HERO on $game->{hero}->{on_tile} ",
-					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
+					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
 				
 				return 1;
 			}
@@ -773,29 +762,26 @@ sub execute{
 		a => sub{
 			if ( 
 				# we are inside the real map
-				$game->{ui}->{hero_x} > 0 	and
+				$game->{hero}{x} > 0 	and
 				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{ui}->{hero_y} ]
-										[ $game->{ui}->{hero_x} - 1 ]
+					$game->{ui}->{map}->[ $game->{hero}{y} ]
+										[ $game->{hero}{x} - 1 ]
 				)
 						
 			){
         
-				$game->{hero}->{x}--;
-				$game->{ui}->{hero_x}--;
+				$game->{hero}{x}--;
 				$game->{ui}->{map_off_x}-- if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-				$game->{ui}->{hero_terrain} = 
-				$game->{hero}->{on_tile} 	= 
+				$game->{hero}{on_tile} 	= 
 											$game->{configuration}->{terrains}->
 												{$game->{ui}->{map}->
-													[ $game->{hero}->{y} ]
-													[ $game->{hero}->{x} ]->[1]  
+													[ $game->{hero}{y} ]
+													[ $game->{hero}{x} ]->[1]  
 												}->[0];
-				# $game->{ui}->draw_map();
 				print __PACKAGE__, 
 					" HERO on $game->{hero}->{on_tile} ",
-					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
+					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
 				
 				return 1;
 			}
@@ -804,29 +790,26 @@ sub execute{
 		d => sub{
 			if ( 
 				# we are inside the real map
-				$game->{ui}->{hero_x}  < $#{$game->{ui}->{map}[0]} 	and
+				$game->{hero}{x}  < $#{$game->{ui}->{map}[0]} 	and
 				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{ui}->{hero_y} ]
-										[ $game->{ui}->{hero_x} + 1 ]
+					$game->{ui}->{map}->[ $game->{hero}{y} ]
+										[ $game->{hero}{x} + 1 ]
 				)
 						
 			){
         
-				$game->{hero}->{x}++;
-				$game->{ui}->{hero_x}++;
+				$game->{hero}{x}++;
 				$game->{ui}->{map_off_x}++ if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
-				$game->{ui}->{hero_terrain} = 
-				$game->{hero}->{on_tile} 	= 
+				$game->{hero}{on_tile} 	= 
 											$game->{configuration}->{terrains}->
 												{$game->{ui}->{map}->
-													[ $game->{hero}->{y} ]
-													[ $game->{hero}->{x} ]->[1]  
+													[ $game->{hero}{y} ]
+													[ $game->{hero}{x} ]->[1]  
 												}->[0];
-				# $game->{ui}->draw_map();
 				print __PACKAGE__, 
-					" HERO on $game->{hero}->{on_tile} ",
-					"at y: $game->{ui}->{hero_y} x: $game->{ui}->{hero_x}\n" if $debug;
+					" HERO on $game->{hero}{on_tile} ",
+					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
 				
 				return 1;
 			}
@@ -838,9 +821,11 @@ sub execute{
 		},
 		# USE ITEM
 		u => sub{
-			print ' '.$game->{ui}->{ dec_ver }.
+			if ( $game->show_bag() ){
+				print ' '.$game->{ui}->{ dec_ver }.
 					" enter the number of object to use or return\n";
-			$game->show_bag();
+			}
+			else{ return 0 }
 			
 			my $num = $game->{ui}{reader}->readline('use item number: ');
 			return unless defined $num;
@@ -859,7 +844,7 @@ sub execute{
 							message		=> $game->{hero}{bag}->[$num]->{message},
 			
 				);
-				use Data::Dump; dd "timeline",$game->{timeline};
+				dd "timeline",$game->{timeline} if $debug > 1;
 				# REMOVE if consumable
 				undef $game->{hero}{bag}->[$num] if $game->{hero}{bag}->[$num]->{consumable};
 				# USE COUNTS AS MOVING
@@ -870,6 +855,17 @@ sub execute{
 					" Warning! Not a number or not such item: [$num]\n";
 				return 0;
 			}
+		},
+		# MESSAGES
+		m => sub{
+			print ' '.$game->{ui}->{ dec_ver }." * Message History *\n";
+			foreach my $turn ( 0..$#{ $game->{messages}} ){
+				foreach my $msg ( @{$game->{messages}->[$turn]} ){
+					print ' '.$game->{ui}->{ dec_ver }.
+							" turn $turn\t$msg\n"
+				}
+			}
+			#print ' '.$game->{ui}->{ dec_ver }." no messages\n" unless @{$game->{messages}}; 
 		},
 		# HELP
 		h => sub{
@@ -890,6 +886,8 @@ u   use an item in the bag (counts as a move)
 h   show this help
 
 l   show labels on the map (to be implemented)
+
+m   show message history
 
 :   switch to COMMAND MODE
 
@@ -981,6 +979,21 @@ EOH
 					# $game->{ui}->init();
 					$game->{ui}->beautify_map();
 					# end of ISSUE #30
+					
+					# let CONFIGURATION reload hero's ICON
+					my $prev_icon = $game->{hero}{icon}->[1];
+					unless ( $prev_icon eq $game->{ui}->{hero_icon} ){
+						$prev_icon = $game->{ui}->{hero_icon};
+					}
+					# let CONFIGURATION reload hero's COLOR
+					$game->{hero}{icon} = [ 
+								$game->{ui}->color_names_to_ANSI($game->{ui}->{hero_color}).	# to DISPLAY
+																				$prev_icon.
+												 $game->{ui}->color_names_to_ANSI('reset'), 
+								$prev_icon, 													# original
+								1                                 								# masked ??
+					];
+					# REDRAW
 					$game->{ui}->draw_map();
 					$game->{ui}->draw_menu( 
 								$game->{turn},
@@ -1012,9 +1025,11 @@ sub show_bag{
 			print ' '.$game->{ui}->{ dec_ver }.
 					"[$index]\t$item->{name}\n"
 		}
+		return 1;
 	}
 	else{
 		print ' '.$game->{ui}->{ dec_ver }."Bag is empty\n";
+		return 0;
 	}	
 }
 

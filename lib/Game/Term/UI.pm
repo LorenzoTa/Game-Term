@@ -121,20 +121,20 @@ sub load_configuration{
 			" ],\n" if $debug > 1;
 		# foreground colors
 		$terrain{$ter}->[2] =  ref $terrain{$ter}->[2] eq 'ARRAY' ?
-								[ map{ color_names_to_ANSI($_) }@{$terrain{$ter}->[2]} ] : 
-								( defined  $terrain{$ter}->[3] ? color_names_to_ANSI( $terrain{$ter}->[3] ):'');
+								[ map{ $ui->color_names_to_ANSI($_) }@{$terrain{$ter}->[2]} ] : 
+								( defined  $terrain{$ter}->[3] ? $ui->color_names_to_ANSI( $terrain{$ter}->[3] ):'');
 		# eventual background colors						
 		$terrain{$ter}->[3] =  ref $terrain{$ter}->[3] eq 'ARRAY' ?
-								[map{ color_names_to_ANSI($_) }@{$terrain{$ter}->[3]} ] : 
-								( defined  $terrain{$ter}->[3] ? color_names_to_ANSI( $terrain{$ter}->[3] ):'');
+								[map{ $ui->color_names_to_ANSI($_) }@{$terrain{$ter}->[3]} ] : 
+								( defined  $terrain{$ter}->[3] ? $ui->color_names_to_ANSI( $terrain{$ter}->[3] ):'');
 	}
 	# INERFACE: translate color names into ANSI constant
 	# ...
 	my %interface_conf = $conf_obj->get_interface();
 	print "DEBUG: interface:\n",map{ "\t$_ => '$interface_conf{$_}'\n" } sort keys %interface_conf if $debug > 1;
 	# translate color names to ANSIx
-	$interface_conf{hero_color} = color_names_to_ANSI($interface_conf{hero_color});
-	$interface_conf{dec_color} = color_names_to_ANSI($interface_conf{dec_color});
+	#$interface_conf{hero_color} = $ui->color_names_to_ANSI($interface_conf{hero_color});
+	$interface_conf{dec_color} = $ui->color_names_to_ANSI($interface_conf{dec_color});
 	# apply
 	foreach my $key ( keys %interface_conf ){
 		$ui->{ $key } = $interface_conf{ $key };	#?????????????????????????????????????????????????
@@ -248,15 +248,15 @@ sub draw_map{
 	LOOP:
 	local $ui->{map}[ $actors[$index]->{y} ][ $actors[$index]->{x} ][0] 
 		= 
-	color_names_to_ANSI($actors[$index]->{color}).$actors[$index]->{icon}.RESET
+	$ui->color_names_to_ANSI($actors[$index]->{color}).$actors[$index]->{icon}.RESET
 	if $actors[$index] and exists $seen{ $actors[$index]->{y}.'_'.$actors[$index]->{x} };
 	$index++; 
 	goto LOOP if $index <= $#actors;
  	
 	# draw hero
 	# this must set $hero->{on_terrain}
-	local $ui->{map}[ $ui->{hero}{y} ][ $ui->{hero}{x} ] = $ui->{hero_icon}; 
-	
+	#local $ui->{map}[ $ui->{hero}{y} ][ $ui->{hero}{x} ] = $ui->{hero_icon}; 
+	local $ui->{map}[ $ui->{hero}{y} ][ $ui->{hero}{x} ] = $ui->{hero}{icon}; 
 	
 	# TITLE AREA:
 	# print decoration first row
@@ -404,10 +404,8 @@ sub set_map_and_hero{
 	
 	$ui->set_hero_pos();
 	
-	unless ( ref $ui->{ hero_icon } eq 'ARRAY' ){
-		$ui->{ hero_icon } = [ color_names_to_ANSI($ui->{ hero_color }).$ui->{ hero_icon }.RESET , $ui->{ hero_icon }, 1 ];
-	}
-		
+	# HERO beautify happens in Game.pm after import from GameState.sto !!
+	
 	$ui->beautify_map();		
 	
 	$ui->set_no_scrolling_area();
@@ -580,6 +578,8 @@ sub set_hero_pos{
 }
 
 our %conv = (
+			reset 	=>  RESET,	
+			
 			Black	=>	ANSI0,
 			Maroon	=>	ANSI1,
 			Green	=>	ANSI2,
@@ -1096,7 +1096,7 @@ our %conv = (
 );
 
 sub color_names_to_ANSI {
-	
+	my $ui = shift;
 	return '' unless $_[0] and exists $conv{$_[0]};
 	if(exists $conv{$_[0]}){ return $conv{$_[0]} }
 	# elsif( $_[0] eq '' ){return ''}

@@ -43,7 +43,7 @@ The present document describes Game::Term version 0.01
     # ..with map in DATA of the current file
     $scenario->get_map_from_DATA();
 	
-	# set the hero at given position or to a defualt location
+    # set the hero at given position or to a defualt location
     $scenario->set_hero_position( @ARGV ? @ARGV : 'south11' );
 
     # a basic configuration will use 16 colors
@@ -94,7 +94,7 @@ The second group is C<terrains> and holds various infos about every possible ter
 
 Once generated the configuration is saved into the C<GameTermConfDefault.conf> under the game directory and will be loaded from this file preferentially.
 
-The engine lets you to reload the configuration during the game.
+The engine lets you to reload the configuration during the game: so if you dont like the default hero's icon or color you can change them in the configuration file created after the game start and reload the configuration (see the appropriate command below) to have them applied.
 
 
 
@@ -220,6 +220,8 @@ Currently commands are (as shown by the inline help):
 
       l   show labels on the map (to be implemented)
 
+      m   show message history
+
       :   switch to COMMAND MODE
 
 
@@ -242,6 +244,9 @@ Currently commands are (as shown by the inline help):
 
       return_to_game
               bring you back to MAP MODE
+
+
+
 
 =head2 events and timeline
 
@@ -296,6 +301,14 @@ Events not in the timeline (doors or other events triggered at particular locati
 
 
 
+=head2 debug levels
+
+Debug can be set to C<0> that means that the game is intended to be played and the screen is refreshed as needed (buffer is cleared) or to C<1> to display game informations and the screen is not cleared or to C<2> dumping a lot of used datastructures used during the game as raw and beautified maps, status of the hero's object and more.
+
+The debug level is passed during the construction of the game object C<debug =E<gt> 1> or C<debug =E<gt> 2>
+
+To mantain the game developer sane if debug is set the game state is also saved into a specular YAML file named C<GameState.sto.yaml>
+
 =head1 AUTHOR
 
 LorenzoTa, C<< <lorenzo at cpan.org> >>
@@ -310,6 +323,9 @@ automatically be notified of progress on your bug as I make changes.
 
 
 =head1 SUPPORT
+
+
+The main support site for this module is  L<perlmonks.org|http://perlmonks.org/>
 
 You can find documentation for this module with the perldoc command.
 
@@ -341,6 +357,12 @@ L<https://metacpan.org/release/Game::Term>
 
 =head1 ACKNOWLEDGEMENTS
 
+Jason Hood for his precious work:  L<ansicon|https://github.com/adoxa/ansicon>
+
+The whole L<perlmonks.org|https://perlmonks.org> community for continous support and specially Corion, choroba, marto
+tybalt89 (the illumunate method is mainly his work), Tux, Marshall, hippo, Eily..
+
+Folks on perl irc channel and especially mst and integral for some nice trick they show me.
 
 =head1 LICENSE AND COPYRIGHT
 
