@@ -1035,7 +1035,8 @@ sub show_bag{
 		print ' '.$game->{ui}->{ dec_ver }." * Bag content *\n";
 		foreach my $item ( sort @{ $game->{hero}{bag} } ){
 			print ' '.$game->{ui}->{ dec_ver }.
-					"[$index]\t$item->{name}\n"
+					"[$index]\t$item->{name}\n";
+			$index++;
 		}
 		return 1;
 	}
