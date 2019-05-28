@@ -1,15 +1,20 @@
+28052019
 
--remove commands from UI.pm 
-
--turn count based on hero moves
--event queue based on turn count
-
--scenario events
 -scenario enigmas
-
 -encounters with creatures
+-labels
+-map legenda
 
 
+#################################################################
+
+- DONE remove commands from UI.pm 
+- DONE turn count based on hero moves
+- DONE event queue based on turn count
+- DONE/DRAFT scenario events
+
+
+DONE:
 ? hero_sight and hero_terrain are STILL used in Game.pm play
 they must be based on $hero properties.
 But hero_sight is used in illuminate sub of UI.pm 
