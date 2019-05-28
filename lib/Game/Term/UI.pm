@@ -245,14 +245,27 @@ sub draw_map{
 	
 	# goto LOOP needed to have multiple locals to work (thanks mst from irc)
 	my $index = 0;
-	LOOP:
+	LOOP_ACTORS:
+	# actor's tile localized to  their ICON
 	local $ui->{map}[ $actors[$index]->{y} ][ $actors[$index]->{x} ][0] 
 		= 
 	$ui->color_names_to_ANSI($actors[$index]->{color}).$actors[$index]->{icon}.RESET
 	if $actors[$index] and exists $seen{ $actors[$index]->{y}.'_'.$actors[$index]->{x} };
+	# actors LABELS
+	local @{$ui->{map}[ $actors[$index]{y}+1 ]}
+				[ $actors[$index]{x}..$actors[$index]{x}+length($actors[$index]{name})-1 ]	
+		=
+		map{[$_,' ',1]}(split //,$actors[$index]->{name})
+		if 	$actors[$index] 												and 
+			exists $seen{ $actors[$index]{y}.'_'.$actors[$index]{x} }	 	and
+			$actors[$index]{y}+1 <= $ui->{map_off_y} + $ui->{map_area_h} 	and
+			$actors[$index]{x}+length($actors[$index]->{name})-1 < $ui->{map_off_x} + $ui->{map_area_w};
+		
 	$index++; 
-	goto LOOP if $index <= $#actors;
+	goto LOOP_ACTORS if $index <= $#actors;
  	
+	
+	
 	# draw hero
 	# this must set $hero->{on_terrain}
 	#local $ui->{map}[ $ui->{hero}{y} ][ $ui->{hero}{x} ] = $ui->{hero_icon}; 
