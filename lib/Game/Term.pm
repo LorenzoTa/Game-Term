@@ -305,7 +305,7 @@ Events not in the timeline (doors or other events triggered at particular locati
 
 Debug can be set to C<0> that means that the game is intended to be played and the screen is refreshed as needed (buffer is cleared) or to C<1> to display game informations and the screen is not cleared or to C<2> dumping a lot of used datastructures used during the game as raw and beautified maps, status of the hero's object and more.
 
-The debug level is passed during the construction of the game object C<debug =E<gt> 1> or <debug =E<gt> 2>
+The debug level is passed during the construction of the game object C<debug =E<gt> 1> or C<debug =E<gt> 2>
 
 To mantain the game developer sane if debug is set the game state is also saved into an specular YAML file named C<GameState.sto.yaml>
 
