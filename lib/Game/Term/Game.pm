@@ -884,6 +884,8 @@ h   show this help
 
 l   show labels on the map (to be implemented)
 
+m   show message history
+
 :   switch to COMMAND MODE
 
 

@@ -220,6 +220,8 @@ Currently commands are (as shown by the inline help):
 
       l   show labels on the map (to be implemented)
 
+      m   show message history
+
       :   switch to COMMAND MODE
 
 
@@ -242,6 +244,9 @@ Currently commands are (as shown by the inline help):
 
       return_to_game
               bring you back to MAP MODE
+
+
+
 
 =head2 events and timeline
 
