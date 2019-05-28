@@ -66,11 +66,14 @@ sub new{
 	$game->get_game_state();
 	# INJECT into UI HERO now!
 	$game->{ui}->{ hero } = $game->{ hero };
-	# let CONFIGURATION to overwrite hero's color
-	if ( $game->{configuration}{interface}{hero_color} ){ #dd $game->{configuration}; exit;
+	# let CONFIGURATION to overwrite hero's COLOR
+	if ( $game->{configuration}{interface}{hero_color} ){
 		$game->{hero}->{color} = $game->{configuration}{interface}{hero_color};
 	}
-	
+	# let CONFIGURATION to overwrite hero's ICON
+	if ( $game->{configuration}{interface}{hero_icon} ){
+		$game->{hero}->{icon} = $game->{configuration}{interface}{hero_icon};
+	}
 	# BEAUTIFY HERO
 	unless ( ref $game->{hero}{icon} eq 'ARRAY' ){
 		$game->{hero}{icon} = [ 
@@ -977,8 +980,12 @@ EOH
 					$game->{ui}->beautify_map();
 					# end of ISSUE #30
 					
-					# let CONFIGURATION reload hero's color
+					# let CONFIGURATION reload hero's ICON
 					my $prev_icon = $game->{hero}{icon}->[1];
+					unless ( $prev_icon eq $game->{ui}->{hero_icon} ){
+						$prev_icon = $game->{ui}->{hero_icon};
+					}
+					# let CONFIGURATION reload hero's COLOR
 					$game->{hero}{icon} = [ 
 								$game->{ui}->color_names_to_ANSI($game->{ui}->{hero_color}).	# to DISPLAY
 																				$prev_icon.
