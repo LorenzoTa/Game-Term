@@ -257,8 +257,8 @@ sub draw_map{
 	local @{$ui->{map}[ $actors[$index]{y}+1 ]}
 				[ $actors[$index]{x}..$actors[$index]{x}+length($actors[$index]{name})-1 ]	
 		=
-		map{[$_,' ',1]}(split //,$actors[$index]->{name})
-		if 	$ui->{map_names}												and
+		map{[$_,'_',1]}(split //,$actors[$index]->{name})
+		if 	$ui->{map_labels}												and
 			$actors[$index] 												and 
 			exists $seen{ $actors[$index]{y}.'_'.$actors[$index]{x} }	 	and
 			$actors[$index]{y}+1 <= $ui->{map_off_y} + $ui->{map_area_h} 	and

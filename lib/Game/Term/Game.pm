@@ -865,12 +865,11 @@ sub execute{
 							" turn $turn\t$msg\n"
 				}
 			}
-			#print ' '.$game->{ui}->{ dec_ver }." no messages\n" unless @{$game->{messages}};
 			return 0;
 		},
-		# NAMES aka LABELS
-		n => sub{
-			$game->{ui}{map_names} = !$game->{ui}{map_names};
+		# LABELS 
+		l => sub{
+			$game->{ui}{map_labels} = !$game->{ui}{map_labels};
 			$game->{ui}->draw_map( @{$game->{actors}} );
 			$game->{ui}->draw_menu( 
 							$game->{turn},
@@ -897,7 +896,7 @@ u   use an item in the bag (counts as a move)
 
 h   show this help
 
-l   show labels on the map (to be implemented)
+l   toggle labels on the map
 
 m   show message history
 
