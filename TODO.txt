@@ -4,7 +4,17 @@
 -encounters with creatures
 -labels
 -map legenda
-
+-review movement penalties:
+	implement energy_gain_multipliers for hero and actors
+-actors movements types:
+	move in area
+	move along a path
+	move toward a point
+	aggro
+-scn variables?
+-game variables?
+-Item::Inventory
+-Actor::Bestiary
 
 #################################################################
 
