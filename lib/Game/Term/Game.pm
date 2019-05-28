@@ -816,9 +816,11 @@ sub execute{
 		},
 		# USE ITEM
 		u => sub{
-			print ' '.$game->{ui}->{ dec_ver }.
+			if ( $game->show_bag() ){
+				print ' '.$game->{ui}->{ dec_ver }.
 					" enter the number of object to use or return\n";
-			$game->show_bag();
+			}
+			else{ return 0 }
 			
 			my $num = $game->{ui}{reader}->readline('use item number: ');
 			return unless defined $num;
@@ -1004,6 +1006,7 @@ sub show_bag{
 	}
 	else{
 		print ' '.$game->{ui}->{ dec_ver }."Bag is empty\n";
+		return 0;
 	}	
 }
 
