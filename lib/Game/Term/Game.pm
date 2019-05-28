@@ -362,6 +362,8 @@ sub play{
 						my %visible = $game->{ui}->illuminate();
 						if ( exists $visible{ $actor->{y}.'_'.$actor->{x} } ){
 							print "$actor->{name} in SIGHT!!\n" if $debug;
+							$game->message( "$actor->{name} in SIGHT!!");
+							
 							$game->{ui}->draw_map(  @{$game->{actors}}  );
 							$game->{ui}->draw_menu( 
 								$game->{turn},
@@ -396,7 +398,7 @@ sub play{
 sub message{
 	my $game = shift;
 	my $msg	= shift;
-	push @{ $game->{messages}[ $game->{turn} ] }, $msg;
+	push @{ $game->{messages}[ $game->{turn} ] }, "$game->{hero}{y}-$game->{hero}{x}\t$msg";
 	print "DEBUG: message $msg\n" if $debug;
 	$game->{ui}->draw_map();
 	$game->{ui}->draw_menu( #$game->{messages}[ $game->{turn} ] 
@@ -496,10 +498,10 @@ sub run_event{
 		else{die "Unknown target_attr!"}
 		# DURATION ( a negative effect after some turn )
 		if( $ev->{duration} ){
-			push @{$game->{timeline}[ $game->{turn} + $ev->{duration} + 1]}, 
+			push @{$game->{timeline}[ $game->{turn} + $ev->{duration} ]}, 
 				Game::Term::Event->new( 
 						type 	=> 'game turn', 
-						check 	=> $game->{turn} + $ev->{duration} + 1, 
+						check 	=> $game->{turn} + $ev->{duration} , 
 						message	=> "END of + $ev->{target_mod} $ev->{target_attr} buff",
 						#target 	=> $ev->{target} eq 'hero' ? 'hero' : $ev->{target},
 						target 	=> $ev->{target} ,
@@ -851,6 +853,17 @@ sub execute{
 				return 0;
 			}
 		},
+		# MESSAGES
+		m => sub{
+			print ' '.$game->{ui}->{ dec_ver }." * Message History *\n";
+			foreach my $turn ( 0..$#{ $game->{messages}} ){
+				foreach my $msg ( @{$game->{messages}->[$turn]} ){
+					print ' '.$game->{ui}->{ dec_ver }.
+							" turn $turn\t$msg\n"
+				}
+			}
+			#print ' '.$game->{ui}->{ dec_ver }." no messages\n" unless @{$game->{messages}}; 
+		},
 		# HELP
 		h => sub{
 			my $help =<<'EOH';
@@ -1003,6 +1016,7 @@ sub show_bag{
 			print ' '.$game->{ui}->{ dec_ver }.
 					"[$index]\t$item->{name}\n"
 		}
+		return 1;
 	}
 	else{
 		print ' '.$game->{ui}->{ dec_ver }."Bag is empty\n";
