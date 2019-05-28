@@ -137,6 +137,24 @@ my $hero = Game::Term::Actor::Hero->new(
 													message => 'Glu.. Glu..',
 													
 												),
+												Game::Term::Item->new(
+													name => 'potion of sight',
+													duration => 5,
+													consumable => 1,
+													target_attr => 'sight',
+													target_mod	=> 10,
+													message => 'Glu.. Glu..',
+													
+												),
+												Game::Term::Item->new(
+													name => 'potion of sight',
+													duration => 5,
+													consumable => 1,
+													target_attr => 'sight',
+													target_mod	=> 10,
+													message => 'Glu.. Glu..',
+													
+												),
 											],
 );
 

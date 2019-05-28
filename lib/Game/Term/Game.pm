@@ -252,7 +252,7 @@ sub play{
 	# $game->{ui}->{map}[$game->{hero}->{y}][$game->{hero}->{x}] = [ " \e[0m",' ',0];
 #$game->get_game_state();
 
-	$game->{ui}->draw_map();
+	$game->{ui}->draw_map( @{$game->{actors}} );
 	$game->{ui}->draw_menu( 
 							$game->{turn},
 							$game->{hero},
@@ -865,7 +865,19 @@ sub execute{
 							" turn $turn\t$msg\n"
 				}
 			}
-			#print ' '.$game->{ui}->{ dec_ver }." no messages\n" unless @{$game->{messages}}; 
+			#print ' '.$game->{ui}->{ dec_ver }." no messages\n" unless @{$game->{messages}};
+			return 0;
+		},
+		# NAMES aka LABELS
+		n => sub{
+			$game->{ui}{map_names} = !$game->{ui}{map_names};
+			$game->{ui}->draw_map( @{$game->{actors}} );
+			$game->{ui}->draw_menu( 
+							$game->{turn},
+							$game->{hero},
+							${$game->{messages}}[ $game->{turn}],
+			);
+			return 0;
 		},
 		# HELP
 		h => sub{
@@ -917,7 +929,7 @@ EOH
 			foreach my $line ( split /\n/,$help ){
 				print ' '.$game->{ui}->{ dec_ver }."\t$line\n";
 			}
-			
+			return 0;
 		},
 		##############################################
 		#	LONGER COMMAND WHILE IN COMMAND MODE

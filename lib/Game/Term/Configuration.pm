@@ -303,7 +303,7 @@ sub validate_conf{
 	$conf{ map_colors } //= 16;
 	$conf{ map_area_w } //= 50; #80;
 	$conf{ map_area_h } //= 20; #20;
-	$conf{ map_labels } //=	0;
+	$conf{ map_names } //=	0;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
 
