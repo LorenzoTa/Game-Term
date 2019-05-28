@@ -243,6 +243,7 @@ sub draw_map{
 	# get area of currently hero's seen tiles (by coords)
 	my %seen = $ui->illuminate();
 	
+	# LOCALIZING
 	# goto LOOP needed to have multiple locals to work (thanks mst from irc)
 	my $index = 0;
 	LOOP_ACTORS:
@@ -251,7 +252,8 @@ sub draw_map{
 		= 
 	$ui->color_names_to_ANSI($actors[$index]->{color}).$actors[$index]->{icon}.RESET
 	if $actors[$index] and exists $seen{ $actors[$index]->{y}.'_'.$actors[$index]->{x} };
-	# actors LABELS
+	
+	# localize actors LABELS
 	local @{$ui->{map}[ $actors[$index]{y}+1 ]}
 				[ $actors[$index]{x}..$actors[$index]{x}+length($actors[$index]{name})-1 ]	
 		=
@@ -266,9 +268,7 @@ sub draw_map{
  	
 	
 	
-	# draw hero
-	# this must set $hero->{on_terrain}
-	#local $ui->{map}[ $ui->{hero}{y} ][ $ui->{hero}{x} ] = $ui->{hero_icon}; 
+	# localize HERO
 	local $ui->{map}[ $ui->{hero}{y} ][ $ui->{hero}{x} ] = $ui->{hero}{icon}; 
 	
 	# TITLE AREA:
