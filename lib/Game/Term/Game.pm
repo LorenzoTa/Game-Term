@@ -945,7 +945,7 @@ u   use an item in the bag (counts as a move)
 
 h   show this help
 
-l   toggle labels on the map
+l   show labels on the map
 
 m   show message history
 
