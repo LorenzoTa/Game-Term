@@ -869,7 +869,37 @@ sub execute{
 		},
 		# LABELS 
 		l => sub{
-			$game->{ui}{map_labels} = !$game->{ui}{map_labels};
+			# get area of currently hero's seen tiles (by coords)
+			my %seen = $game->{ui}->illuminate();
+			# LOCALIZING
+			my @actors = @{$game->{actors}};
+			my $index = 0;
+			LOOP_ACTORS:
+			# actor's tile localized to  their ICON
+			local $game->{ui}->{map}[ $actors[$index]->{y} ][ $actors[$index]->{x} ][0] 
+				= 
+			$game->{ui}->color_names_to_ANSI($actors[$index]->{color}).
+			$actors[$index]->{icon}.
+			$game->{ui}->color_names_to_ANSI( 'reset' )
+			if $actors[$index] and exists $seen{ $actors[$index]->{y}.'_'.$actors[$index]->{x} };
+			
+			# localize actors LABELS -- OK version
+			local @{$game->{ui}->{map}[ $actors[$index]{y}+1 ]}
+						[ $actors[$index]{x}..$actors[$index]{x}+length($actors[$index]{name})-1 ]	
+			=
+			map{[$_,'_',1]}(split //,$actors[$index]->{name})
+			if 	#$ui->{map_labels}												and
+				$actors[$index] 												and 
+				exists $seen{ $actors[$index]{y}.'_'.$actors[$index]{x} }	 	and
+				$actors[$index]{y}+1 <= $game->{ui}->{map_off_y} + $game->{ui}->{map_area_h} 	and
+				$actors[$index]{x}+length($actors[$index]->{name})-1 < $game->{ui}->{map_off_x} + $game->{ui}->{map_area_w};
+			
+			
+			$index++; 
+			goto LOOP_ACTORS if $index <= $#actors;
+			
+			# scenario LABELS
+			
 			$game->{ui}->draw_map( @{$game->{actors}} );
 			$game->{ui}->draw_menu( 
 							$game->{turn},
