@@ -902,7 +902,23 @@ sub execute{
 			goto LOOP_ACTORS if $index <= $#actors;
 			
 			# scenario LABELS
+			my @labels = @{$game->{labels}};
+			my $label_index = 0;
+			LOOP_PLACES:
 			
+			local @{$game->{ui}->{map}[ $labels[$label_index]->[0] ]}
+						[ $labels[$label_index][1]..$labels[$label_index][1]+length($labels[$label_index][2])-1 ]	
+			=
+			map{[$_,'_',1]}(split //,$labels[$label_index]->[2])
+			if 	
+				$labels[$label_index] 												and 
+				$game->{ui}{map}[ $labels[$label_index][0] ][$labels[$label_index][1]][2]	 	and
+				$labels[$label_index][0] <= $game->{ui}->{map_off_y} + $game->{ui}->{map_area_h} 	and
+				$labels[$label_index][1]+length($labels[$label_index][2])-1 < $game->{ui}->{map_off_x} + $game->{ui}->{map_area_w};
+			
+			$label_index++; 
+			goto LOOP_PLACES if $label_index <= $#labels;
+			#
 			$game->{ui}->draw_map( @{$game->{actors}} );
 			$game->{ui}->draw_menu( 
 							$game->{turn},
