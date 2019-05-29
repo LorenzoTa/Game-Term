@@ -24,7 +24,10 @@ my $scenario = Game::Term::Scenario->new(
 					Game::Term::Actor->new(name=>'TRE',y=>28, x=>51,energy_gain=>2),
 										
 				],
-				
+				labels => [
+							[17,20,'Arunakosh'],
+							[18,20,'river'],
+				],
 				events => [
 					# Game::Term::Event->new( 
 											# type 	=> 'game turn', 

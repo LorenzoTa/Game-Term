@@ -46,18 +46,21 @@ sub new{
 	$param{scenario}->{actors} = undef;
 	my @events = @{$param{scenario}->{events}};
 	$param{scenario}->{events} = undef;
+	my @labels = @{$param{scenario}->{labels}};
+	$param{scenario}->{labels} = undef;
 	
 	my $game = bless {
 				is_running => 1,				
 				configuration => $param{configuration} ,				
 				current_scenario => $param{scenario}->{name},				
-				ui	=> $param{ui},				
-				hero => $param{hero},
+				ui		=> $param{ui},				
+				hero 	=> $param{hero},
 				actors	=> [ @actors ],				
-				events => [ @events ],				
-				timeline => [],				
-				messages	=> [],				
-				turn => 0,				
+				events	=> [ @events ],
+				labels 	=> [ @labels ],
+				timeline=> [],				
+				messages=> [],				
+				turn 	=> 0,				
 	}, $class;
 	
 	# beautify the map (not hero!) and others..
