@@ -62,6 +62,7 @@ sub new{
 				messages=> [],				
 				turn 	=> 0,				
 	}, $class;
+
 	
 	# beautify the map (not hero!) and others..
 	$game->{ui}->init();
@@ -309,12 +310,7 @@ sub play{
 						);
 						# sigth modifications
 						local $game->{hero}{sight} = $game->{hero}{sight} + 2 
-							if $game->{hero}->{on_tile} eq 'hill';
-						local $game->{hero}{sight}  = $game->{hero}{sight} + 4 
-							if $game->{hero}->{on_tile} eq 'mountain';
-						local $game->{hero}{sight} = $game->{hero}{sight} - 2 
-							if $game->{hero}->{on_tile} eq 'wood';
-						
+
 						# local $game->{hero}{sight} = $game->{hero}{sight} + 2 
 							# if $game->{ui}->{hero_terrain} eq 'hill';
 						# local $game->{hero}{sight}  = $game->{hero}{sight} + 4 
