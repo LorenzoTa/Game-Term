@@ -19,12 +19,15 @@ my $scenario = Game::Term::Scenario->new(
 				#map=> Game::Term::Map->new(fake_map=>'one')->{data},
 				name => 'A river in the wood',
 				actors => [
-					Game::Term::Actor->new(name=>'UNO',y=>26, x=>31, energy_gain=>4),
+					Game::Term::Actor->new(name=>'UNO',y=>32, x=>33,energy_gain=>4),
 					Game::Term::Actor->new(name=>'DUE',y=>28, x=>41,energy_gain=>2),
 					Game::Term::Actor->new(name=>'TRE',y=>28, x=>51,energy_gain=>2),
 										
 				],
-				
+				labels => [
+							[17,20,'Arunakosh'],
+							[18,20,'river'],
+				],
 				events => [
 					# Game::Term::Event->new( 
 											# type 	=> 'game turn', 
@@ -128,6 +131,24 @@ my $conf = Game::Term::Configuration->new();
 my $hero = Game::Term::Actor::Hero->new( 
 											name => 'My New Hero',
 											bag => [
+												Game::Term::Item->new(
+													name => 'potion of sight',
+													duration => 5,
+													consumable => 1,
+													target_attr => 'sight',
+													target_mod	=> 10,
+													message => 'Glu.. Glu..',
+													
+												),
+												Game::Term::Item->new(
+													name => 'potion of sight',
+													duration => 5,
+													consumable => 1,
+													target_attr => 'sight',
+													target_mod	=> 10,
+													message => 'Glu.. Glu..',
+													
+												),
 												Game::Term::Item->new(
 													name => 'potion of sight',
 													duration => 5,

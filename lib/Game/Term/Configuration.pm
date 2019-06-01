@@ -164,6 +164,7 @@ sub terrains_16_colors{
 	#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
 	' ' => [  'plain', ' ', '', '',        0 ],
+	'_' => [  'plain', ' ', '', '',        0 ], # not affected by fog of war
 	A => [ 'bridge', '-', ['Maroon'],  '',  0 ],
 	a => [ 'bridge', '|', ['Maroon'],  '',  0 ],
 	B => [ 'bridge', '/', ['Maroon'],  '',  0 ], # you need two of this
@@ -229,6 +230,7 @@ sub terrains_256_colors{
 	#		     0 str           1 scalar/[]        2 scalar/[]          3 scalar/[]   4 0..5(5=unwalkable)
 # letter used in map, descr  possible renders,  possible fg colors,  bg color,  speed penality
 	' ' => [  'plain', ' ', '', '',        0 ],
+	'_' => [  'plain', ' ', '', '',        0 ], # not affected by fog of war
 	A => [ 'bridge', '-', 'Olive',  '',  0 ],
 	a => [ 'bridge', '|', 'Olive',  '',  0 ],
 	B => [ 'bridge', '/', 'Olive',  '',  0 ], # you need two of this
@@ -302,7 +304,8 @@ sub validate_conf{
 	
 	$conf{ map_colors } //= 16;
 	$conf{ map_area_w } //= 50; #80;
-	$conf{ map_area_h } //=  20; #20;
+	$conf{ map_area_h } //= 20; #20;
+	#$conf{ map_labels } //=	0;
 	$conf{ menu_area_w } //= $conf{ map_area_w };
 	$conf{ menu_area_h } //= 20;
 

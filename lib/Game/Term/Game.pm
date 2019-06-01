@@ -46,18 +46,21 @@ sub new{
 	$param{scenario}->{actors} = undef;
 	my @events = @{$param{scenario}->{events}};
 	$param{scenario}->{events} = undef;
+	my @labels = @{$param{scenario}->{labels}};
+	$param{scenario}->{labels} = undef;
 	
 	my $game = bless {
 				is_running => 1,				
 				configuration => $param{configuration} ,				
 				current_scenario => $param{scenario}->{name},				
-				ui	=> $param{ui},				
-				hero => $param{hero},
+				ui		=> $param{ui},				
+				hero 	=> $param{hero},
 				actors	=> [ @actors ],				
-				events => [ @events ],				
-				timeline => [],				
-				messages	=> [],				
-				turn => 0,				
+				events	=> [ @events ],
+				labels 	=> [ @labels ],
+				timeline=> [],				
+				messages=> [],				
+				turn 	=> 0,				
 	}, $class;
 	
 	# beautify the map (not hero!) and others..
@@ -252,7 +255,7 @@ sub play{
 	# $game->{ui}->{map}[$game->{hero}->{y}][$game->{hero}->{x}] = [ " \e[0m",' ',0];
 #$game->get_game_state();
 
-	$game->{ui}->draw_map();
+	$game->{ui}->draw_map( @{$game->{actors}} );
 	$game->{ui}->draw_menu( 
 							$game->{turn},
 							$game->{hero},
@@ -865,7 +868,64 @@ sub execute{
 							" turn $turn\t$msg\n"
 				}
 			}
-			#print ' '.$game->{ui}->{ dec_ver }." no messages\n" unless @{$game->{messages}}; 
+			return 0;
+		},
+		# LABELS 
+		l => sub{
+			# get area of currently hero's seen tiles (by coords)
+			my %seen = $game->{ui}->illuminate();
+			# LOCALIZING
+			my @actors = @{$game->{actors}};
+			my $index = 0;
+			LOOP_ACTORS:
+			# actor's tile localized to  their ICON
+			local $game->{ui}->{map}[ $actors[$index]->{y} ][ $actors[$index]->{x} ][0] 
+				= 
+			$game->{ui}->color_names_to_ANSI($actors[$index]->{color}).
+			$actors[$index]->{icon}.
+			$game->{ui}->color_names_to_ANSI( 'reset' )
+			if $actors[$index] and exists $seen{ $actors[$index]->{y}.'_'.$actors[$index]->{x} };
+			
+			# localize actors LABELS -- OK version
+			local @{$game->{ui}->{map}[ $actors[$index]{y}+1 ]}
+						[ $actors[$index]{x}..$actors[$index]{x}+length($actors[$index]{name})-1 ]	
+			=
+			map{[$_,'_',1]}(split //,$actors[$index]->{name})
+			if 	#$ui->{map_labels}												and
+				$actors[$index] 												and 
+				exists $seen{ $actors[$index]{y}.'_'.$actors[$index]{x} }	 	and
+				$actors[$index]{y}+1 <= $game->{ui}->{map_off_y} + $game->{ui}->{map_area_h} 	and
+				$actors[$index]{x}+length($actors[$index]->{name})-1 < $game->{ui}->{map_off_x} + $game->{ui}->{map_area_w};
+			
+			
+			$index++; 
+			goto LOOP_ACTORS if $index <= $#actors;
+			
+			# scenario LABELS
+			my @labels = @{$game->{labels}};
+			my $label_index = 0;
+			LOOP_PLACES:
+			
+			local @{$game->{ui}->{map}[ $labels[$label_index]->[0] ]}
+						[ $labels[$label_index][1]..$labels[$label_index][1]+length($labels[$label_index][2])-1 ]	
+			=
+			map{[$_,'_',1]}(split //,$labels[$label_index]->[2])
+			if 	
+				$labels[$label_index] 												and 
+				$game->{ui}{map}[ $labels[$label_index][0] ][$labels[$label_index][1]][2]	 	and
+				$labels[$label_index][0] <= $game->{ui}->{map_off_y} + $game->{ui}->{map_area_h} 	and
+				$labels[$label_index][1]+length($labels[$label_index][2])-1 < $game->{ui}->{map_off_x} + $game->{ui}->{map_area_w};
+			
+			$label_index++; 
+			goto LOOP_PLACES if $label_index <= $#labels;
+			#
+			$game->{ui}->draw_map( @{$game->{actors}} );
+			$game->{ui}->draw_menu( 
+							$game->{turn},
+							$game->{hero},
+							${$game->{messages}}[ $game->{turn}],
+			);
+			return 0;
 		},
 		# HELP
 		h => sub{
@@ -885,7 +945,7 @@ u   use an item in the bag (counts as a move)
 
 h   show this help
 
-l   show labels on the map (to be implemented)
+l   show labels on the map
 
 m   show message history
 
@@ -917,7 +977,7 @@ EOH
 			foreach my $line ( split /\n/,$help ){
 				print ' '.$game->{ui}->{ dec_ver }."\t$line\n";
 			}
-			
+			return 0;
 		},
 		##############################################
 		#	LONGER COMMAND WHILE IN COMMAND MODE
@@ -1023,7 +1083,8 @@ sub show_bag{
 		print ' '.$game->{ui}->{ dec_ver }." * Bag content *\n";
 		foreach my $item ( sort @{ $game->{hero}{bag} } ){
 			print ' '.$game->{ui}->{ dec_ver }.
-					"[$index]\t$item->{name}\n"
+					"[$index]\t$item->{name}\n";
+			$index++;
 		}
 		return 1;
 	}

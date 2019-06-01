@@ -31,6 +31,7 @@ sub new{
 		map	=> $param{map},
 		actors => $param{actors}//[],
 		events	=> $param{events}//[],
+		labels	=> $param{labels}//[],
 				
 	}, $class; 
 

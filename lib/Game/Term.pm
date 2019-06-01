@@ -218,7 +218,7 @@ Currently commands are (as shown by the inline help):
 
       h   show this help
 
-      l   show labels on the map (to be implemented)
+      l   show labels on the map
 
       m   show message history
 
