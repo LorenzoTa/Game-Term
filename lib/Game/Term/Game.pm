@@ -976,7 +976,7 @@ EOH
 			return 0;
 		},
 		##############################################
-		#	LONGER COMMAND WHILE IN COMMAND MODE
+		#	LONGER COMMAND WHILE IN COMMAND MODE #LABEL2
 		#	they can print to STDOUT
 		#	following commands has to be sync with
 		#	$term->Attribs->{completion_function} in UI.pm
