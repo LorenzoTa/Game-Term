@@ -309,14 +309,14 @@ sub play{
 							$game->{configuration}->{terrains}->{$game->{ui}->{map}->[ $game->{hero}->{y} ][ $game->{hero}->{x} ]->[1]}->[4]
 						);
 						# sigth modifications
-						local $game->{hero}{sight} = $game->{hero}{sight} + 2 
+						#local $game->{hero}{sight} = $game->{hero}{sight} + 2 
 
-						# local $game->{hero}{sight} = $game->{hero}{sight} + 2 
-							# if $game->{ui}->{hero_terrain} eq 'hill';
-						# local $game->{hero}{sight}  = $game->{hero}{sight} + 4 
-							# if $game->{ui}->{hero_terrain} eq 'mountain';
-						# local $game->{hero}{sight} = $game->{hero}{sight} - 2 
-							# if $game->{ui}->{hero_terrain} eq 'wood';
+						local $game->{hero}{sight} = $game->{hero}{sight} + 2 
+							if $game->{ui}->{hero_terrain} eq 'hill';
+						local $game->{hero}{sight}  = $game->{hero}{sight} + 4 
+							if $game->{ui}->{hero_terrain} eq 'mountain';
+						local $game->{hero}{sight} = $game->{hero}{sight} - 2 
+							if $game->{ui}->{hero_terrain} eq 'wood';
 												
 						# draw screen (passing actors)
 						$game->{ui}->draw_map(  @{$game->{actors}}  );
