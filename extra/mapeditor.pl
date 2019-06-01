@@ -8,11 +8,13 @@ $mw->geometry("400x200+0+0");
 
 
 
+# TOP FRAME
+my $top_frame = $mw->Frame( -borderwidth => 2, 
+							-relief => 'groove',
+)->pack(-anchor=>'ne', -fill => 'both');
 
-my $top_frame = $mw->Frame( -borderwidth => 2, -relief => 'groove',)->pack(-expand => 1, -fill => 'x');
-
-my $maxy = 30;
-my $maxx = 5; 
+my $maxy = 80;
+my $maxx = 50; 
 
 my $tile_w = 10;
 my $tile_h = 10;
@@ -27,7 +29,7 @@ my $current = 'current tile (y-x): 0-0';
 $top_frame->Label( 
 					-text=>"using ",
 					-textvariable=>\$current,
-)->pack( );
+)->pack( -side=>'top');
 
 $top_frame->Label( 
 					-text=>"using "
@@ -71,27 +73,29 @@ $top_frame->Button(	-padx=> 5,
 					-command => sub{exit}
 )->pack(-side => 'left',-padx=>5);
 
-
+# MAP FRAME
 my $map_frame = $mw->Scrolled(	'Frame',
 								-scrollbars => 'osoe',
-								-background=>'ivory',
-								-borderwidth => 10, 
+								#-background=>'pink',
+								#-borderwidth => 10, 
 								-relief => 'groove',
-)->pack(); #-expand => 1, -fill => 'both'
+)->pack(-anchor=>'n',-expand => 1, -fill => 'both');
 
-my $c = $map_frame->Canvas( 
-								-width => $maxx * $tile_w,
-								-height => $maxy * $tile_h,
- )->pack(-expand => 1, -fill => 'both');
+# my $c = $mw->Scrolled(	'Canvas',
+						# -background=>'Navy',
+								# -scrollbars => 'osoe',
+								# -width => 300,#$maxx * $tile_w,
+								# -height => 300,#$maxy * $tile_h,
+ # )->pack(-anchor=>'ne',-expand => 1, -fill => 'both');
  
  
-# my $c = $map_frame->Canvas(
-						# -bg => 'black',
-                         # -width => $maxx x $tile_w,
-								# -height => $maxy x $tile_h,
-             # #-scrollbars => 'osoe',
-             # #-scrollregion => [ 0, 0, $canvasWidth, $canvasHeight ],
-              # )->pack;
+my $c = $map_frame->Canvas(
+							-bg => 'ivory',
+							-width => $maxx * $tile_w,
+							-height => $maxy * $tile_h,
+             #-scrollbars => 'osoe',
+             #-scrollregion => [ 0, 0, $canvasWidth, $canvasHeight ],
+              )->pack(-anchor=>'n',-expand => 1, -fill => 'both');
 			  
 			  
 # my $tx = $c->createText(20, 10, -text => 'X: UNKNOWN');
