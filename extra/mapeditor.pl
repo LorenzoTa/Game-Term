@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use Tk;
 use Tk::Pane;
+use Data::Dump;
 
 my $mw = Tk::MainWindow->new(-bg=>'ivory',-title=>'Game::Term Map Editor');
 $mw->geometry("600x600+0+0");
@@ -13,31 +14,30 @@ my $top_frame = $mw->Frame( -borderwidth => 2,
 							-relief => 'groove',
 )->pack(-anchor=>'ne', -fill => 'both');
 
-my $maxy = 20;
-my $maxx = 20; 
+my $default_char = ' ';
 
-my $tile_w = 20;
-my $tile_h = 20;
+my $maxy = 80;
+my $maxx = 80; 
 
-my @aoa = map{ [ ('o') x $maxx  ] } 0..$maxy-1;
+my $tile_w = 10;
+my $tile_h = 10;
+
+my @aoa = map{ [ ($default_char) x $maxx  ] } 0..$maxy-1;
 #use Data::Dump; dd @aoa;
 
 
 
                           
 my $current = 'current tile (y-x): 0-0';
-$top_frame->Label( 
-					-text=>"using ",
-					-textvariable=>\$current,
-)->pack( -side=>'top');
 
-$top_frame->Label( 
-					-text=>"using "
-)->pack( );
+$top_frame->Label( -textvariable=>\$current,)->pack( -side=>'left');
 
-$top_frame->Label(	
-					-text => "Rows: 0-"
-)->pack(-side => 'left');
+$top_frame->Label( -text=>"painting  with:",)->pack( -side=>'left' );
+
+$top_frame->Label( -textvariable=>\$default_char,)->pack( -side=>'left' );
+
+
+$top_frame->Label(-text => "Rows: 0-")->pack(-side => 'left');
 
 $top_frame->Entry(	
 					-width => 3,
@@ -45,9 +45,7 @@ $top_frame->Entry(
 					-textvariable => \$maxy
 )->pack(-side => 'left');
 
-$top_frame->Label(	
-					-text => "columns: 0-"
-)->pack(-side => 'left');
+$top_frame->Label(-text => "columns: 0-")->pack(-side => 'left');
 
 $top_frame->Entry(	
 					-width => 3,
@@ -70,7 +68,15 @@ $top_frame->Button(	-padx=> 5,
 $top_frame->Button(	-padx=> 5,
 					-text => "export",
 					-borderwidth => 4, 
-					-command => sub{exit}
+					-command => sub{&export_aoa()},
+)->pack(-side => 'left',-padx=>5);
+
+
+
+$top_frame->Button(	-padx=> 5,
+					-text => "toggle grid",
+					-borderwidth => 4, 
+					-command => sub{&toggle_grid()},
 )->pack(-side => 'left',-padx=>5);
 
 # MAP FRAME
@@ -96,7 +102,10 @@ my $canvas = $map_frame->Canvas(
              #-scrollbars => 'osoe',
              #-scrollregion => [ 0, 0, $canvasWidth, $canvasHeight ],
               )->pack(-anchor=>'n',-expand => 1, -fill => 'both');
-$canvas->createGrid(0,0, $tile_w, $tile_h, lines=>1,-width=>1); 
+#$canvas->createGrid(0,0, $tile_w, $tile_h, lines=>1,-width=>1);
+my $grid_show = 1;
+$canvas->createGrid(0,0, $tile_w, $tile_h, lines=>1,-width=>1,-tags=>['thegrid']);
+ 
 my $start_y = 0;
 my $end_y = $start_y + $tile_h;
 
@@ -132,16 +141,28 @@ foreach my $row (0..$#aoa){
 
 
 
-#
+$mw->bind("<Key>", [ \&set_default_char, Ev('K') ] );
+$mw->bind("<Key-space>", [ \&set_default_char_to_space, Ev('K') ] );
 #$canvas->Tk::bind("<Motion>", [ \&get_coord, Ev('x'), Ev('y') ]);
-$canvas->Tk::bind("<Button-1>", [ \&set_coord, Ev('x'), Ev('y') ]);
-
-$canvas->Tk::bind("<Button-3>",  [ \&reset_motion, Ev('x'), Ev('y') ]);
+$canvas->Tk::bind("<Control-Motion>", [ \&set_coord, Ev('x'), Ev('y') ]);
+$canvas->Tk::bind("<Button-1>", [ \&get_coord, Ev('x'), Ev('y') ]);
+#$canvas->Tk::bind("<Button-3>",  [ \&reset_motion, Ev('x'), Ev('y') ]);
 
 
 				  
 MainLoop();
-
+sub set_default_char {
+		my ($canv, $k) = @_;
+		print "DEBUG [$k] was pressed..\n";
+		return 0 unless $k =~ /^.$/;
+		print "setting char to [$k]\n";
+		$default_char = $k;
+}
+sub set_default_char_to_space {
+		my ($canv, $k) = @_;
+		print "setting char to [ ]\n";
+		$default_char = ' ';
+}
 sub set_coord {
 	my ($canv, $x, $y) = @_;
 	#print "SETtING (x,y) = ", $canv->canvasx($x), ", ", $canv->canvasy($y), "\n";
@@ -151,19 +172,35 @@ sub set_coord {
 	$current = "current tile (y-x): $list[0] " if $list[0];
 	
 	if ( $list[0] ){
-		my ($y,$x)=split /-/, $list[0];
 		print "SET $y - $x\n";
-		$canv->itemconfigure($cur, -text=>'X');
-		
-		use Data::Dump; dd $cur,$map[$y][$x];
+		$canv->itemconfigure($cur, -text=> $default_char);
+		my ($y,$x)=split /-/, $list[0];
+		$aoa[$y][$x]= $default_char;
+		#use Data::Dump; dd $cur,$map[$y][$x];
 	}
-	$canvas->Tk::bind("<Motion>", [ \&set_coord, Ev('x'), Ev('y') ]);
+	#$canvas->Tk::bind("<Motion>", [ \&set_coord, Ev('x'), Ev('y') ]);
 }
 
 sub reset_motion {
 	$canvas->Tk::bind("<Motion>", [ \&get_coord, Ev('x'), Ev('y') ]);
 }
 
+sub toggle_grid{
+	if ( $grid_show ){
+		#my @withtag = $canvas->find('withtag','thegrid');
+		#$withtag[0]->itemconfigure(-state => 'disabled',-disabledcolor => undef);
+		#$canvas->itemconfigure('thegrid',-state => 'disabled');
+		$canvas->itemconfigure('thegrid',-color=>'ivory');
+		#$grid = $canvas->createGrid(0,0, $tile_w, $tile_h, lines=>1,-width=>1,-state=>'hidden',-color=>undef);
+		# $grid->itemconfigure(-state => 'disabled',-disabledcolor => undef);
+		# $grid = undef;
+	}
+	else{
+		#$grid = $canvas->createGrid(0,0, $tile_w, $tile_h, lines=>1,-width=>1,-tags=>['thegrid']);
+		$canvas->itemconfigure('thegrid',-color=>'black');
+	}
+	$grid_show = !$grid_show;
+}
 
 # from https://www.perlmonks.org/?node_id=987407 zentara rules!!
 sub get_coord {
@@ -175,7 +212,14 @@ sub get_coord {
 	$current = "current tile (y-x): $list[0] " if $list[0];
 	
 }
-
+sub export_aoa{
+	foreach my $row (0..$#aoa){
+		foreach my $col( 0..$#{$aoa[$row]} ){
+			print $aoa[$row][$col];
+		}
+		print "\n";	
+	}
+}
 __DATA__
 https://www.perlmonks.org/?node_id=691267
 
