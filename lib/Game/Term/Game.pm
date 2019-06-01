@@ -312,11 +312,11 @@ sub play{
 						#local $game->{hero}{sight} = $game->{hero}{sight} + 2 
 
 						local $game->{hero}{sight} = $game->{hero}{sight} + 2 
-							if $game->{ui}->{hero_terrain} eq 'hill';
+							if $game->{hero}{on_tile} eq 'hill';
 						local $game->{hero}{sight}  = $game->{hero}{sight} + 4 
-							if $game->{ui}->{hero_terrain} eq 'mountain';
+							if $game->{hero}{on_tile} eq 'mountain';
 						local $game->{hero}{sight} = $game->{hero}{sight} - 2 
-							if $game->{ui}->{hero_terrain} eq 'wood';
+							if $game->{hero}{on_tile} eq 'wood';
 												
 						# draw screen (passing actors)
 						$game->{ui}->draw_map(  @{$game->{actors}}  );
