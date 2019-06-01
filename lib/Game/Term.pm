@@ -309,6 +309,13 @@ The debug level is passed during the construction of the game object C<debug =E<
 
 To mantain the game developer sane if debug is set the game state is also saved into a specular YAML file named C<GameState.sto.yaml>
 
+
+=head2 labels and names
+
+The UI has the ability momentary show labels defined in the scenario (place names) and names of creatures lurking in the map if in the sight range. Labels are not saved in the C<GameState.sto> file but are loaded from the scenario file.
+
+Place labels are assigned in the sceario to a tile and if this tile is discovered then the labels can be shown and will be shown also if covered by the fogo of war effect.
+
 =head1 AUTHOR
 
 LorenzoTa, C<< <lorenzo at cpan.org> >>
