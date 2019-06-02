@@ -7,10 +7,22 @@ use Data::Dump;
 my $mw = Tk::MainWindow->new(-bg=>'ivory',-title=>'Game::Term Map Editor');
 $mw->geometry("600x600+0+0");
 
+$mw->optionAdd('*font', 'Courier 12');
+    # $mw->optionAdd( '*Entry.background',   'lavender' );
+    # $mw->optionAdd( '*Entry.font',   'Courier 12 bold'  );
+#$mw->optionAdd( '*Canvas.font',   'Courier 14 bold'  );
+
+
 
 
 # TOP FRAME
-my $top_frame = $mw->Frame( -borderwidth => 2, 
+my $top_frame0 = $mw->Frame( -borderwidth => 2, 
+							-relief => 'groove',
+)->pack(-anchor=>'ne', -fill => 'both');
+$top_frame0->Label( -text=>"press a char to use as brush\nhold CRTL and move the pointer to paint",)->pack( -side=>'top');
+
+
+my $top_frame1 = $mw->Frame( -borderwidth => 2, 
 							-relief => 'groove',
 )->pack(-anchor=>'ne', -fill => 'both');
 
@@ -19,8 +31,8 @@ my $default_char = ' ';
 my $maxy = 80;
 my $maxx = 80; 
 
-my $tile_w = 10;
-my $tile_h = 10;
+my $tile_w = 15;
+my $tile_h = 15;
 
 my @aoa = map{ [ ($default_char) x $maxx  ] } 0..$maxy-1;
 #use Data::Dump; dd @aoa;
@@ -30,42 +42,49 @@ my @aoa = map{ [ ($default_char) x $maxx  ] } 0..$maxy-1;
                           
 my $current = 'current tile (y-x): 0-0';
 
-$top_frame->Label( -textvariable=>\$current,)->pack( -side=>'left');
-
-$top_frame->Label( -text=>"painting  with:",)->pack( -side=>'left' );
-
-$top_frame->Label( -textvariable=>\$default_char,)->pack( -side=>'left' );
+$top_frame1->Label( -textvariable=>\$current,)->pack( -side=>'left');
 
 
-$top_frame->Label(-text => "Rows: 0-")->pack(-side => 'left');
+$top_frame1->Label( -text=>"]",)->pack( -side=>'right' );
+$top_frame1->Label( -textvariable=>\$default_char,)->pack( -side=>'right' );
+$top_frame1->Label( -text=>"painting  with: [",)->pack( -side=>'right' );
 
-$top_frame->Entry(	
+
+
+
+
+my $top_frame2 = $mw->Frame( -borderwidth => 2, 
+							-relief => 'groove',
+)->pack(-anchor=>'ne', -fill => 'both');
+
+
+$top_frame2->Entry(	
 					-width => 3,
 					-borderwidth => 4, 
 					-textvariable => \$maxy
 )->pack(-side => 'left');
 
-$top_frame->Label(-text => "columns: 0-")->pack(-side => 'left');
+$top_frame2->Label(-text => "columns: 0-")->pack(-side => 'left');
 
-$top_frame->Entry(	
+$top_frame2->Entry(	
 					-width => 3,
 					-borderwidth => 4, 
 					-textvariable => \$maxx
 )->pack(-side => 'left');
 
-$top_frame->Button(	-padx=> 5,
+$top_frame2->Button(	-padx=> 5,
 					-text => "new",
 					-borderwidth => 4, 
 					-command => sub{exit}
 )->pack(-side => 'left',-padx=>5);
 
-$top_frame->Button(	-padx=> 5,
+$top_frame2->Button(	-padx=> 5,
 					-text => "import",
 					-borderwidth => 4, 
 					-command => sub{exit}
 )->pack(-side => 'left',-padx=>5);
 
-$top_frame->Button(	-padx=> 5,
+$top_frame2->Button(	-padx=> 5,
 					-text => "export",
 					-borderwidth => 4, 
 					-command => sub{&export_aoa()},
@@ -73,7 +92,7 @@ $top_frame->Button(	-padx=> 5,
 
 
 
-$top_frame->Button(	-padx=> 5,
+$top_frame2->Button(	-padx=> 5,
 					-text => "toggle grid",
 					-borderwidth => 4, 
 					-command => sub{&toggle_grid()},
@@ -125,7 +144,8 @@ foreach my $row (0..$#aoa){
 								($start_y + $end_y ) / 2,
 								
 								 -text => $aoa[$row][$col],
-								 -tags => ["$row-$col"]
+								 -tags => ["$row-$col"],
+								 -font=> 'Courier 14 bold'
 		);
 		$start_x += $tile_w;
 		$end_x	+= $tile_w;
@@ -142,7 +162,7 @@ foreach my $row (0..$#aoa){
 
 
 $mw->bind("<Key>", [ \&set_default_char, Ev('K') ] );
-$mw->bind("<Key-space>", [ \&set_default_char_to_space, Ev('K') ] );
+#$mw->bind("<Key-space>", [ \&set_default_char_to_space, Ev('K') ] );
 #$canvas->Tk::bind("<Motion>", [ \&get_coord, Ev('x'), Ev('y') ]);
 $canvas->Tk::bind("<Control-Motion>", [ \&set_coord, Ev('x'), Ev('y') ]);
 $canvas->Tk::bind("<Button-1>", [ \&get_coord, Ev('x'), Ev('y') ]);
@@ -154,15 +174,57 @@ MainLoop();
 sub set_default_char {
 		my ($canv, $k) = @_;
 		print "DEBUG [$k] was pressed..\n";
-		return 0 unless $k =~ /^.$/;
-		print "setting char to [$k]\n";
-		$default_char = $k;
+		#return 0 unless $k =~ /^.$/;
+		my %other_chars = (
+				space		=> ' ',
+				backslash 	=> '\\',
+				bar			=> '|',
+				exclam		=> '!',
+				quotedbl	=> '"',
+				# sterling	=> '£', # BUG ???
+				dollar		=> '$',
+				percent		=> '%',
+				ampersand	=> '&',
+				slash		=> '/',
+				parenleft	=> '(',
+				parenright	=> ')',
+				equal		=> '=',
+				quoteright	=>	"'",
+				question	=> '?',
+				asciicircum	=> '^',
+				comma 		=> ',',
+				period		=> '.',
+				minus		=> '-',
+				semicolon	=> ';',
+				colon		=> ':',
+				underscore	=> '_',
+				plus		=> '+',
+				asterisk	=> '*',
+				# degree		=> '°', # BUG ?
+				greater		=> '>',
+				less		=> '<',
+								
+				
+		);
+		if( $k =~ /^.$/){
+			$default_char = $k;
+			print "setting brush to [$k]\n";
+		}
+		elsif( exists $other_chars{$k} ){
+			$default_char = $other_chars{$k};
+			print "setting brush to [$other_chars{$k}]\n";
+		}
+		else{
+			print "WARNING: cannot use [$k] as char to draw!\n";
+		}
+		
+		
 }
-sub set_default_char_to_space {
-		my ($canv, $k) = @_;
-		print "setting char to [ ]\n";
-		$default_char = ' ';
-}
+# sub set_default_char_to_space {
+		# my ($canv, $k) = @_;
+		# print "setting char to [ ]\n";
+		# $default_char = ' ';
+# }
 sub set_coord {
 	my ($canv, $x, $y) = @_;
 	#print "SETtING (x,y) = ", $canv->canvasx($x), ", ", $canv->canvasy($y), "\n";
