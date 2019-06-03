@@ -4,8 +4,10 @@ use Tk;
 use Tk::Pane;
 use Data::Dump;
 
+my $debug = 0;
+
 my $mw = Tk::MainWindow->new(-bg=>'ivory',-title=>'Game::Term Map Editor');
-$mw->geometry("700x600+0+0");
+$mw->geometry("800x600+0+0");
 
 $mw->optionAdd('*font', 'Courier 12');
 $mw->optionAdd( '*Entry.background',   'lavender' );
@@ -16,7 +18,8 @@ $mw->optionAdd( '*Entry.font',   'Courier 12 bold'  );
 my $top_frame0 = $mw->Frame( -borderwidth => 2, -relief => 'groove',)->pack(-anchor=>'ne', -fill => 'both');
 
 $top_frame0->Label( -text=>"press a key to set brush (or choose it from the below menu)\n".
-							"hold CRTL and move the pointer to paint",)->pack( -side=>'top');
+							"hold CRTL and move the pointer to paint with actual brush\n".
+							"hold ALT to slect, SHIFT to deselect (DEL to clear selection)",)->pack( -side=>'top');
 
 
 my $top_frame1 = $mw->Frame( -borderwidth => 2,-relief => 'groove',)->pack(-anchor=>'ne', -fill => 'both');
@@ -46,27 +49,30 @@ my $top_frame2 = $mw->Frame( -borderwidth => 2,
 							-relief => 'groove',
 )->pack(-anchor=>'ne', -fill => 'both');
 
-$top_frame2->Label(-text => "rows: 0-")->pack(-side => 'left');
+$top_frame2->Label(-text => "rows:0-")->pack(-side => 'left',-padx=>5);
 
 $top_frame2->Entry(	
 					-width => 3,
 					-borderwidth => 4, 
 					-textvariable => \$maxy
-)->pack(-side => 'left',-padx=>5);
+)->pack(-side => 'left');
 
-$top_frame2->Label(-text => "columns: 0-")->pack(-side => 'left',-padx=>5);
+$top_frame2->Label(-text => "columns:0-")->pack(-side => 'left');
 
 $top_frame2->Entry(	
 					-width => 3,
 					-borderwidth => 4, 
 					-textvariable => \$maxx
-)->pack(-side => 'left',,-padx=>5);
+)->pack(-side => 'left',);
 
 $top_frame2->Button(	-padx=> 5,
 					-text => "new",
 					-borderwidth => 4, 
 					-command => sub{ &setup_new }
 )->pack(-side => 'left',-padx=>5);
+
+
+
 
 
 
@@ -77,16 +83,16 @@ $top_frame2->Button(	-padx=> 5,
 )->pack(-side => 'right',-padx=>5);
 
 $top_frame2->Button(	-padx=> 5,
-					-text => "export",
+					-text => "export map",
 					-borderwidth => 4, 
 					-command => sub{&export_aoa()},
 )->pack(-side => 'right',-padx=>5);
 
-# $top_frame2->Button(	-padx=> 5,
-					# -text => "import",
-					# -borderwidth => 4, 
-					# -command => sub{exit}
-# )->pack(-side => 'right',-padx=>5);
+$top_frame2->Button(	-padx=> 5,
+					-text => "export selection",
+					-borderwidth => 4, 
+					-command => sub{&export_selection()},
+)->pack( -side => 'right' );
 
 
 
@@ -100,7 +106,14 @@ my $map_frame = $mw->Scrolled(	'Frame',
  
 my $canvas;
 my $grid_show = 1;
+
+# the final datastructure
 my @aoa;
+
+# the hash of sected tiles
+my %selected;
+
+
 setup_new();	
 
 				  
@@ -157,30 +170,81 @@ sub setup_new{
 	#$canvas->Tk::bind("<Button-3>",  [ \&reset_motion, Ev('x'), Ev('y') ]);
 	
 	
-	$canvas->Tk::bind("<Alt-Motion>", [ \&save_coord, Ev('x'), Ev('y') ]);
-	
+	$canvas->Tk::bind("<Alt-Motion>", [ \&select_coord, Ev('x'), Ev('y') ]);
+	$canvas->Tk::bind("<Shift-Motion>", [ \&deselect_coord, Ev('x'), Ev('y') ]);
+	$canvas->Tk::bind("<Delete>", [ \&clear_selection, Ev('x'), Ev('y') ]);
 }
 
-sub save_coord {
+sub clear_selection{
+	my $canv = shift;
+	foreach my $key ( %selected ){
+		$canv->delete( $selected{$key} );
+		#delete $selected{$key};		
+	}
+	undef %selected;
+}
+
+sub deselect_coord{
 	my ($canv, $x, $y) = @_;
-	#print "SETtING (x,y) = ", $canv->canvasx($x), ", ", $canv->canvasy($y), "\n";
+	my $cur = $canv->find('withtag' =>'current' );
+	my @list = grep{$_ ne 'current'} $canv->gettags($cur);
+		
+	if ( $list[0] ){
+		
+		my($tile_y,$tile_x) = split/-/,$list[0];
+		$cur_tile_lbl = "tile (y-x): $tile_y-$tile_x ";
+		
+		if (exists $selected{"$tile_y-$tile_x"} ){
+			print "DESELECTING $tile_y-$tile_x\n";
+			$canv->delete( $selected{"$tile_y-$tile_x"} );
+			delete $selected{"$tile_y-$tile_x"};		
+		}
+	}
+}
+sub select_coord {
+	my ($canv, $x, $y) = @_;
 	my $cur = $canv->find('withtag' =>'current' );
 	my @list = grep{$_ ne 'current'} $canv->gettags($cur);
 	
-	$cur_tile_lbl = "tile (y-x): $list[0] " if $list[0];
 	
 	if ( $list[0] ){
-		print "SET $y - $x\n";
-		$canv->itemconfigure($cur, -fill => "red");
-		my ($y,$x)=split /-/, $list[0];
-		$aoa[$y][$x]= $default_char;
+		
+		my($tile_y,$tile_x) = split/-/,$list[0];
+		$cur_tile_lbl = "tile (y-x): $tile_y-$tile_x ";
+		print "SELECTING $tile_y-$tile_x\n"
+			unless exists $selected{"$tile_y-$tile_x"};		
+		# CALCULATE SMALL SQUARE CORNERS
+		my $min_y = $tile_y * $tile_h;
+		my $min_x = $tile_x * $tile_w;
+		my $max_y = $tile_y * $tile_h + $tile_h;
+		my $max_x = $tile_x * $tile_w + $tile_w;
+		
+		# SAVE SELECTION
+		$selected{"$tile_y-$tile_x"} 
+		= 
+		$canv->createRectangle($min_x,$min_y,$max_x,$max_y,-outline=>'red',-width=>2)
+		unless exists $selected{"$tile_y-$tile_x"};
+
 	}
 }
 
+sub export_selection{
+	#my @pairs = sort keys %selected;
+	my %grouped;
+	map{ 
+		my $orig = $_ ;
+		my ($y,$x) = split /-/,$_;
+		push @{$grouped{$y}},$orig; 
+	} sort keys %selected;
+	foreach my $key ( sort {$a<=>$b} keys %grouped ){
+		print map{s/-/,/;"[$_],"} @{$grouped{$key}};
+		print "\n";
+	}
+}
 
 sub set_default_char {
 		my ($canv, $k) = @_;
-		print "DEBUG [$k] was pressed..\n";
+		print "DEBUG [$k] was pressed..\n" if $debug;
 		#return 0 unless $k =~ /^.$/;
 		my %other_chars = (
 				space		=> ' ',
@@ -217,14 +281,14 @@ sub set_default_char {
 		);
 		if( $k =~ /^.$/){
 			$default_char = $k;
-			print "setting brush to [$k]\n";
+			print "setting brush to [$k]\n" if $debug;
 		}
 		elsif( exists $other_chars{$k} ){
 			$default_char = $other_chars{$k};
-			print "setting brush to [$other_chars{$k}]\n";
+			print "setting brush to [$other_chars{$k}]\n"if $debug;
 		}
 		else{
-			print "WARNING: cannot use [$k] as char to draw!\n";
+			print "WARNING: cannot use [$k] as char to draw!\n"if $debug;
 		}
 		
 		
@@ -236,13 +300,13 @@ sub set_coord {
 	my $cur = $canv->find('withtag' =>'current' );
 	my @list = grep{$_ ne 'current'} $canv->gettags($cur);
 	
-	$cur_tile_lbl = "tile (y-x): $list[0] " if $list[0];
-	
-	if ( $list[0] ){
-		print "SET $y - $x\n";
+		if ( $list[0] ){
+		
 		$canv->itemconfigure($cur, -text=> $default_char);
-		my ($y,$x)=split /-/, $list[0];
-		$aoa[$y][$x]= $default_char;
+		my ($tile_y,$tile_x)=split /-/, $list[0];
+		$cur_tile_lbl = "tile (y-x): $tile_y-$tile_x";
+		print "SET $tile_y - $tile_x\n";
+		$aoa[$tile_y][$tile_x]= $default_char;
 	}
 }
 
