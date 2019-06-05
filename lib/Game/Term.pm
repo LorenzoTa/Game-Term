@@ -132,6 +132,8 @@ Each tile of the map inside the UI will hold an anonymous array with 3 elements:
 
 The map only contains terrain informations, no actors nor the hero.
 
+A MapEditor using L<Tk> is included in the distribution.
+
 
 =head2 UI
 
