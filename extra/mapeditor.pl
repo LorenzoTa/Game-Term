@@ -142,6 +142,7 @@ sub setup_new{
 							-bg => 'ivory',
 							-width 	=> $maxx * $tile_w + $tile_w - 2, # -2 correction for the grid
 							-height => $maxy * $tile_h + $tile_h - 2,
+							-closeenough => 0, # BETTER?
               )->pack(-anchor=>'n',-expand => 1, -fill => 'both');
 	
 	$canvas->focusForce;
