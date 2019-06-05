@@ -121,7 +121,7 @@ my $scenario = Game::Term::Scenario->new(
 														[26,16],[26,17],[26,18],[26,19],[26,20],
 														[27,13],[27,14],[27,15],[27,16],[27,17],[27,18],[27,19],[27,20],[27,21],
 														[28,12],[28,13],[28,14],[28,15],[28,16],[28,17],[28,18],[28,19],[28,20],[28,21],[28,22],[28,23],
-														[29,11],[29,12],[29,13],[29,14],[29,15],[29,16],[29,17],[29,18],[29,19],[29,20],[29,21],[29,22],[29,23],
+														[29,11],[29,12],[29,13],[29,14],[29,15],[29,16],[29,17],[29,18],[29,19],[29,20],[29,21],[29,22],[29,23],[29,24],[29,25],[29,26],
 														[30,10],[30,11],[30,12],[30,13],[30,14],[30,15],[30,16],[30,17],[30,18],[30,19],[30,20],[30,21],[30,22],[30,23],[30,24],[30,25],[30,26],[30,27],
 														[31,10],[31,11],[31,12],[31,13],[31,14],[31,15],[31,16],[31,17],[31,18],[31,19],[31,20],[31,21],[31,22],[31,23],[31,24],[31,25],[31,26],[31,27],[31,28],[31,29],
 														[32,10],[32,11],[32,12],[32,13],[32,14],[32,15],[32,16],[32,17],[32,18],[32,19],[32,20],[32,21],[32,22],[32,23],[32,24],[32,25],[32,26],[32,27],[32,28],[32,29],[32,30],
@@ -196,33 +196,33 @@ $game->play()
 
 __DATA__
 tttt ttTTTTTTTTTTTTTTTTTTTTTTTTTTmmmMMWWwwMMttt ttmMMMMmmmmmmmmMtMMMMM hhhhhMMMM
-ttttt ttttTTTTTTTTTTTTTTTTTTTTTTTmmmmmWWMwmttttttmMMMmtttthhmmmMMmmmmmttt  httmm
-ttttttTTTTTttttttTTTTTttttttttttt  bbWWwwmmttttttmMM ht MttthhmMMmmm tt hhhhMMmm
- ttttTTtttttttttttttttttttttttttt WWbbwtwmmttttttmMhhh  MMMthhmMMmmthhhhh tMtmmt
- tttTTttt                   ttttWWWwwbbwtmmtttttt M hh   MMtttt tmm hhtth MMmmMt
+ttttt ttttTTTTTTTTTTTTTTTTTTTTTTTmmmmmWWMwmttttttmMMMmtttthhmmmMMmmmmmttthhhttmm
+ttttttTTTTTttttttTTTTTttttttttttt  bbWWwwmmttttttmMM ht MttthhmMM     t hh    mm
+ ttttTTtttttttttttttttttttttttttt WWbbwtwmmttttttmMhhh  MMMthhmMM mth hhh     mt
+ tttTTttt                   ttttWWWwwbbwtmmtttttt M hh   MMtttt   m h  th MMmmMt
    tttt     tttttttt           WWwwwwwbbtttttttt  MMMMmm      tttMmhh tth Mmm tt
    Tt     tttttttttt          WWwwhhhhh    tttt   MMMMMm         Mthhtt Mmmm mtt
    ttt  ttwwwwwtt     ttttttAAAAAhhhhh     tttt       Mmmm      MMt  t Mmmtmmm t
-  tt   ttwwwwwwww   ttttttt AAAAAhhmMMM     ttt          m   MMmmhhh   Mm t t  t
-  t   tttwwWWWWww  ttttttt   WWwhhhmMMMM    ttt        mmm   Mmhhhmh MMMm t   tt
-     ttttwwBBWWww  tt tt     WWwwhhhMM                mmMMMMMhhhtmhh     tttt tt
+  tt   ttwwwwwwww   ttttttt AAAAAhhmMMM     ttt              MMmmhhh   M  t t  t
+  t   tttwwWWWWww  ttttttt   WWwhhhmMMMM    ttt         mm   Mmhhhmh MM   t   tt
+     ttttwwBBWWww  tt tt     WWwwhhhMM                 mMMMMMhhhtmhh     tttt tt
      ttttwBBWWWww  t  t       Wwwwhh             ttt   MMhhhhhttttmtmm  tttttttt
-     ttttBBwWWWww  t  hmmmh   WWwwww     tttttttttttt  MMhttttttttmmmm  tttttttt
+     ttttBBwWWWww  t  hmmmh   WWwwww     tttttttttttt  MMhttttt ttmmmm  tttttttt
      tttBBwwwwww   tt hhhmh    WWwwww   tttttttTTtttt                m   ttttt t
      ttttttwwwwtttttthhhhhh      WWww   ttttttttTTTTttttTttt       ttmmm   ttttt
-      ttt tttttt tt t            WWwwwd   tttttttttTTtttTTTttt     tttTt      tt
+      ttt tt  tt tt t            WWwwwd   tttttttttTTtttTTTttt     tttTt      tt
              tt tt      WWWWWWaaWWwwww      tttttttttttttttTTtt    tttTttt      
           hhhh  t   WWWWWWwwwwaawwwwww      tt           tttTtt     ttTTTt     t
          mmhhhhttdWWWwwwwwwsss   wwwww                      ttttt     ttTTtttttt
-      h mm ht  tssWWwwssssssss    sss                       ttttt      tTtttttTt
-     hhmmhttttttswWwssssssss       ss      tttt                 tttt      tttTtt
-     hhhhhttttttswWwsSSssSSs           ttttttt   ttttt       tttt           tTTT
-         ttttt sswwwssSSSSSs           tttttt    ttttt        tTt       ttttttTT
-        tttttsssswwWwsSSSSSSss        ttttttt    ttttt      tttTt      ttttttTTt
-        tt   sssswWwwsssSSSSSs       tthhttt    tttt       ttTTTt      tttTTTTTt
-       ttt ssssswWwwwssssSSsss   ttttthhhht    sssss       tTTttt      tttttttTt
-           ssssswWwwwwsssssss    tthhhhhht     ssSSss      tTTt             ttTT
-           sswwwwWWWwwwsssssss    hhhhhhtt     ssSSSss                      tttT
+      h mm ht  t sWWwwssssssss    sss                       ttttt      tTtttttTt
+     hhmmhtttttt wWWssssssss       ss      tttt                 tttt      tttTtt
+     hhhhhtttt   wWWsSSssSSs           ttttttt   ttttt       tttt           tTTT
+         tttt    wwwssSSSSSs           tttttt    ttttt        tTt       ttttttTT
+        ttttt   swwWwsSSSSSSss        ttttttt    ttttt      tttTt      ttttttTTt
+        tt    ssswWwwsssSSSSSs       tthhttt    tttt       ttTTTt      tttTTTTTt
+       ttt ssssswWWwwssssSSsss   ttttthhhht    sssss       tTTttt      tttttttTt
+           ssssswWWwwwsssssss    tthhhhhht     ssSSss      tTTt             ttTT
+           sswwwWWWWwwwsssssss    hhhhhhtt     ssSSSss                      tttT
           sswwWWWWWWWwwwssssss      ttttt  yyt tsssssss                ttt  tttT
          sswwWWWWWWWWWWWwwwssss          yyyytttt  ttt           tt   tttt  ttTT
  t      sswwWWWWWWWWWWWWWWWWwws          TTTTTTTttt    ttt ttttttttttttttt  ttTt

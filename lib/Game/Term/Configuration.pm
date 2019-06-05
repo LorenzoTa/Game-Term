@@ -166,7 +166,7 @@ sub terrains_16_colors{
 	' ' => [  'plain', ' ', '', '',        0 ],
 	'_' => [  'plain', ' ', '', '',        0 ], # not affected by fog of war
 	A => [ 'bridge', '-', ['Maroon'],  '',  0 ],
-	a => [ 'bridge', '|', ['Maroon'],  '',  0 ],
+	a => [ 'bridge', '|', 'Maroon',  '',  0 ],
 	B => [ 'bridge', '/', ['Maroon'],  '',  0 ], # you need two of this
     b => [ 'bridge', '\\', ['Maroon'],  '',  0 ],#   ''
 	# BUG single color is not applied
@@ -203,7 +203,7 @@ sub terrains_16_colors{
 	# q 
 	# R 
 	# r 
-	S => [ 'unwalkable swamp', [qw( ~ - ~ - ~)], 'Green', 'On_Olive',  999 ],
+	S => [ 'unwalkable swamp', [qw( ~ - ~ - ~)], ['Green'], 'On_Olive',  999 ],
 	s => [ 'swamp', ['v', '-'], ['Olive'],  '',       1 ],
 	T => [ 'unwalkable wood', 'O',   [ 'Olive', 'Lime' ],  '',       999 ], 
 	t => [ 'wood', ['O', 'o'], [ 'Olive', 'Green'], '',        0.5 ],

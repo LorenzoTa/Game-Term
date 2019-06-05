@@ -484,9 +484,9 @@ sub beautify_map{
 				my $color = ref $terrain{ $ui->{map}[$row][$col] }[2] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[2]->
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[2]}+1))]  :
-							$terrain{ $ui->{map}[$row][$col] }[2]  					;
+							$terrain{ $ui->{map}[$row][$col] }[2] 					;
 				# BACKGROUND COLOR			
-				my $bg_color = ref $terrain{ $ui->{map}[$row][$col] }[3] eq 'ARRAY' 	?
+				my $bg_color = ref $terrain{ $ui->{map}[$row][$col] }[3] eq 'ARRAY' ?
 					$terrain{ $ui->{map}[$row][$col] }[3]->
 						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[3]}+1))]  :
 							$terrain{ $ui->{map}[$row][$col] }[3]  					;
@@ -494,8 +494,8 @@ sub beautify_map{
 				# CHARCTER TO DISPLAY
 				my $to_display = ref $terrain{ $ui->{map}[$row][$col] }[1] eq 'ARRAY' 	?
 					$terrain{ $ui->{map}[$row][$col] }[1]->
-						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[1]}+1))]  :
-							$terrain{ $ui->{map}[$row][$col] }[1]  					;			
+						[int( rand( $#{$terrain{ $ui->{map}[$row][$col] }[1]}+1))]  	:
+							$terrain{ $ui->{map}[$row][$col] }[1]  						;			
 				
 				# final tile is anonymous array
 				$ui->{map}[$row][$col] = [
