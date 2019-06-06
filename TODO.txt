@@ -2,7 +2,7 @@
 
 -scenario enigmas
 -encounters with creatures
--labels
+
 -map legenda
 -review movement penalties:
 	implement energy_gain_multipliers for hero and actors
@@ -15,8 +15,10 @@
 -game variables?
 -Item::Inventory
 -Actor::Bestiary
-
+io@COMP:c>perl -I .\lib -MGame::Term::UI -e "$ui=Game::Term::UI->new(debug=>2);$ui->{hero}{y}=$ui->{hero}{x}=0;$ui->{her
+o_side}='N';$ui->{map}[0][1]='a';$ui->init; $ui->beautify_map"
 #################################################################
+-DONE June 19 labels
 
 - DONE remove commands from UI.pm 
 - DONE turn count based on hero moves
