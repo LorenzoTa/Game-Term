@@ -102,7 +102,7 @@ sub load_configuration{
 		print "DEBUG: configuration provided as object\n" if $debug;
 	}
 	# CONFIGURATION provided as file
-	elsif (-e -s -f -r $conf_from ){ 
+	elsif ($conf_from and -e -s -f -r $conf_from ){ 
 		$conf_obj = Game::Term::Configuration->new( from => $conf_from );
 		print "DEBUG: configuration provided as file\n" if $debug;
 	}
