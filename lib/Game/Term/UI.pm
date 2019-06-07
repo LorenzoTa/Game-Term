@@ -122,7 +122,7 @@ sub load_configuration{
 		# foreground colors
 		$terrain{$ter}->[2] =  ref $terrain{$ter}->[2] eq 'ARRAY' ?
 								[ map{ $ui->color_names_to_ANSI($_) }@{$terrain{$ter}->[2]} ] : 
-								( defined  $terrain{$ter}->[3] ? $ui->color_names_to_ANSI( $terrain{$ter}->[3] ):'');
+								( defined  $terrain{$ter}->[3] ? $ui->color_names_to_ANSI( $terrain{$ter}->[2] ):'');
 		# eventual background colors						
 		$terrain{$ter}->[3] =  ref $terrain{$ter}->[3] eq 'ARRAY' ?
 								[map{ $ui->color_names_to_ANSI($_) }@{$terrain{$ter}->[3]} ] : 
