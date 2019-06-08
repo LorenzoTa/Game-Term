@@ -146,7 +146,7 @@ sub setup_new{
 	$canvas->packForget if Tk::Exists($canvas); 
 	
 	print "DEBUG: in setup_new maxy: $maxy maxy: $maxx\n".
-			"AoA is ".(scalar @aoa - 1)." x $#{$aoa[0]}\n"
+			"AoA is ".(scalar @aoa)." x ".($#{$aoa[0]}+1)."\n"
 			if $debug;
 	
 	$canvas = $map_frame->Canvas(
