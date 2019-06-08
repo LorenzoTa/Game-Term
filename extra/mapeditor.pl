@@ -67,7 +67,14 @@ $top_frame0->Entry(
 $top_frame0->Button(-padx=> 5,
 					-text => "new",
 					-borderwidth => 4, 
-					-command => sub{ &setup_new }
+					-command => sub{ 
+									$default_char = ' ';
+									@aoa = map{ 
+												[ ($default_char) x ($maxx + 1)  ] 
+									} 0..$maxy;
+									&setup_new; 
+								}
+									
 )->pack(-side => 'left',-padx=>5);
 
 
@@ -137,6 +144,10 @@ sub setup_new{
 	$default_char = ' ';
 	
 	$canvas->packForget if Tk::Exists($canvas); 
+	
+	#@aoa = map{ [ ($default_char) x ($maxx + 1)  ] } 0..$maxy;
+	print "DEBUG: in setup_new maxy: $maxy maxy: $maxx\n".
+			"AoA is ".(scalar @aoa - 1)." x $#{$aoa[0]}\n";
 	
 	$canvas = $map_frame->Canvas(
 							-bg => 'ivory',
