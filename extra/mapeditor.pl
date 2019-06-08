@@ -7,7 +7,7 @@ use File::Spec;
 use utf8;
 
 
-my $debug = 0;
+my $debug = $ARGV[0]//0;
 my $default_char = ' ';
 
 my $maxy = 29;
@@ -145,9 +145,9 @@ sub setup_new{
 	
 	$canvas->packForget if Tk::Exists($canvas); 
 	
-	#@aoa = map{ [ ($default_char) x ($maxx + 1)  ] } 0..$maxy;
 	print "DEBUG: in setup_new maxy: $maxy maxy: $maxx\n".
-			"AoA is ".(scalar @aoa - 1)." x $#{$aoa[0]}\n";
+			"AoA is ".(scalar @aoa - 1)." x $#{$aoa[0]}\n"
+			if $debug;
 	
 	$canvas = $map_frame->Canvas(
 							-bg => 'ivory',
@@ -237,11 +237,11 @@ sub load_save{
 						my $FSref = $exp_win->FileSelect(-directory => $start_dir);
 						$to_load = $FSref->Show;
 						$to_load = File::Spec->rel2abs($to_load);
-						print "ready to load $to_load\n";
+						print "ready to load $to_load\n" if $debug;
 						my($volume,$directories,$file) =
 							File::Spec->splitpath( $to_load || File::Spec->rel2abs('.') );
 						$start_dir = File::Spec->catdir( $volume,$directories );
-						print "START DIR: $start_dir\n";
+						print "SET START DIR TO: $start_dir\n" if $debug;
 				},
 		)->pack(-side => 'left',-padx=>5);
 		my $after_data = 0;
@@ -385,7 +385,7 @@ sub deselect_coord{
 		$cur_tile_lbl = "tile (y-x): $tile_y-$tile_x ";
 		
 		if (exists $selected{"$tile_y-$tile_x"} ){
-			print "DESELECTING $tile_y-$tile_x\n";
+			print "DESELECTING $tile_y-$tile_x\n" if $debug;
 			$canv->delete( $selected{"$tile_y-$tile_x"} );
 			delete $selected{"$tile_y-$tile_x"};		
 		}
@@ -402,8 +402,10 @@ sub select_coord {
 		
 		my($tile_y,$tile_x) = split/-/,$list[0];
 		$cur_tile_lbl = "tile (y-x): $tile_y-$tile_x ";
-		print "SELECTING $tile_y-$tile_x\n"
-			unless exists $selected{"$tile_y-$tile_x"};		
+		if ( $debug ){
+			print "SELECTING $tile_y-$tile_x\n"
+				unless exists $selected{"$tile_y-$tile_x"};
+		}
 		# CALCULATE SMALL SQUARE CORNERS
 		my $min_y = $tile_y * $tile_h;
 		my $min_x = $tile_x * $tile_w;
@@ -492,7 +494,7 @@ sub set_coord {
 		my ($tile_y,$tile_x)=split /-/, $list[0];
 		unless ($cur_tile_lbl eq "tile (y-x): $tile_y-$tile_x"){
 			$cur_tile_lbl = "tile (y-x): $tile_y-$tile_x";
-			print "SET $tile_y - $tile_x\n";
+			print "SET $tile_y - $tile_x\n" if $debug;
 		}
 		$aoa[$tile_y][$tile_x]= $default_char;
 	}
@@ -513,7 +515,7 @@ sub export_aoa{
 		foreach my $col( 0..$#{$aoa[$row]} ){
 			print $aoa[$row][$col];
 		}
-		print "\n";	
+		print "\n" unless $row == $#aoa;	
 	}
 }
 ##################################################################
