@@ -1143,6 +1143,11 @@ sub color_names_to_ANSI {
 1; # End of Game::Term::UI
 __DATA__
 
+
+useful article linked by simcop2387 https://www.redblobgames.com/
+	and https://www.reddit.com/r/gamedev/
+	https://opengameart.org/
+
 useful article linked by Corion: http://journal.stuffwithstuff.com/2014/07/15/a-turn-based-game-loop/
 
 color tool https://devblogs.microsoft.com/commandline/introducing-the-windows-console-colortool/
