@@ -1143,6 +1143,12 @@ sub color_names_to_ANSI {
 1; # End of Game::Term::UI
 __DATA__
 
+
+useful article linked by simcop2387 https://www.redblobgames.com/
+	and https://www.reddit.com/r/gamedev/
+	https://opengameart.org/
+	FONTS: https://opengameart.org/art-search-advanced?keys=&title=&field_art_tags_tid_op=or&field_art_tags_tid=font%2C%20fonts&name=&field_art_type_tid[9]=9&field_art_type_tid[10]=10&field_art_type_tid[7273]=7273&field_art_type_tid[14]=14&field_art_type_tid[12]=12&field_art_type_tid[13]=13&field_art_type_tid[11]=11&field_art_licenses_tid[17981]=17981&field_art_licenses_tid[2]=2&field_art_licenses_tid[17982]=17982&field_art_licenses_tid[3]=3&field_art_licenses_tid[6]=6&field_art_licenses_tid[5]=5&field_art_licenses_tid[10310]=10310&field_art_licenses_tid[4]=4&field_art_licenses_tid[8]=8&field_art_licenses_tid[7]=7&sort_by=score&sort_order=DESC&items_per_page=24&collection=
+
 useful article linked by Corion: http://journal.stuffwithstuff.com/2014/07/15/a-turn-based-game-loop/
 
 color tool https://devblogs.microsoft.com/commandline/introducing-the-windows-console-colortool/

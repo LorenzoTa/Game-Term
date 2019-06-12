@@ -8,6 +8,9 @@ use File::Spec;
 use YAML::XS qw(Dump DumpFile LoadFile);
 use Term::ANSIColor qw(RESET :constants :constants256);
 
+use if $^O =~ /win32/i, "Win32";
+
+
 # CLEAR           RESET             BOLD            DARK
 # FAINT           ITALIC            UNDERLINE       UNDERSCORE
 # BLINK           REVERSE           CONCEALED
@@ -293,16 +296,39 @@ sub terrains_256_colors{
 sub validate_conf{
 	my %conf = @_;
 	
-	if( $conf{map_colors} ){
+	# check win32 older OSs supporting only 16 colors
+	my ($str, $major, $minor, $build, @others);
+	if ( $^O =~ /win32/i ){
+		($str, $major, $minor, $build, @others) = Win32::GetOSVersion();
+		print "Win32 OS spotted version: major $major, minor $minor, build $build\n"; 
+		# see https://devblogs.microsoft.com/commandline/24-bit-color-in-the-windows-console/
+		if ( $major >= 10 and $build >= 14931 ){
+			$conf{map_colors} = 256;
+			print "this Win32 OS supports 256 colors\n"; 
+		}
+		else{
+			$conf{map_colors} = 16;
+			print "unfortunately this Win32 OS only supports 16 colors\n"; 
+		}
+	}
+	else{
+		if( $conf{map_colors} ){
 		croak "configuration 'colors' accepts 2, 16 or 256" 
 			unless $conf{map_colors} =~/^(2|16|256)$/;
+		}
+		else{
+			$conf{map_colors} = 256;
+			print "assuming $^O supports 256 colors\n";
+		}
 	}
+	
+	
 	$conf{game_dir} //= File::Spec->rel2abs('.');
 	$conf{game_dir} = File::Spec->rel2abs($conf{game_dir});
 	
 	$conf{mode} //= 'map';
 	
-	$conf{ map_colors } //= 16;
+	#$conf{ map_colors } //= 16;
 	$conf{ map_area_w } //= 50; #80;
 	$conf{ map_area_h } //= 20; #20;
 	#$conf{ map_labels } //=	0;

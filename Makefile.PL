@@ -3,6 +3,13 @@ use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 
+# on mswin32 we need Win32 module to check the OS version
+my %prereq_pm_win32;
+
+if ($^O =~ /mswin32/i) {
+    $prereq_pm_win32{'Win32'} = '0';
+}
+
 WriteMakefile(
     NAME             => 'Game::Term',
     AUTHOR           => q{LorenzoTa <lorenzo@cpan.org>},
@@ -28,6 +35,8 @@ WriteMakefile(
 		'Term::ReadLine' => '0',
 		'List::Util' => '0',
 		'Data::Dump' => '0',
+		
+		%prereq_pm_win32
 		# 
         #'Foo::Bar::Module' => '5.0401',
     },
