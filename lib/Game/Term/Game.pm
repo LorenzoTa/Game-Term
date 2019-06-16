@@ -383,8 +383,8 @@ sub play{
 				# CANNOT MOVE
 				else{
 					#$actor->{energy} += $actor->{energy_gain};
-			print "$actor->{name} on TILE: ->",$game->{ui}->{map}->[ $actor->{y} ][ $actor->{x} ]->[1],"<-\n";
-			dd $actor->{energy_gain};
+			# print "$actor->{name} on TILE: ->",$game->{ui}->{map}->[ $actor->{y} ][ $actor->{x} ]->[1],"<-\n";
+			# dd $actor->{energy_gain};
 			
 					$actor->{energy} +=
 						$actor->{energy_gain}{

@@ -26,7 +26,8 @@ sub validate_conf{
 		h 	=> 30, 	# hill
 		m 	=> 10, 	# mountain 
 		s	=> 5, 	# swamp
-		t 	=> 30, 	# wood 
+		t 	=> 30, 	# wood
+t 	=> 30, 	# wood 		
 		w	=> 10, 	# shallow water 
 		y 	=> 40, 	# pine wood 
 	};
