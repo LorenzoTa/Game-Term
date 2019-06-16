@@ -699,8 +699,8 @@ sub execute{
 	my %table = (
 		##############################################
 		#	SINGLE LETTER COMMAND WHILE IN MAP MODE
-		#   they return 1 if a movement was done
-		#	or 0 if not (b for bag, u for use, l for labels?)
+		#   they return energy consumed
+		#	or 0 if not (b for bag, u for use, l for labels)
 		##############################################
 		
 		# MOVE NORTH

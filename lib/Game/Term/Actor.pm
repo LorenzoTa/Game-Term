@@ -20,13 +20,14 @@ sub validate_conf{
 	$params{hitpoints} //= 1;
 	$params{energy} //= 0;
 	$params{energy_gain} //= 40;
-	$params{energy_gain_multipliers} = {
-		h => 0.8, # hill 0.8
-		m => 0.3, # mountain 3
-		s => 0.1, # swamp 1 
-		t => 0.5, # wood 0.5
-		w => 0.2, # shallow water 2
-		y => 0.5, # wood 0.5 
+	$params{energy_gain} = {
+		' ' => 40,	# plain
+		h 	=> 30, 	# hill
+		m 	=> 10, 	# mountain 
+		s	=> 5, 	# swamp
+		t 	=> 30, 	# wood 
+		w	=> 10, 	# shallow water 
+		y 	=> 40, 	# pine wood 
 	};
 	$params{icon} = 'X';
 	$params{color} = 'Fuchsia';
