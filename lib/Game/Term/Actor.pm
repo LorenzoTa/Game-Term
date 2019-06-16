@@ -19,7 +19,7 @@ sub validate_conf{
 	$params{race} //= 'unknown';
 	$params{hitpoints} //= 1;
 	$params{energy} //= 0;
-	$params{energy_gain} //= 5;
+	$params{energy_gain} //= 40;
 	$params{energy_gain_multipliers} = {
 		h => 0.8, # hill 0.8
 		m => 0.3, # mountain 3
