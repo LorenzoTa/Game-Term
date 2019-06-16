@@ -40,17 +40,17 @@ my $scenario = Game::Term::Scenario->new(
 											
 											
 											# ),#
-					Game::Term::Event->new( 
-											type 	=> 'game turn', 
-											check 	=> 5, # turn 5
-											target 	=> 'DUE', # the name of the actor
-											target_attr => 'energy_gain',
-											target_mod 	=> 5,
-											duration => 50,
-											message	=> 'BUFF! energy gain +5 for 3 turns',
+# Game::Term::Event->new( 
+# type 	=> 'game turn', 
+# check 	=> 5, # turn 5
+# target 	=> 'DUE', # the name of the actor
+# target_attr => 'energy_gain',
+# target_mod 	=> 5,
+# duration => 50,
+# message	=> 'BUFF! energy gain +5 for 3 turns',
 											
 											
-											),#
+#),#
 					# Game::Term::Event->new( 
 											# type 	=> 'game turn', 
 											# check 	=> 10, 
