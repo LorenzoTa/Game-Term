@@ -1143,6 +1143,9 @@ sub color_names_to_ANSI {
 1; # End of Game::Term::UI
 __DATA__
 
+see also Graph::Weighted
+https://metacpan.org/pod/Game::PlatformsOfPeril
+
 
 useful article linked by simcop2387 https://www.redblobgames.com/
 	and https://www.reddit.com/r/gamedev/
