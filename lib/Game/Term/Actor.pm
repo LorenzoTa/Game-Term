@@ -19,9 +19,10 @@ sub validate_conf{
 	$params{race} //= 'unknown';
 	$params{hitpoints} //= 1;
 	$params{energy} //= 0;
-	$params{energy_gain} //= 40;
+	#$params{energy_gain} //= 40;
 	$params{energy_gain} = {
 		' ' => 40,	# plain
+		d 	=> 40, 	# door
 		h 	=> 30, 	# hill
 		m 	=> 10, 	# mountain 
 		s	=> 5, 	# swamp

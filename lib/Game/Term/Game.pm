@@ -361,6 +361,7 @@ sub play{
 						
 						$actor->{y} = $$newpos[0];
 						$actor->{x} = $$newpos[1];
+			$consumed_energy = 50;
 						# DRAW MAP only if actor is in sight range
 						my %visible = $game->{ui}->illuminate();
 						if ( exists $visible{ $actor->{y}.'_'.$actor->{x} } ){
@@ -374,14 +375,26 @@ sub play{
 								${$game->{messages}}[ $game->{turn}],
 							);
 						}
-						$actor->{energy} -= 50;
+						#$actor->{energy} -= 50;
+						$actor->{energy} -= $consumed_energy;
 						print "$actor->{name} at y: $actor->{y} / 0-$#{$game->{ui}->{map}} x: $actor->{x} / 0-$#{$game->{ui}->{map}[0]}\n" if $debug;
 									
 				}
 				# CANNOT MOVE
 				else{
-					$actor->{energy} += $actor->{energy_gain};
+					#$actor->{energy} += $actor->{energy_gain};
+			print "$actor->{name} on TILE: ->",$game->{ui}->{map}->[ $actor->{y} ][ $actor->{x} ]->[1],"<-\n";
+			dd $actor->{energy_gain};
+			
+					$actor->{energy} +=
+						$actor->{energy_gain}{
+							$game->{ui}->{map}->[ $actor->{y} ][ $actor->{x} ]->[1]
+							
+						};
+			
+			
 					print __PACKAGE__," DEBUG '$actor->{name}' ends with energy $actor->{energy}\n" if $debug;
+			#my $dummy = <STDIN>;
 				}
 				# ENCOUNTER
 				if ( 
