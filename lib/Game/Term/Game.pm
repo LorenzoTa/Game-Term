@@ -726,7 +726,7 @@ sub execute{
 					" HERO on $game->{hero}->{on_tile} ",
 					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
 				
-				return 1;
+				return 50;
 			}
 		},
 		# MOVE SOUTH
@@ -754,7 +754,7 @@ sub execute{
 					" HERO on $game->{hero}->{on_tile} ",
 					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
 				
-				return 1;
+				return 50;
 			}
 		},
 		# MOVE WEST
@@ -782,7 +782,7 @@ sub execute{
 					" HERO on $game->{hero}->{on_tile} ",
 					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
 				
-				return 1;
+				return 50;
 			}
 		},
 		# MOVE EAST
@@ -810,7 +810,7 @@ sub execute{
 					" HERO on $game->{hero}{on_tile} ",
 					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
 				
-				return 1;
+				return 50;
 			}
 		},
 		# SHOW BAG
@@ -847,7 +847,7 @@ sub execute{
 				# REMOVE if consumable
 				undef $game->{hero}{bag}->[$num] if $game->{hero}{bag}->[$num]->{consumable};
 				# USE COUNTS AS MOVING
-				return 1;
+				return 10;
 			}
 			else{
 				print ' '.$game->{ui}->{ dec_ver }.
@@ -1017,7 +1017,7 @@ EOH
 								$game->{hero},
 								${$game->{messages}}[ $game->{turn}],
 					);
-					return ;
+					return 0;
 		},
 		show_legenda => sub{ 
 					print "to be implemented\n";
@@ -1059,7 +1059,7 @@ EOH
 									@{$game->{messages}}[ $game->{turn} ]//'' 
 								],
 					);
-					#return 1;
+					return 0;
 		},
 		
 		exit => sub{
