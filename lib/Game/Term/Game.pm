@@ -281,8 +281,9 @@ sub play{
 			foreach my $actor ( $game->{hero}, @{$game->{actors}} ){
 				# undef actors were eliminated
 				next unless defined $actor;
+				my $consumed_energy;
 				# ACTOR CAN MOVE
-				if ( $actor->{energy} >= 10 and $actor->isa('Game::Term::Actor::Hero') ){
+				if ( $actor->{energy} >= 100 and $actor->isa('Game::Term::Actor::Hero') ){
 					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n"
 						 if $debug;
 					
@@ -296,7 +297,7 @@ sub play{
 						last;
 					}
 					# movement OK
-					if ( $game->execute(@usr_cmd) ){
+					if ( $consumed_energy = $game->execute(@usr_cmd) ){
 						# TIME
 						$game->{turn}++;
 						# EVENTS
@@ -325,7 +326,7 @@ sub play{
 							$game->{hero},
 							${$game->{messages}}[ $game->{turn}],
 						);	
-						$actor->{energy} -= 10;
+						$actor->{energy} -= $consumed_energy;
 					}
 					# NO movement 
 					else{
@@ -334,7 +335,7 @@ sub play{
 					}
 				}	
 				# NPC: AUTOMOVE
-				elsif( $actor->{energy} >= 10 ){
+				elsif( $actor->{energy} >= 100 ){
 						print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n" if $debug;
 						# MOVE receives:
 						my $newpos = $actor->move(
@@ -373,7 +374,7 @@ sub play{
 								${$game->{messages}}[ $game->{turn}],
 							);
 						}
-						$actor->{energy} -= 10;
+						$actor->{energy} -= 50;
 						print "$actor->{name} at y: $actor->{y} / 0-$#{$game->{ui}->{map}} x: $actor->{x} / 0-$#{$game->{ui}->{map}[0]}\n" if $debug;
 									
 				}
