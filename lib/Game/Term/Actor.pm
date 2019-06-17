@@ -22,12 +22,20 @@ sub validate_conf{
 	#$params{energy_gain} //= 40;
 	$params{energy_gain} = {
 		' ' => 40,	# plain
+		A 	=> 40,	# bridge
+		a 	=> 40,	# bridge
+		B 	=> 40,	# bridge
+		b	=> 40,	# bridge
+		D 	=> 0,	# closed door
 		d 	=> 40, 	# door
 		h 	=> 30, 	# hill
+		M 	=> 0,	# unwalkable mountain
 		m 	=> 10, 	# mountain 
+		S 	=> 0,	# unwalkable swamp
 		s	=> 5, 	# swamp
+		T   => 0,	# unwalkable wood
 		t 	=> 30, 	# wood
-t 	=> 30, 	# wood 		
+		W 	=>	0,	# deep water
 		w	=> 10, 	# shallow water 
 		y 	=> 40, 	# pine wood 
 	};
