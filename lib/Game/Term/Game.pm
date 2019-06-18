@@ -959,6 +959,7 @@ w   walk north
 a   walk west
 s   walk south
 d   walk east
+r 	rest
 
 b   show bag content
 u   use an item in the bag (counts as a move)
