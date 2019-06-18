@@ -313,7 +313,7 @@ sub play{
 							# the slowness #4 of the terrain original letter #1 where
 							# the hero currently is on the map
 							$game->{configuration}->{terrains}->{$game->{ui}->{map}->[ $game->{hero}->{y} ][ $game->{hero}->{x} ]->[1]}->[4]
-						);
+						) if $consumed_energy > 0;
 						# sigth modifications
 						#local $game->{hero}{sight} = $game->{hero}{sight} + 2 
 
