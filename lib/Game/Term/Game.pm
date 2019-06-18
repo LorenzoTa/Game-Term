@@ -286,7 +286,8 @@ sub play{
 				if ( $actor->{energy} >= 100 and $actor->isa('Game::Term::Actor::Hero') ){
 					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n"
 						 if $debug;
-					
+					print "DEBUG '$actor->{name}' has energy: $actor->{energy}\n"
+						 if $debug;
 					# PLAYER: GET USER COMMAND	
 					my @usr_cmd = $game->{ui}->get_user_command();
 					next unless @usr_cmd; # ??? last ???
@@ -826,6 +827,15 @@ sub execute{
 				
 				return 50;
 			}
+		},
+		# REST
+		r => sub{
+			my $gain = $game->{hero}{energy_gain}{
+							$game->{ui}->{map}->[ $game->{hero}{y} ]
+											[ $game->{hero}{x} ][1]
+						};
+			# return NEGATIVE consumed energy
+			return 0-$gain;
 		},
 		# SHOW BAG
 		b => sub{
