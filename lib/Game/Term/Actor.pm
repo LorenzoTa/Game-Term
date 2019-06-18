@@ -19,7 +19,7 @@ sub validate_conf{
 	$params{race} //= 'unknown';
 	$params{hitpoints} //= 1;
 	$params{energy} //= 0;
-	#$params{energy_gain} //= 40;
+	$params{max_energy} //= 200;
 	$params{energy_gain} = {
 		' ' => 40,	# plain
 		A 	=> 40,	# bridge
