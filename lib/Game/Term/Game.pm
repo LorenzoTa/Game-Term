@@ -284,6 +284,10 @@ sub play{
 				my $consumed_energy;
 				# ACTOR CAN MOVE
 				if ( $actor->{energy} >= 100 and $actor->isa('Game::Term::Actor::Hero') ){
+					# LIMIT energy to max_energy
+					$actor->{energy} = $actor->{max_energy}
+						if $actor->{energy} > $actor->{max_energy};
+						
 					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n"
 						 if $debug;
 					print "DEBUG '$actor->{name}' has energy: $actor->{energy}\n"
@@ -337,6 +341,9 @@ sub play{
 				}	
 				# NPC: AUTOMOVE
 				elsif( $actor->{energy} >= 100 ){
+						# LIMIT energy to max_energy
+						$actor->{energy} = $actor->{max_energy}
+							if $actor->{energy} > $actor->{max_energy};
 						print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n" if $debug;
 						# MOVE receives:
 						my $newpos = $actor->move(
