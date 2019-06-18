@@ -835,6 +835,36 @@ sub execute{
 				return 50;
 			}
 		},
+		# MOVE NORTH-EAST
+		q => sub{
+			if ( 
+				# we are inside the real map
+				$game->{hero}{x}  < $#{$game->{ui}->{map}[0]} 	and
+				$game->{hero}{x}  > 0 	and
+				$game->is_walkable(
+					$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
+										[ $game->{hero}{x} - 1 ]
+				)
+						
+			){
+				$game->{hero}{y}--;
+				$game->{hero}{x}--;
+				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();
+				$game->{ui}->{map_off_x}-- if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{hero}{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}{y} ]
+													[ $game->{hero}{x} ]->[1]  
+												}->[0];
+				print __PACKAGE__, 
+					" HERO on $game->{hero}{on_tile} ",
+					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
+				
+				return 70;
+			}
+		},
 		# REST
 		r => sub{
 			my $gain = $game->{hero}{energy_gain}{
@@ -966,6 +996,7 @@ w   walk north
 a   walk west
 s   walk south
 d   walk east
+q 	walk northeast
 r 	rest
 
 b   show bag content
