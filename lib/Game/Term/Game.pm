@@ -715,9 +715,9 @@ sub is_inside_map{
 	my ($y,$x) = @_;
 	if(
 		$y >= 0 					and
-		$y <= $#{ $game->{map} } 	and 
+		$y <= $#{ $game->{ui}{map} } 	and 
 		$x >= 0						and
-		$x <= $#{ $game->{map}[$y] }
+		$x <= $#{ $game->{ui}{map}[$y] }
 		){
 			return 1;
 	}
@@ -742,7 +742,7 @@ sub execute{
 		w => sub{
 			if ( 
 				# we are inside the real map
-				$game->{hero}{y} > 0 	and
+				$game->is_inside_map( $game->{hero}{y} - 1, $game->{hero}{x} )	and
 				$game->is_walkable(
 					$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
 										[ $game->{hero}{x} ]
