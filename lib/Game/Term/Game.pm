@@ -710,6 +710,20 @@ sub is_walkable{
 	else{return 0}
 }
 
+sub is_inside_map{
+	my $game = shift;
+	my ($y,$x) = @_;
+	if(
+		$y >= 0 					and
+		$y <= $#{ $game->{map} } 	and 
+		$x >= 0						and
+		$x <= $#{ $game->{map}[$y] }
+		){
+			return 1;
+	}
+	else{ return 0 }
+}
+
 sub execute{
 	my $game = shift;
 	my ($cmd,@args) = @_;
