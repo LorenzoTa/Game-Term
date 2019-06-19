@@ -743,12 +743,22 @@ sub execute{
 			if ( 
 				# we are inside the real map
 				$game->is_inside_map( $game->{hero}{y} - 1, $game->{hero}{x} )	and
-				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
-										[ $game->{hero}{x} ]
-				)
+				# $game->is_walkable(
+					# $game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
+										# [ $game->{hero}{x} ]
+				# )
+				
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
+											[ $game->{hero}{x} ]->[1]
+										} > 0
+				
 						
 			){
+				# print "Energy gain for terrain [".
+					# $game->{ui}->{map}->[ $game->{hero}{y} - 1 ][ $game->{hero}{x} ]->[1].
+					# "] is ".
+					# $game->{hero}{energy_gain}{$game->{ui}->{map}->[ $game->{hero}{y} - 1 ][ $game->{hero}{x} ]->[1]}."\n";
         		$game->{hero}{y}--;
 				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
