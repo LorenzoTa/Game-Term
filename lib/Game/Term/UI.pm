@@ -1230,6 +1230,14 @@ http://dwarffortresswiki.org/Tileset_repository  cheepicus_15x15   	Belal
 https://int10h.org/oldschool-pc-fonts/fontlist/
 ---> http://www.pentacom.jp/pentacom/bitfontmaker2/  funziona LucidaConsoleaa.ttf
 --> but: https://superuser.com/questions/920440/how-to-add-additional-fonts-to-the-windows-console-windows
+
+	NOT OK: Oxygen Monospace
+	OK:		Space Mono
+	OK:		Ubuntu Mono
+	
+http://birdfont.org  
+
+
 https://github.com/powerline/fonts
 
 how to install a font for cmd.exe https://www.techrepublic.com/blog/windows-and-office/quick-tip-add-fonts-to-the-command-prompt/
