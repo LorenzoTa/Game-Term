@@ -769,7 +769,7 @@ sub execute{
 		s => sub{
 			if ( 
 				# we are inside the real map
-				$game->{hero}{y} < $#{$game->{ui}->{map}} 	and
+				$game->is_inside_map( $game->{hero}{y} + 1, $game->{hero}{x} )	and
 				$game->is_walkable(
 					$game->{ui}->{map}->[ $game->{hero}{y} + 1 ]
 										[ $game->{hero}{x} ]
@@ -797,7 +797,7 @@ sub execute{
 		a => sub{
 			if ( 
 				# we are inside the real map
-				$game->{hero}{x} > 0 	and
+				$game->is_inside_map( $game->{hero}{y}, $game->{hero}{x} - 1 )	and
 				$game->is_walkable(
 					$game->{ui}->{map}->[ $game->{hero}{y} ]
 										[ $game->{hero}{x} - 1 ]
@@ -825,7 +825,7 @@ sub execute{
 		d => sub{
 			if ( 
 				# we are inside the real map
-				$game->{hero}{x}  < $#{$game->{ui}->{map}[0]} 	and
+				$game->is_inside_map( $game->{hero}{y}, $game->{hero}{x} + 1)	and
 				$game->is_walkable(
 					$game->{ui}->{map}->[ $game->{hero}{y} ]
 										[ $game->{hero}{x} + 1 ]
@@ -853,8 +853,7 @@ sub execute{
 		q => sub{
 			if ( 
 				# we are inside the real map
-				$game->{hero}{x}  < $#{$game->{ui}->{map}[0]} 	and
-				$game->{hero}{x}  > 0 	and
+				$game->is_inside_map( $game->{hero}{y} - 1, $game->{hero}{x} - 1 )	and
 				$game->is_walkable(
 					$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
 										[ $game->{hero}{x} - 1 ]
