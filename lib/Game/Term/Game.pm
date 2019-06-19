@@ -743,17 +743,11 @@ sub execute{
 			if ( 
 				# we are inside the real map
 				$game->is_inside_map( $game->{hero}{y} - 1, $game->{hero}{x} )	and
-				# $game->is_walkable(
-					# $game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
-										# [ $game->{hero}{x} ]
-				# )
-				
+				# intended destination has an energy_gain > 0 (is walkable)
 				$game->{hero}{energy_gain}{
 											$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
 											[ $game->{hero}{x} ]->[1]
-										} > 0
-				
-						
+										} > 0						
 			){
 				# print "Energy gain for terrain [".
 					# $game->{ui}->{map}->[ $game->{hero}{y} - 1 ][ $game->{hero}{x} ]->[1].
@@ -780,11 +774,11 @@ sub execute{
 			if ( 
 				# we are inside the real map
 				$game->is_inside_map( $game->{hero}{y} + 1, $game->{hero}{x} )	and
-				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{hero}{y} + 1 ]
-										[ $game->{hero}{x} ]
-				)
-						
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} + 1 ]
+											[ $game->{hero}{x} ]->[1]
+										} > 0						
 			){
         
 				$game->{hero}{y}++;
@@ -808,11 +802,11 @@ sub execute{
 			if ( 
 				# we are inside the real map
 				$game->is_inside_map( $game->{hero}{y}, $game->{hero}{x} - 1 )	and
-				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{hero}{y} ]
-										[ $game->{hero}{x} - 1 ]
-				)
-						
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} ]
+											[ $game->{hero}{x} - 1 ]->[1]
+										} > 0						
 			){
         
 				$game->{hero}{x}--;
@@ -836,13 +830,12 @@ sub execute{
 			if ( 
 				# we are inside the real map
 				$game->is_inside_map( $game->{hero}{y}, $game->{hero}{x} + 1)	and
-				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{hero}{y} ]
-										[ $game->{hero}{x} + 1 ]
-				)
-						
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} ]
+											[ $game->{hero}{x} + 1 ]->[1]
+										} > 0						
 			){
-        
 				$game->{hero}{x}++;
 				$game->{ui}->{map_off_x}++ if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
@@ -859,21 +852,108 @@ sub execute{
 				return 50;
 			}
 		},
-		# MOVE NORTH-EAST
+		# MOVE NORTH-WEST
 		q => sub{
 			if ( 
 				# we are inside the real map
 				$game->is_inside_map( $game->{hero}{y} - 1, $game->{hero}{x} - 1 )	and
-				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
-										[ $game->{hero}{x} - 1 ]
-				)
-						
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
+											[ $game->{hero}{x} - 1 ]->[1]
+										} > 0						
 			){
 				$game->{hero}{y}--;
 				$game->{hero}{x}--;
 				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();
 				$game->{ui}->{map_off_x}-- if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{hero}{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}{y} ]
+													[ $game->{hero}{x} ]->[1]  
+												}->[0];
+				print __PACKAGE__, 
+					" HERO on $game->{hero}{on_tile} ",
+					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
+				
+				return 70;
+			}
+		},
+		# MOVE NORTH-EAST
+		e => sub{
+			if ( 
+				# we are inside the real map
+				$game->is_inside_map( $game->{hero}{y} - 1, $game->{hero}{x} + 1 )	and
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
+											[ $game->{hero}{x} + 1 ]->[1]
+										} > 0						
+			){
+				$game->{hero}{y}--;
+				$game->{hero}{x}++;
+				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();
+				$game->{ui}->{map_off_x}++ if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{hero}{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}{y} ]
+													[ $game->{hero}{x} ]->[1]  
+												}->[0];
+				print __PACKAGE__, 
+					" HERO on $game->{hero}{on_tile} ",
+					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
+				
+				return 70;
+			}
+		},
+		# MOVE SOUTH-WEST
+		z => sub{
+			if ( 
+				# we are inside the real map
+				$game->is_inside_map( $game->{hero}{y} + 1, $game->{hero}{x} - 1 )	and
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} + 1 ]
+											[ $game->{hero}{x} - 1 ]->[1]
+										} > 0						
+			){
+				$game->{hero}{y}++;
+				$game->{hero}{x}--;
+				$game->{ui}->{map_off_y}++ if $game->{ui}->must_scroll();
+				$game->{ui}->{map_off_x}-- if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{hero}{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}{y} ]
+													[ $game->{hero}{x} ]->[1]  
+												}->[0];
+				print __PACKAGE__, 
+					" HERO on $game->{hero}{on_tile} ",
+					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
+				
+				return 70;
+			}
+		},
+		# MOVE SOUTH-EAST
+		x => sub{
+			if ( 
+				# we are inside the real map
+				$game->is_inside_map( $game->{hero}{y} + 1, $game->{hero}{x} + 1 )	and
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} + 1 ]
+											[ $game->{hero}{x} + 1 ]->[1]
+										} > 0						
+			){
+				$game->{hero}{y}++;
+				$game->{hero}{x}++;
+				$game->{ui}->{map_off_y}++ if $game->{ui}->must_scroll();
+				$game->{ui}->{map_off_x}++ if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
 				$game->{hero}{on_tile} 	= 
 											$game->{configuration}->{terrains}->
