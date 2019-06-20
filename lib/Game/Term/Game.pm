@@ -976,7 +976,10 @@ w   walk north
 a   walk west
 s   walk south
 d   walk east
-q 	walk northeast
+q   walk northwest
+e   walk northeast
+z   walk southwest
+x   walk southeast
 r 	rest
 
 b   show bag content
