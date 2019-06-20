@@ -22,6 +22,7 @@ sub validate_conf{
 	$params{max_energy} //= 200;
 	$params{energy_gain} = {
 		' ' => 40,	# plain
+		'#'	=> 0,	# stone
 		A 	=> 40,	# bridge
 		a 	=> 40,	# bridge
 		B 	=> 40,	# bridge
