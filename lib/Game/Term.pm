@@ -214,6 +214,11 @@ Currently commands are (as shown by the inline help):
       a   walk west
       s   walk south
       d   walk east
+      q   walk northwest
+      e   walk northeast
+      z   walk southwest
+      x   walk southeast
+      r   rest
 
       b   show bag content
       u   use an item in the bag (counts as a move)

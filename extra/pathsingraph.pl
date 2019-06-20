@@ -24,14 +24,11 @@ foreach my $row (0..$#aoa){
 }
 
 
-
-
-
 cmpthese( -2, {
-    # 'Paths::Graph' => sub {
-		# my $obj = Paths::Graph->new(-origin=>"0_0",-destiny=>$dest,-graph=>\%graph);
-		# my @paths = $obj->shortest_path();
-    # },
+    'Paths::Graph' => sub {
+		my $obj = Paths::Graph->new(-origin=>"0_0",-destiny=>$dest,-graph=>\%graph);
+		my @paths = $obj->shortest_path();
+    },
     'Graph::Weighted' => sub {
 		my $g = Graph::Weighted->new();
 		$g->populate(\%graph);
