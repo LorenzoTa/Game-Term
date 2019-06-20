@@ -254,6 +254,20 @@ Currently commands are (as shown by the inline help):
 
 
 
+=head2 movement system
+
+The movement system follows the energy pattern: during the game loop each actor (player and creatures) receives a given amount of energy depending on the terrain they are on at the moment. So for humans, being on plain give more energy than being on shallow water.
+
+When an actor has enough energy (100 at the moment) they can move. Moving vertically or horizontally will consume 50 energy points, while moving diagonally will consume 70 energy points.
+
+An actor can also rest ie. skipping the move and gaining the energy provided by the terrain where they are. A maximum of energy is also present (currently 200) to cap the maximum of energy accumulable by an actor.
+
+The above will result in creatures moving at different speeds: a human moving on plain terrain will be faster of another human crossing hills and this will be achieved providing more moves to the first one.
+
+Every time the player does a succesfull move (actually moving, resting but also using an object) a new game turn will start.
+
+
+
 
 =head2 events and timeline
 
