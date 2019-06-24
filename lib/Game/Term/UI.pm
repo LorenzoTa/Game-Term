@@ -1143,13 +1143,24 @@ sub color_names_to_ANSI {
 1; # End of Game::Term::UI
 __DATA__
 
+see also Graph::Weighted
+https://metacpan.org/pod/Game::PlatformsOfPeril
+
 
 useful article linked by simcop2387 https://www.redblobgames.com/
 	and https://www.reddit.com/r/gamedev/
 	https://opengameart.org/
 	FONTS: https://opengameart.org/art-search-advanced?keys=&title=&field_art_tags_tid_op=or&field_art_tags_tid=font%2C%20fonts&name=&field_art_type_tid[9]=9&field_art_type_tid[10]=10&field_art_type_tid[7273]=7273&field_art_type_tid[14]=14&field_art_type_tid[12]=12&field_art_type_tid[13]=13&field_art_type_tid[11]=11&field_art_licenses_tid[17981]=17981&field_art_licenses_tid[2]=2&field_art_licenses_tid[17982]=17982&field_art_licenses_tid[3]=3&field_art_licenses_tid[6]=6&field_art_licenses_tid[5]=5&field_art_licenses_tid[10310]=10310&field_art_licenses_tid[4]=4&field_art_licenses_tid[8]=8&field_art_licenses_tid[7]=7&sort_by=score&sort_order=DESC&items_per_page=24&collection=
 
-useful article linked by Corion: http://journal.stuffwithstuff.com/2014/07/15/a-turn-based-game-loop/
+useful article linked by Corion: 
+	http://journal.stuffwithstuff.com/2014/07/15/a-turn-based-game-loop/
+	http://gameprogrammingpatterns.com/command.html
+	http://gameprogrammingpatterns.com/event-queue.html
+	http://gameprogrammingpatterns.com/observer.html
+	
+	
+ECS:	
+	https://en.wikipedia.org/wiki/Entity_component_system
 
 color tool https://devblogs.microsoft.com/commandline/introducing-the-windows-console-colortool/
 
@@ -1219,6 +1230,14 @@ http://dwarffortresswiki.org/Tileset_repository  cheepicus_15x15   	Belal
 https://int10h.org/oldschool-pc-fonts/fontlist/
 ---> http://www.pentacom.jp/pentacom/bitfontmaker2/  funziona LucidaConsoleaa.ttf
 --> but: https://superuser.com/questions/920440/how-to-add-additional-fonts-to-the-windows-console-windows
+
+	NOT OK: Oxygen Monospace
+	OK:		Space Mono
+	OK:		Ubuntu Mono
+	
+http://birdfont.org  
+
+
 https://github.com/powerline/fonts
 
 how to install a font for cmd.exe https://www.techrepublic.com/blog/windows-and-office/quick-tip-add-fonts-to-the-command-prompt/

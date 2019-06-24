@@ -19,9 +19,9 @@ my $scenario = Game::Term::Scenario->new(
 				#map=> Game::Term::Map->new(fake_map=>'one')->{data},
 				name => 'A river in the wood',
 				actors => [
-					Game::Term::Actor->new(name=>'UNO',y=>32, x=>33,energy_gain=>4),
-					Game::Term::Actor->new(name=>'DUE',y=>28, x=>41,energy_gain=>2),
-					Game::Term::Actor->new(name=>'TRE',y=>28, x=>51,energy_gain=>2),
+					Game::Term::Actor->new(name=>'UNO',y=>32, x=>33,energy_gain=>40),
+					Game::Term::Actor->new(name=>'DUE',y=>28, x=>41,energy_gain=>30),
+					Game::Term::Actor->new(name=>'TRE',y=>28, x=>51,energy_gain=>20),
 										
 				],
 				labels => [
@@ -40,17 +40,17 @@ my $scenario = Game::Term::Scenario->new(
 											
 											
 											# ),#
-					Game::Term::Event->new( 
-											type 	=> 'game turn', 
-											check 	=> 5, # turn 5
-											target 	=> 'DUE', # the name of the actor
-											target_attr => 'energy_gain',
-											target_mod 	=> 5,
-											duration => 50,
-											message	=> 'BUFF! energy gain +5 for 3 turns',
+# Game::Term::Event->new( ## BUGGED with new energy gain!!!
+# type 	=> 'game turn', 
+# check 	=> 5, # turn 5
+# target 	=> 'DUE', # the name of the actor
+# target_attr => 'energy_gain',
+# target_mod 	=> 5,
+# duration => 50,
+# message	=> 'BUFF! energy gain +5 for 3 turns',
 											
 											
-											),#
+#),#
 					# Game::Term::Event->new( 
 											# type 	=> 'game turn', 
 											# check 	=> 10, 

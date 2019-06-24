@@ -281,11 +281,17 @@ sub play{
 			foreach my $actor ( $game->{hero}, @{$game->{actors}} ){
 				# undef actors were eliminated
 				next unless defined $actor;
+				my $consumed_energy;
 				# ACTOR CAN MOVE
-				if ( $actor->{energy} >= 10 and $actor->isa('Game::Term::Actor::Hero') ){
+				if ( $actor->{energy} >= 100 and $actor->isa('Game::Term::Actor::Hero') ){
+					# LIMIT energy to max_energy
+					$actor->{energy} = $actor->{max_energy}
+						if $actor->{energy} > $actor->{max_energy};
+						
 					print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n"
 						 if $debug;
-					
+					print "DEBUG '$actor->{name}' has energy: $actor->{energy}\n"
+						 if $debug;
 					# PLAYER: GET USER COMMAND	
 					my @usr_cmd = $game->{ui}->get_user_command();
 					next unless @usr_cmd; # ??? last ???
@@ -296,7 +302,7 @@ sub play{
 						last;
 					}
 					# movement OK
-					if ( $game->execute(@usr_cmd) ){
+					if ( $consumed_energy = $game->execute(@usr_cmd) ){
 						# TIME
 						$game->{turn}++;
 						# EVENTS
@@ -307,7 +313,7 @@ sub play{
 							# the slowness #4 of the terrain original letter #1 where
 							# the hero currently is on the map
 							$game->{configuration}->{terrains}->{$game->{ui}->{map}->[ $game->{hero}->{y} ][ $game->{hero}->{x} ]->[1]}->[4]
-						);
+						) if $consumed_energy > 0;
 						# sigth modifications
 						#local $game->{hero}{sight} = $game->{hero}{sight} + 2 
 
@@ -325,7 +331,7 @@ sub play{
 							$game->{hero},
 							${$game->{messages}}[ $game->{turn}],
 						);	
-						$actor->{energy} -= 10;
+						$actor->{energy} -= $consumed_energy;
 					}
 					# NO movement 
 					else{
@@ -334,7 +340,10 @@ sub play{
 					}
 				}	
 				# NPC: AUTOMOVE
-				elsif( $actor->{energy} >= 10 ){
+				elsif( $actor->{energy} >= 100 ){
+						# LIMIT energy to max_energy
+						$actor->{energy} = $actor->{max_energy}
+							if $actor->{energy} > $actor->{max_energy};
 						print join ' ',__PACKAGE__,'play'," DEBUG '$actor->{name}' --> can move\n" if $debug;
 						# MOVE receives:
 						my $newpos = $actor->move(
@@ -360,6 +369,7 @@ sub play{
 						
 						$actor->{y} = $$newpos[0];
 						$actor->{x} = $$newpos[1];
+			$consumed_energy = 50;
 						# DRAW MAP only if actor is in sight range
 						my %visible = $game->{ui}->illuminate();
 						if ( exists $visible{ $actor->{y}.'_'.$actor->{x} } ){
@@ -373,14 +383,26 @@ sub play{
 								${$game->{messages}}[ $game->{turn}],
 							);
 						}
-						$actor->{energy} -= 10;
+						#$actor->{energy} -= 50;
+						$actor->{energy} -= $consumed_energy;
 						print "$actor->{name} at y: $actor->{y} / 0-$#{$game->{ui}->{map}} x: $actor->{x} / 0-$#{$game->{ui}->{map}[0]}\n" if $debug;
 									
 				}
 				# CANNOT MOVE
 				else{
-					$actor->{energy} += $actor->{energy_gain};
+					#$actor->{energy} += $actor->{energy_gain};
+			# print "$actor->{name} on TILE: ->",$game->{ui}->{map}->[ $actor->{y} ][ $actor->{x} ]->[1],"<-\n";
+			# dd $actor->{energy_gain};
+			
+					$actor->{energy} +=
+						$actor->{energy_gain}{
+							$game->{ui}->{map}->[ $actor->{y} ][ $actor->{x} ]->[1]
+							
+						};
+			
+			
 					print __PACKAGE__," DEBUG '$actor->{name}' ends with energy $actor->{energy}\n" if $debug;
+			#my $dummy = <STDIN>;
 				}
 				# ENCOUNTER
 				if ( 
@@ -542,129 +564,6 @@ sub run_event{
 
 }
 
-sub check_eventsORIGINAL{
-	my $game = shift;
-	print "DEBUG: checking events at turn $game->{turn}..\n" if $debug;
-	
-	# PROCESS regular events(all) AND events in the timeline for the current turn
-	foreach my $ev( @{$game->{events}}, @{$game->{timeline}[ $game->{turn} ]} ){
-		next unless $ev;
-		print "DEBUG: analyzing event of type: $ev->{type}..\n" if $debug;
-		
-		# SELECT target:
-		# HERO
-		my $target;
-		if( $ev->{target} eq 'hero' ){
-			$target = \$game->{hero};
-		}
-		# other ACTOR
-		elsif ( my @byname = grep{defined $_ and $_->{name} =~ /$ev->{target}/ }@{$game->{actors}}  ){
-			$target = \$byname[0];		
-		}
-		# UNDEF
-		else{ 
-			print "DEBUG: undef target event will be removed\n" if $debug;
-			undef $ev;
-			next;		
-		} 
-# NEED a run_event method!!		
-		# GAME TURN EVENT
-		if ( $target and $ev->{type} eq 'game turn' ){
-############next unless $ev->{check} == $game->{turn};
-			
-			#use Data::Dump; dd "BEFORE",$$target if $target;
-			#print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
-			$game->message( $ev->{message} ) if ref $$target eq 'Game::Term::Actor::Hero';
-			# ENERGY GAIN
-			if ( $ev->{target_attr} eq 'energy_gain' ){			
-				$$target->{energy_gain} += $ev->{target_mod};						
-			}
-			# SIGHT (only for the hero)
-			elsif( $ev->{target_attr} eq 'sight' ){
-				next unless ref $$target eq 'Game::Term::Actor::Hero';
-				$$target->{sight} += $ev->{target_mod};
-				# but sight is implemented in UI..
-				$game->{ui}{hero_sight} += $ev->{target_mod};
-			}
-			else{die "Unknown target_attr!"}
-			
-			# dd "AFTER",$$target;
-			
-			# DURATION ( a negative effect after some turn )
-			if( $ev->{duration} ){
-				push @{$game->{timeline}[ $game->{turn} + $ev->{duration} + 1]}, 
-					Game::Term::Event->new( 
-							type 	=> 'game turn', 
-							check 	=> $game->{turn} + $ev->{duration} + 1, 
-							message	=> "END of + $ev->{target_mod} $ev->{target_attr} buff",
-							#target 	=> $ev->{target} eq 'hero' ? 'hero' : $ev->{target},
-							target 	=> $ev->{target} ,
-							target_attr => $ev->{target_attr},
-							target_mod 	=> - $ev->{target_mod},										
-					);
-			}	
-			
-			#dd $game->{timeline} if $debug;			
-			next;			
-		}
-		# ACTOR AT EVENT
-		elsif ( $target and $ev->{type} eq 'actor at' ){
-			
-			next unless _is_inside( [$$target->{y}, $$target->{x}],  $ev->{check} );
-			
-			#print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
-			$game->message( $ev->{message} ) if ref $$target eq 'Game::Term::Actor::Hero';
-			undef $ev if  $ev->{first_time_only};
-			
-			next;
-			
-		}
-		# MAP VIEW (ACTOR AT EVENT)
-		elsif ( $target and $ev->{type} eq 'map view' ){
-			
-			next unless _is_inside( [$$target->{y}, $$target->{x}],  $ev->{check} );
-			
-			# print "EVENT MESSAGE: $ev->{message}\n" if $game->{is_running};
-			
-			foreach my $tile( @{ $ev->{area} } ){
-				$game->{ui}{map}[$tile->[0]][$tile->[1]][2] = 1;
-			}
-			# $game->{ui}->draw_map();
-			$game->message( $ev->{message} );
-			undef $ev; # always for this kind of events
-			
-			next;
-			
-		}
-		# DOOR (ACTOR AT EVENT)
-		elsif ( $target and $ev->{type} eq 'door' ){
-			
-			next unless _is_inside( [$$target->{y}, $$target->{x}],  $ev->{check} );
-			$game->message( $ev->{message} );
-			my $answer = $game->{ui}{reader}->readline('Enter?: ');
-			chomp $answer;
-			if( $answer =~ /^y/i ){
-					$game->save_game_state();
-					print "DEBUG: SYSTEM: ",(join ' ',$^X,'-I ./lib', @{ $ev->{destination} } ),"\n";
-					
-					undef $game;
-					#$game->DESTROY();
-					
-					system( $^X,'-I .\lib', @{ $ev->{destination} } );
-					exit;
-			}
-			else{ next }
-			
-		}
-		else{ die "Unknown event type in Game.pm" }
-		
-	}
-	
-	# CLEAN timeline
-	$game->{timeline}[ $game->{turn} ] = undef;
-
-}
-
 sub _is_inside{
 	my $it   = shift;
 	my $area = shift;
@@ -688,6 +587,20 @@ sub is_walkable{
 	else{return 0}
 }
 
+sub is_inside_map{
+	my $game = shift;
+	my ($y,$x) = @_;
+	if(
+		$y >= 0 					and
+		$y <= $#{ $game->{ui}{map} } 	and 
+		$x >= 0						and
+		$x <= $#{ $game->{ui}{map}[$y] }
+		){
+			return 1;
+	}
+	else{ return 0 }
+}
+
 sub execute{
 	my $game = shift;
 	my ($cmd,@args) = @_;
@@ -698,21 +611,25 @@ sub execute{
 	my %table = (
 		##############################################
 		#	SINGLE LETTER COMMAND WHILE IN MAP MODE
-		#   they return 1 if a movement was done
-		#	or 0 if not (b for bag, u for use, l for labels?)
+		#   they return energy consumed
+		#	or 0 if not (b for bag, u for use, l for labels)
 		##############################################
 		
 		# MOVE NORTH
 		w => sub{
 			if ( 
 				# we are inside the real map
-				$game->{hero}{y} > 0 	and
-				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
-										[ $game->{hero}{x} ]
-				)
-						
+				$game->is_inside_map( $game->{hero}{y} - 1, $game->{hero}{x} )	and
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
+											[ $game->{hero}{x} ]->[1]
+										} > 0						
 			){
+				# print "Energy gain for terrain [".
+					# $game->{ui}->{map}->[ $game->{hero}{y} - 1 ][ $game->{hero}{x} ]->[1].
+					# "] is ".
+					# $game->{hero}{energy_gain}{$game->{ui}->{map}->[ $game->{hero}{y} - 1 ][ $game->{hero}{x} ]->[1]}."\n";
         		$game->{hero}{y}--;
 				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
@@ -726,19 +643,19 @@ sub execute{
 					" HERO on $game->{hero}->{on_tile} ",
 					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
 				
-				return 1;
+				return 50;
 			}
 		},
 		# MOVE SOUTH
 		s => sub{
 			if ( 
 				# we are inside the real map
-				$game->{hero}{y} < $#{$game->{ui}->{map}} 	and
-				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{hero}{y} + 1 ]
-										[ $game->{hero}{x} ]
-				)
-						
+				$game->is_inside_map( $game->{hero}{y} + 1, $game->{hero}{x} )	and
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} + 1 ]
+											[ $game->{hero}{x} ]->[1]
+										} > 0						
 			){
         
 				$game->{hero}{y}++;
@@ -754,19 +671,19 @@ sub execute{
 					" HERO on $game->{hero}->{on_tile} ",
 					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
 				
-				return 1;
+				return 50;
 			}
 		},
 		# MOVE WEST
 		a => sub{
 			if ( 
 				# we are inside the real map
-				$game->{hero}{x} > 0 	and
-				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{hero}{y} ]
-										[ $game->{hero}{x} - 1 ]
-				)
-						
+				$game->is_inside_map( $game->{hero}{y}, $game->{hero}{x} - 1 )	and
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} ]
+											[ $game->{hero}{x} - 1 ]->[1]
+										} > 0						
 			){
         
 				$game->{hero}{x}--;
@@ -782,21 +699,20 @@ sub execute{
 					" HERO on $game->{hero}->{on_tile} ",
 					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
 				
-				return 1;
+				return 50;
 			}
 		},
 		# MOVE EAST
 		d => sub{
 			if ( 
 				# we are inside the real map
-				$game->{hero}{x}  < $#{$game->{ui}->{map}[0]} 	and
-				$game->is_walkable(
-					$game->{ui}->{map}->[ $game->{hero}{y} ]
-										[ $game->{hero}{x} + 1 ]
-				)
-						
+				$game->is_inside_map( $game->{hero}{y}, $game->{hero}{x} + 1)	and
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} ]
+											[ $game->{hero}{x} + 1 ]->[1]
+										} > 0						
 			){
-        
 				$game->{hero}{x}++;
 				$game->{ui}->{map_off_x}++ if $game->{ui}->must_scroll();				
 				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
@@ -810,8 +726,133 @@ sub execute{
 					" HERO on $game->{hero}{on_tile} ",
 					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
 				
-				return 1;
+				return 50;
 			}
+		},
+		# MOVE NORTH-WEST
+		q => sub{
+			if ( 
+				# we are inside the real map
+				$game->is_inside_map( $game->{hero}{y} - 1, $game->{hero}{x} - 1 )	and
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
+											[ $game->{hero}{x} - 1 ]->[1]
+										} > 0						
+			){
+				$game->{hero}{y}--;
+				$game->{hero}{x}--;
+				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();
+				$game->{ui}->{map_off_x}-- if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{hero}{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}{y} ]
+													[ $game->{hero}{x} ]->[1]  
+												}->[0];
+				print __PACKAGE__, 
+					" HERO on $game->{hero}{on_tile} ",
+					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
+				
+				return 70;
+			}
+		},
+		# MOVE NORTH-EAST
+		e => sub{
+			if ( 
+				# we are inside the real map
+				$game->is_inside_map( $game->{hero}{y} - 1, $game->{hero}{x} + 1 )	and
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} - 1 ]
+											[ $game->{hero}{x} + 1 ]->[1]
+										} > 0						
+			){
+				$game->{hero}{y}--;
+				$game->{hero}{x}++;
+				$game->{ui}->{map_off_y}-- if $game->{ui}->must_scroll();
+				$game->{ui}->{map_off_x}++ if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{hero}{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}{y} ]
+													[ $game->{hero}{x} ]->[1]  
+												}->[0];
+				print __PACKAGE__, 
+					" HERO on $game->{hero}{on_tile} ",
+					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
+				
+				return 70;
+			}
+		},
+		# MOVE SOUTH-WEST
+		z => sub{
+			if ( 
+				# we are inside the real map
+				$game->is_inside_map( $game->{hero}{y} + 1, $game->{hero}{x} - 1 )	and
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} + 1 ]
+											[ $game->{hero}{x} - 1 ]->[1]
+										} > 0						
+			){
+				$game->{hero}{y}++;
+				$game->{hero}{x}--;
+				$game->{ui}->{map_off_y}++ if $game->{ui}->must_scroll();
+				$game->{ui}->{map_off_x}-- if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{hero}{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}{y} ]
+													[ $game->{hero}{x} ]->[1]  
+												}->[0];
+				print __PACKAGE__, 
+					" HERO on $game->{hero}{on_tile} ",
+					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
+				
+				return 70;
+			}
+		},
+		# MOVE SOUTH-EAST
+		x => sub{
+			if ( 
+				# we are inside the real map
+				$game->is_inside_map( $game->{hero}{y} + 1, $game->{hero}{x} + 1 )	and
+				# intended destination has an energy_gain > 0 (is walkable)
+				$game->{hero}{energy_gain}{
+											$game->{ui}->{map}->[ $game->{hero}{y} + 1 ]
+											[ $game->{hero}{x} + 1 ]->[1]
+										} > 0						
+			){
+				$game->{hero}{y}++;
+				$game->{hero}{x}++;
+				$game->{ui}->{map_off_y}++ if $game->{ui}->must_scroll();
+				$game->{ui}->{map_off_x}++ if $game->{ui}->must_scroll();				
+				# el. #0 (descr) of the terrain on which the hero is on the map (el. #1 original chr)
+				$game->{hero}{on_tile} 	= 
+											$game->{configuration}->{terrains}->
+												{$game->{ui}->{map}->
+													[ $game->{hero}{y} ]
+													[ $game->{hero}{x} ]->[1]  
+												}->[0];
+				print __PACKAGE__, 
+					" HERO on $game->{hero}{on_tile} ",
+					"at y: $game->{hero}{y} x: $game->{hero}{x}\n" if $debug;
+				
+				return 70;
+			}
+		},
+		# REST
+		r => sub{
+			my $gain = $game->{hero}{energy_gain}{
+							$game->{ui}->{map}->[ $game->{hero}{y} ]
+											[ $game->{hero}{x} ][1]
+						};
+			# return NEGATIVE consumed energy
+			return 0-$gain;
 		},
 		# SHOW BAG
 		b => sub{
@@ -847,7 +888,7 @@ sub execute{
 				# REMOVE if consumable
 				undef $game->{hero}{bag}->[$num] if $game->{hero}{bag}->[$num]->{consumable};
 				# USE COUNTS AS MOVING
-				return 1;
+				return 10;
 			}
 			else{
 				print ' '.$game->{ui}->{ dec_ver }.
@@ -935,6 +976,11 @@ w   walk north
 a   walk west
 s   walk south
 d   walk east
+q   walk northwest
+e   walk northeast
+z   walk southwest
+x   walk southeast
+r 	rest
 
 b   show bag content
 u   use an item in the bag (counts as a move)
@@ -1017,7 +1063,7 @@ EOH
 								$game->{hero},
 								${$game->{messages}}[ $game->{turn}],
 					);
-					return ;
+					return 0;
 		},
 		show_legenda => sub{ 
 					print "to be implemented\n";
@@ -1059,7 +1105,7 @@ EOH
 									@{$game->{messages}}[ $game->{turn} ]//'' 
 								],
 					);
-					#return 1;
+					return 0;
 		},
 		
 		exit => sub{

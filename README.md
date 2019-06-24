@@ -51,8 +51,10 @@ To try the game engine demo:
     <li class='indexItem indexItem2'><a href='#game_object'>game object</a>
     <li class='indexItem indexItem2'><a href='#hero_and_actors'>hero and actors</a>
     <li class='indexItem indexItem2'><a href='#commands'>commands</a>
+    <li class='indexItem indexItem2'><a href='#movement_system'>movement system</a>
     <li class='indexItem indexItem2'><a href='#events_and_timeline'>events and timeline</a>
     <li class='indexItem indexItem2'><a href='#debug_levels'>debug levels</a>
+    <li class='indexItem indexItem2'><a href='#labels_and_names'>labels and names</a>
   </ul>
   <li class='indexItem indexItem1'><a href='#AUTHOR'>AUTHOR</a>
   <li class='indexItem indexItem1'><a href='#BUGS'>BUGS</a>
@@ -152,7 +154,7 @@ name="configuration"
 
 <p>Once generated the configuration is saved into the <code>GameTermConfDefault.conf</code> under the game directory and will be loaded from this file preferentially.</p>
 
-<p>The engine lets you to reload the configuration during the game.</p>
+<p>The engine lets you to reload the configuration during the game: so if you dont like the default hero&#39;s icon or color you can change them in the configuration file created after the game start and reload the configuration (see the appropriate command below) to have them applied.</p>
 
 <h2><a class='u' href='#___top' title='click to go to top of document'
 name="maps"
@@ -180,6 +182,9 @@ name="maps"
 </ul>
 
 <p>The map only contains terrain informations, no actors nor the hero.</p>
+
+<p>A MapEditor using <a href="http://search.cpan.org/perldoc?Tk" class="podlinkpod"
+>Tk</a> is included in the distribution.</p>
 
 <h2><a class='u' href='#___top' title='click to go to top of document'
 name="UI"
@@ -274,13 +279,20 @@ name="commands"
       a   walk west
       s   walk south
       d   walk east
+      q   walk northwest
+      e   walk northeast
+      z   walk southwest
+      x   walk southeast
+      r   rest
 
       b   show bag content
       u   use an item in the bag (counts as a move)
 
       h   show this help
 
-      l   show labels on the map (to be implemented)
+      l   show labels on the map
+
+      m   show message history
 
       :   switch to COMMAND MODE
 
@@ -304,6 +316,20 @@ name="commands"
 
       return_to_game
               bring you back to MAP MODE</pre>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="movement_system"
+>movement system</a></h2>
+
+<p>The movement system follows the energy pattern: during the game loop each actor (player and creatures) receives a given amount of energy depending on the terrain they are on at the moment. So for humans, being on plain give more energy than being on shallow water.</p>
+
+<p>When an actor has enough energy (100 at the moment) they can move. Moving vertically or horizontally will consume 50 energy points, while moving diagonally will consume 70 energy points.</p>
+
+<p>An actor can also rest ie. skipping the move and gaining the energy provided by the terrain where they are. A maximum of energy is also present (currently 200) to cap the maximum of energy accumulable by an actor.</p>
+
+<p>The above will result in creatures moving at different speeds: a human moving on plain terrain will be faster of another human crossing hills and this will be achieved providing more moves to the first one.</p>
+
+<p>Every time the player does a succesfull move (actually moving, resting but also using an object) a new game turn will start.</p>
 
 <h2><a class='u' href='#___top' title='click to go to top of document'
 name="events_and_timeline"
@@ -365,9 +391,17 @@ name="debug_levels"
 
 <p>Debug can be set to <code>0</code> that means that the game is intended to be played and the screen is refreshed as needed (buffer is cleared) or to <code>1</code> to display game informations and the screen is not cleared or to <code>2</code> dumping a lot of used datastructures used during the game as raw and beautified maps, status of the hero&#39;s object and more.</p>
 
-<p>The debug level is passed during the construction of the game object <code>debug =&#62; 1</code> or &#60;debug =&#62; 2&#62;</p>
+<p>The debug level is passed during the construction of the game object <code>debug =&#62; 1</code> or <code>debug =&#62; 2</code></p>
 
-<p>To mantain the game developer sane if debug is set the game state is also saved into an specular YAML file named <code>GameState.sto.yaml</code></p>
+<p>To mantain the game developer sane if debug is set the game state is also saved into a specular YAML file named <code>GameState.sto.yaml</code></p>
+
+<h2><a class='u' href='#___top' title='click to go to top of document'
+name="labels_and_names"
+>labels and names</a></h2>
+
+<p>The UI has the ability momentary show labels defined in the scenario (place names) and names of creatures lurking in the map if in the sight range. Labels are not saved in the <code>GameState.sto</code> file but are loaded from the scenario file.</p>
+
+<p>Place labels are assigned in the sceario to a tile and if this tile is discovered then the labels can be shown and will be shown also if covered by the fogo of war effect.</p>
 
 <h1><a class='u' href='#___top' title='click to go to top of document'
 name="AUTHOR"
@@ -424,8 +458,8 @@ name="ACKNOWLEDGEMENTS"
 <p>Jason Hood for his precious work: <a href="https://github.com/adoxa/ansicon" class="podlinkurl"
 >ansicon</a></p>
 
-<p>The whole <a href="https://perlmonks.org" class="podlinkpod"
->perlmonks.org</a> community for continuos support and specially Corion, choroba, marto tybalt89 (the illumunate method is mainly his work), Tux, Marshall, hippo, Eily..</p>
+<p>The whole <a href="https://perlmonks.org" class="podlinkurl"
+>perlmonks.org</a> community for continous support and specially Corion, choroba, marto tybalt89 (the illumunate method is mainly his work), Tux, Marshall, hippo, Eily..</p>
 
 <p>Folks on perl irc channel and especially mst and integral for some nice trick they show me.</p>
 
