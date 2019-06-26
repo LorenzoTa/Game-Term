@@ -8,7 +8,7 @@ use File::Spec;
 use YAML::XS qw(Dump DumpFile LoadFile);
 use Term::ANSIColor qw(RESET :constants :constants256);
 
-use if $^O =~ /win32/i, "Win32";
+use if scalar($^O =~ /win32/i), "Win32";
 
 
 # CLEAR           RESET             BOLD            DARK
