@@ -1,3 +1,10 @@
+03072019 (discussed in pm chat same day)
+
+- spawn new map with system is wrong on Linux. Via exec is very bugghis on Windows.
+see Term/Game.pm#L549 (DOOR event type)
+Probably I must just reinitialize map and game ;(
+
+
 28052019
 
 -scenario enigmas
