@@ -1,3 +1,11 @@
+11092019
+-scenarios HAVE TO BE MODULES!!!!!
+ so to be required by game 
+ these modules should inherit from Scenario.pm
+ 
+-implement new FOV
+
+
 28052019
 
 -scenario enigmas
