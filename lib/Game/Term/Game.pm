@@ -552,9 +552,12 @@ sub run_event{
 		chomp $answer;
 		if( $answer =~ /^y/i ){
 			$game->save_game_state();
-			print "DEBUG: SYSTEM: ",(join ' ',$^X,'-I ./lib', @{ $ev->{destination} } ),"\n";
+			my @cmd = ($^X,'-I ./lib', @{ $ev->{destination} }); 
+			warn "Launching [@cmd]"; 
+			print "DEBUG: SYSTEM: [@cmd]\n";
 			undef $game;
-			system( $^X,'-I .\lib', @{ $ev->{destination} } );
+			#system( $^X,'-I .\lib', @{ $ev->{destination} } );
+			exec( @cmd ) == 0 or die "$! / $?";
 			exit;
 		}
 		else{ next }
