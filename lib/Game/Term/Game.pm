@@ -553,12 +553,22 @@ sub run_event{
 		if( $answer =~ /^y/i ){
 			$game->save_game_state();
 			my @cmd = ($^X,'-I ./lib', @{ $ev->{destination} }); 
-			warn "Launching [@cmd]"; 
-			print "DEBUG: SYSTEM: [@cmd]\n";
-			undef $game;
-			#system( $^X,'-I .\lib', @{ $ev->{destination} } );
-			exec( @cmd ) == 0 or die "$! / $?";
-			exit;
+			warn "Launching (system on windows, exec otherwise. Ugly patch): [@cmd]"; 
+		 #print "DEBUG: SYSTEM: [@cmd]\n";
+			if ( $^O =~ /win32/i ){
+				system( @cmd );			
+			}
+			else{
+				exec( @cmd ) == 0 or die "$! / $?";
+			}
+			# undef $game;
+			# #system( $^X,'-I .\lib', @{ $ev->{destination} } );
+			# exec( @cmd ) == 0 or die "$! / $?";
+			# exit;
+			# %{$game} =Game::Term::Game->new( 
+								# scenario 		=> $scenario,
+								
+							# );
 		}
 		else{ next }
 		
