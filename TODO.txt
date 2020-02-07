@@ -1,3 +1,12 @@
+11092019
+-scenarios HAVE TO BE MODULES!!!!!
+ so to be required by game 
+ these modules should inherit from Scenario.pm
+ 
+-implement new FOV
+
+
+
 03072019 (discussed in pm chat same day)
 
 - spawn new map with system is wrong on Linux. Via exec is very bugghis on Windows.
