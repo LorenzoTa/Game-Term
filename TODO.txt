@@ -1,5 +1,6 @@
 11092019
 -scenarios HAVE TO BE MODULES!!!!!
+(the current system/exec trick is also broken on win32)
  so to be required by game 
  these modules should inherit from Scenario.pm
  
