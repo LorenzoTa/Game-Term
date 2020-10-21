@@ -26,7 +26,7 @@ To try the game engine demo:
 
 <pre>
 
-  clone  https://github.com/LorenzoTa/Game-Term
+  git clone  https://github.com/LorenzoTa/Game-Term
   cd Game-Term
   perl -I ./lib ./demo/00-start.pl
 
